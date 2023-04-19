@@ -1,0 +1,48 @@
+---
+name:  wilcoxRanksum
+title: Wilcoxon Rank-Sum Test
+menuGroup: nonpara
+version: '0.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: dep
+      title: Dependent Variable
+      type: Variable
+
+    - name: group
+      title: Grouping Variable
+      type: Variable
+
+    - name: dist
+      title: Distribution
+      type: List
+      options:
+        - title: Exact
+          name: exact
+        - title: Asymptotic
+          name: asymptotic
+        - title: Approximate
+          name: approximate
+      default: exact
+    
+    - name: alternative
+      title: Alternative Hypothesis
+      type: List
+      options:
+        - title: less
+          name:  less
+        - title: two.sided
+          name:  two.sided
+        - title: greater
+          name:  greater
+      default: two.sided
+      
+    - name: correct
+      title: Continuity Correction
+      type: Bool
+      default: false
+...

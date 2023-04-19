@@ -1,0 +1,4 @@
+"0","# Datensatz für den Wilcoxon Rangsummentest mit Ties"
+"0","mind2 <- data.frame(ID = as.factor(1:7),"
+"0","                    Werte = c(4,6,8, 2,4,4,6), "
+"0","                    Gruppe = factor(c(1,1,1, 2,2,2,2)))"

@@ -1,0 +1,7 @@
+"0","mind <- data.frame(ID = as.factor(1:7),
+                    Werte = c(1,4,9, 8,3,6,7), 
+                    Gruppe = factor(c(2,2,2, 1,1,1)))
+"
+"2","Error in data.frame(ID = as.factor(1:7), Werte = c(1, 4, 9, 8, 3, 6, 7),  : 
+  Argumente implizieren unterschiedliche Anzahl Zeilen: 7, 6
+"

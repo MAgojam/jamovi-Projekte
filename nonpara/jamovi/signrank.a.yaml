@@ -1,0 +1,31 @@
+---
+name:  signrank
+title: Sign Rank Test
+menuGroup: nonpara
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: samp1
+      title: Sample One
+      type: Variable
+
+    - name: samp2
+      title: Sample Two
+      type: Variable
+
+    - name: alternative
+      title: Alternative hypothesis
+      type: List
+      options:
+        - title: Not equal
+          name:  two.sided
+        - title: One greater
+          name:  greater
+        - title: Two greater
+          name:  less
+      default: two.sided
+...

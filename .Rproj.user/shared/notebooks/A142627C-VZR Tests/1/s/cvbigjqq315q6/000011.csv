@@ -1,0 +1,3 @@
+"0","rstatix::sign_test(Blutdruck ~ Horrorfilm, "
+"0","                   data = blood, "
+"0","                   alternative = ""less"")"

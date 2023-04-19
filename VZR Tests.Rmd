@@ -1,0 +1,47 @@
+---
+title: "VZR Test"
+author: "Dan Studer"
+date: "2023-03-30"
+output: html_document
+---
+
+# Daten
+
+```{r}
+blood <- data.frame(ID = as.factor(rep(1:6, times = 2)), 
+                    Blutdruck = c(130.2, 180.2, 149.6, 153.2, 162.6, 160.1,
+                                  136.9, 201.4, 166.8, 150.0, 173.2, 169.3), 
+                    Horrorfilm = factor(rep(c("vorher","nachher"), each = 6),
+                                        levels = c("vorher", "nachher")))
+```
+
+
+# Vorzeichentest
+```{r}
+rstatix::sign_test(Blutdruck ~ Horrorfilm, 
+                   data = blood, 
+                   alternative = "less")
+```
+
+```{r}
+blood_coin <- data.frame(x1 = blood$Blutdruck[1:6],
+                         x2 = blood$Blutdruck[7:12])
+get <- coin::sign_test(x1 ~ x2,
+                distribution = "exact",
+                data = blood_coin,
+                alternative = "less")
+
+get@statistic@teststatistic
+coin::statistic(get)
+coin::pvalue(get)
+
+```
+
+
+# Vorzeichen-Rangtest
+```{r}
+coin::wilcoxsign_test(x1 ~ x2,
+                      distribution = "exact",
+                      data = blood_coin,
+                      alternative = "less")
+```

@@ -1,0 +1,5 @@
+"0","blood <- data.frame(ID = as.factor(rep(1:6, times = 2)), "
+"0","                    Blutdruck = c(130.2, 180.2, 149.6, 153.2, 162.6, 160.1,"
+"0","                                  136.9, 201.4, 166.8, 150.0, 173.2, 169.3), "
+"0","                    Horrorfilm = factor(rep(c(""vorher"",""nachher""), each = 6),"
+"0","                                        levels = c(""vorher"", ""nachher"")))"

@@ -1,0 +1,173 @@
+---
+title: "Wilcoxon Rangsummen-Test"
+author: "Dan Studer"
+date: "2023-03-22"
+output: html_document
+---
+
+# Datensatz
+```{r}
+# Datensatz für den Wilcoxon Rangsummentest mit Ties
+mind2 <- data.frame(ID = as.factor(1:7),
+                    Werte = c(4,6,8, 2,4,4,6), 
+                    Gruppe = factor(c(1,1,1, 2,2,2,2)))
+
+mind <- data.frame(ID = as.factor(1:7),
+                    Werte = c(1,4,9, 8,3,6,7), 
+                    Gruppe = factor(c(1,1,1, 2,2,2,2)))
+
+
+mind <- data.frame(ID = as.factor(1:7),
+                    Werte = c(1,4,9, 8,3,6,7), 
+                    Gruppe = factor(c(2,2,2, 1,1,1,1)))
+
+```
+
+```{r}
+str(mind2)
+levels(mind2$Gruppe)
+```
+
+# Exakte Tests
+## Exakter Test mit `coin::wilcox_test()`
+```{r}
+coin::wilcox_test(Werte ~ Gruppe, 
+                  data = mind, 
+                  distribution = "exact", 
+                  alternative = "less")
+```
+Ergebnis ist identisch mit der Berechnung von Hand, scheint korrekt zu sein.
+
+
+## Exakter Test mit `coin::independence_test()`
+```{r}
+coin::independence_test(Werte ~ Gruppe, 
+                        data = mind, 
+                        distribution = "exact", 
+                        alternative = "less")
+```
+Ergebnis ist identisch zu `coin::wilcox_test(` (ist glaub nur ein Wrapper von `independence_test`).
+
+
+## Exakter Test mit `stats::wilcox.test()`
+```{r}
+stats::wilcox.test(Werte ~ Gruppe,
+                   data = mind2,
+                   exact = TRUE,
+                   correct = FALSE,
+                   alternative = "greater")
+```
+
+Schlägt fehl, weil die Funktion bei Ties keinen exakten Test ausführen kann.
+
+
+
+
+
+
+
+
+
+# Asymptotische Tests
+## Asymptotischer Test mit `coin::wilcox_test()`
+```{r}
+coin::wilcox_test(Werte ~ Gruppe, 
+                  data = mind2, 
+                  distribution = "asymptotic", 
+                  alternative = "greater")
+```
+
+## Asymptotischer Test mit `stats::wilcox.test()` ohne Kontinuitätskorrektur
+```{r}
+stats::wilcox.test(Werte ~ Gruppe,
+                   data = mind2,
+                   exact = FALSE,
+                   correct = FALSE,
+                   alternative = "greater")
+```
+## Asymptotischer Test mit `stats::wilcox.test()` mit Kontinuitätskorrektur
+```{r}
+stats::wilcox.test(Werte ~ Gruppe,
+                   data = mind2,
+                   exact = FALSE,
+                   correct = TRUE,
+                   alternative = "greater")
+```
+
+-> das ist genau das was `Jamovi` ausgibt! Kontinuitätskorrektur ist auch nicht gerade unumstritten...
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Reakreationsversuch
+
+```{r}
+self <- list()
+self$data <- mind2
+self$options$dist <- "exact"
+self$options$dep <- "Werte"
+self$options$group <- "Gruppe"
+self$options$alternative <- "greater"
+self$options$correct <- TRUE
+```
+
+
+
+```{r}
+# getformula
+formula <- jmvcore::constructFormula(self$options$dep, self$options$group)
+formula <- as.formula(formula)
+
+
+if(self$options$correct &&
+   self$options$dist == "asymptotic") {
+  # ... calculate the wilcoxon test with stats
+  results <- stats::wilcox.test(
+    formula = formula,
+    data = self$data,
+    exact = FALSE,
+    # paired = FALSE,
+    correct = TRUE,
+    alternative = self$options$alternative
+  )
+  
+  
+} else if (self$options$correct &
+           self$options$dist != "asymptotic") {
+  # ... use coin::wilcox_test()
+  results <- coin::wilcox_test(
+    formula = formula,
+    data = self$data,
+    distribution = self$options$dist,
+    alternative = self$options$alternative
+  )
+  
+  
+} else {
+  # ... use coin::wilcox_test()
+  results <- coin::wilcox_test(
+    formula = formula,
+    data = self$data,
+    distribution = self$options$dist,
+    alternative = self$options$alternative
+  )
+}
+
+```
+
+
+
+
+
+
+
+

@@ -1,0 +1,37 @@
+---
+name:  wilcoxRanksum
+title: Wilcoxon Rank-Sum Test
+jrs:   '1.1'
+
+items:
+    - name: wrs
+      title: Wilcoxon Rank-Sum Test
+      type: Table
+      rows: 1
+      columns:
+        - name: var
+          title: ''
+          type: text
+        # - name: method
+        #   title: method
+        #   type: text
+        - name: stat
+          title: statistic
+          type: text
+        - name: p
+          type: number
+          format: zto,pvalue
+    # - name: warning
+    #   title: 'Warning'
+    #   type: Html
+    
+    - name: text
+      title: text
+      type: Preformatted
+    - name: richtung
+      title: richtung
+      type: Preformatted
+    - name: daten
+      title: daten
+      type: Preformatted
+...
