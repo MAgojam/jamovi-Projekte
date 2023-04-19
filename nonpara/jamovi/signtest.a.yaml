@@ -9,28 +9,23 @@ options:
     - name: data
       type: Data
 
-    - name: dep
-      title: Dependent Variable
+    - name: samp1
+      title: Sample One
       type: Variable
 
-    - name: group
-      title: Grouping Variable
+    - name: samp2
+      title: Sample Two
       type: Variable
 
-    - name: alt
+    - name: alternative
       title: Alternative hypothesis
       type: List
       options:
         - title: Not equal
-          name:  notequal
+          name:  two.sided
         - title: One greater
-          name:  onegreater
+          name:  greater
         - title: Two greater
-          name:  twogreater
-      default: notequal
-
-    - name: varEq
-      title: Assume equal variances
-      type: Bool
-      default: true
+          name:  less
+      default: two.sided
 ...

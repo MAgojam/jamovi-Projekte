@@ -1,0 +1,49 @@
+---
+name:  wrsTest
+title: wrsTest
+menuGroup: nonpara
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: dep
+      title: Dependent Variable
+      type: Variable
+      suggested: [ordinal, continuous]
+      permitted: [numeric]
+
+    - name: group
+      title: Grouping Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+
+    - name: dist
+      title: Distribution
+      type: List
+      options:
+        - title: Exact
+          name: exact
+        - title: Approximate
+          name: approximate
+        - title: "Asymptotic, with Continuity Correction"
+          name: asymptoticCC
+        - title: "Asymptotic, without Continuity Correction"
+          name: asymptotic
+      default: exact
+    
+    - name: alternative
+      title: Alternative Hypothesis
+      type: List
+      options:
+        - title: less
+          name:  less
+        - title: two.sided
+          name:  two.sided
+        - title: greater
+          name:  greater
+      default: two.sided
+...

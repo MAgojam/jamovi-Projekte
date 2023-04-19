@@ -57,31 +57,36 @@ signrankResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Sign Rank Test")
+                title="Signed Rank Test")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title="st"))
+                title="text"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="table",
-                title="tbd",
+                title="Exact Wilcoxon Signed-Rank Test",
                 rows=1,
                 columns=list(
                     list(
                         `name`="s1", 
+                        `title`="Sample One", 
                         `type`="text"),
                     list(
                         `name`="alt", 
+                        `title`="Alternative", 
                         `type`="text"),
                     list(
                         `name`="s2", 
+                        `title`="Sample Two", 
                         `type`="text"),
                     list(
                         `name`="stat", 
+                        `title`="Statistic", 
                         `type`="number"),
                     list(
                         `name`="p", 
+                        `title`="p-Value", 
                         `type`="number", 
                         `format`="zto,pvalue"))))}))
 
@@ -105,7 +110,7 @@ signrankBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresMissings = FALSE)
         }))
 
-#' Sign Rank Test
+#' Signed Rank Test
 #'
 #' 
 #' @param data .

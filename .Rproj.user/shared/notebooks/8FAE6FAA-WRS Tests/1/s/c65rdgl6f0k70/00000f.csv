@@ -1,7 +1,0 @@
-"0","self <- list()"
-"0","self$data <- mind2"
-"0","self$options$dist <- ""exact"""
-"0","self$options$dep <- ""Werte"""
-"0","self$options$group <- ""Gruppe"""
-"0","self$options$alternative <- ""greater"""
-"0","self$options$correct <- TRUE"

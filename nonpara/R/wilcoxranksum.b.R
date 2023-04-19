@@ -13,8 +13,9 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
       formula <- jmvcore::constructFormula(self$options$dep, self$options$group)
       formula <- as.formula(formula)
       
-      
       data <- as.data.frame(self$data)
+      # data[ , 2] <- factor(data[ , 2], levels = c("2", "1"))
+      
       
       ### If CC is selected and distribution is asymptotic, ...
       if(self$options$correct && self$options$dist == "asymptotic"){
@@ -58,7 +59,7 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                      values = list(
                        var = self$options$dep,
                        # method = self$options$dist,
-                       stat = results@statistic@teststatistic,
+                       stat = coin::statistic(results),
                        p = coin::pvalue(results)
                      ))
         
@@ -79,7 +80,7 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                      values = list(
                        var = self$options$dep,
                        # method = self$options$dist,
-                       stat = results@statistic@teststatistic,
+                       stat = coin::statistic(results),
                        p = coin::pvalue(results)
                      ))
         
@@ -121,15 +122,8 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
       }
       
       # Paste distribution + WRST for more detailed title
-      tabletitle <- stringr::str_to_title(paste(self$options$dist, "Wilcoxon Rank-Sum Test"))
-      table$setTitle(tabletitle)
-      
-      # self$results$daten$setContent(dplyr::filter(self$data, Gruppe == 1))
-      self$results$text$setContent(results)
-      self$results$richtung$setContent(self$options$alternative)
-      self$results$daten$setContent(data)
-      
-      # Bei "approximate" müsste im Hinweis noch irgendwo stehen, wie gross das gezogene sample bei der monte carlo approximation ist.
+      # tabletitle <- stringr::str_to_title(paste(self$options$dist, "Wilcoxon Rank-Sum Test"))
+      # table$setTitle(tabletitle)
       
     }
   )

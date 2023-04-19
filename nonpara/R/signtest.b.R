@@ -28,7 +28,6 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                      s2 = self$options$samp2,
                      stat = coin::statistic(results),
                      p = coin::pvalue(results)
-                     # vlt das beim anderen Test auch mal so proberen und nicht mit results@statistic@...?
                    ))
       
     })

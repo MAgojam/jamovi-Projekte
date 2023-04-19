@@ -1,8 +1,0 @@
-"0","coin::independence_test(Werte ~ Gruppe, 
-                        data = mind, 
-                        distribution = ""exact"", 
-                        alternative = ""less"",
-                        xtrafo = rank(.))
-"
-"2","Error in rank(.) : object '.' not found
-"

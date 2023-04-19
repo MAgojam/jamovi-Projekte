@@ -6,10 +6,9 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            dep = NULL,
-            group = NULL,
-            alt = "notequal",
-            varEq = TRUE, ...) {
+            samp1 = NULL,
+            samp2 = NULL,
+            alternative = "two.sided", ...) {
 
             super$initialize(
                 package="nonpara",
@@ -17,47 +16,41 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..dep <- jmvcore::OptionVariable$new(
-                "dep",
-                dep)
-            private$..group <- jmvcore::OptionVariable$new(
-                "group",
-                group)
-            private$..alt <- jmvcore::OptionList$new(
-                "alt",
-                alt,
+            private$..samp1 <- jmvcore::OptionVariable$new(
+                "samp1",
+                samp1)
+            private$..samp2 <- jmvcore::OptionVariable$new(
+                "samp2",
+                samp2)
+            private$..alternative <- jmvcore::OptionList$new(
+                "alternative",
+                alternative,
                 options=list(
-                    "notequal",
-                    "onegreater",
-                    "twogreater"),
-                default="notequal")
-            private$..varEq <- jmvcore::OptionBool$new(
-                "varEq",
-                varEq,
-                default=TRUE)
+                    "two.sided",
+                    "greater",
+                    "less"),
+                default="two.sided")
 
-            self$.addOption(private$..dep)
-            self$.addOption(private$..group)
-            self$.addOption(private$..alt)
-            self$.addOption(private$..varEq)
+            self$.addOption(private$..samp1)
+            self$.addOption(private$..samp2)
+            self$.addOption(private$..alternative)
         }),
     active = list(
-        dep = function() private$..dep$value,
-        group = function() private$..group$value,
-        alt = function() private$..alt$value,
-        varEq = function() private$..varEq$value),
+        samp1 = function() private$..samp1$value,
+        samp2 = function() private$..samp2$value,
+        alternative = function() private$..alternative$value),
     private = list(
-        ..dep = NA,
-        ..group = NA,
-        ..alt = NA,
-        ..varEq = NA)
+        ..samp1 = NA,
+        ..samp2 = NA,
+        ..alternative = NA)
 )
 
 signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "signtestResults",
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]]),
+        text = function() private$.items[["text"]],
+        table = function() private$.items[["table"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -68,7 +61,34 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title="Sign Test"))}))
+                title="text"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="table",
+                title="Exact Sign Test",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="s1", 
+                        `title`="Sample One", 
+                        `type`="text"),
+                    list(
+                        `name`="alt", 
+                        `title`="Alternative", 
+                        `type`="text"),
+                    list(
+                        `name`="s2", 
+                        `title`="Sample Two", 
+                        `type`="text"),
+                    list(
+                        `name`="stat", 
+                        `title`="Statistic", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p-Value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))}))
 
 signtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "signtestBase",
@@ -94,40 +114,44 @@ signtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' 
 #' @param data .
-#' @param dep .
-#' @param group .
-#' @param alt .
-#' @param varEq .
+#' @param samp1 .
+#' @param samp2 .
+#' @param alternative .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$table} \tab \tab \tab \tab \tab a table \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$table$asDF}
+#'
+#' \code{as.data.frame(results$table)}
 #'
 #' @export
 signtest <- function(
     data,
-    dep,
-    group,
-    alt = "notequal",
-    varEq = TRUE) {
+    samp1,
+    samp2,
+    alternative = "two.sided") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("signtest requires jmvcore to be installed (restart may be required)")
 
-    if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
-    if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
+    if ( ! missing(samp1)) samp1 <- jmvcore::resolveQuo(jmvcore::enquo(samp1))
+    if ( ! missing(samp2)) samp2 <- jmvcore::resolveQuo(jmvcore::enquo(samp2))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL))
+            `if`( ! missing(samp1), samp1, NULL),
+            `if`( ! missing(samp2), samp2, NULL))
 
 
     options <- signtestOptions$new(
-        dep = dep,
-        group = group,
-        alt = alt,
-        varEq = varEq)
+        samp1 = samp1,
+        samp2 = samp2,
+        alternative = alternative)
 
     analysis <- signtestClass$new(
         options = options,

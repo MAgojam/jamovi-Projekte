@@ -1,6 +1,6 @@
 ---
 name:  signrank
-title: Sign Rank Test
+title: Signed Rank Test
 menuGroup: nonpara
 version: '1.0.0'
 jas: '1.2'

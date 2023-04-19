@@ -1,32 +1,32 @@
 ---
 name:  signrank
-title: Sign Rank Test
+title: Signed Rank Test
 jrs:   '1.1'
 
 items:
     - name:  text
-      title: st
+      title: text
       type:  Preformatted
     
     - name: table
-      title: tbd
+      title: Exact Wilcoxon Signed-Rank Test
       type: Table
       rows: 1
       columns:
         - name: s1
-          # title: "Sample One"
+          title: "Sample One"
           type: text
         - name: alt
-          # title: "Alternative"
+          title: "Alternative"
           type: text
         - name: s2
-          # title: "Sample Two"
+          title: "Sample Two"
           type: text
         - name: stat
-          # title: "Statistic"
+          title: "Statistic"
           type: number
         - name: p
-          # title: "p-Value"
+          title: "p-Value"
           type: number
           format: zto,pvalue
 ...

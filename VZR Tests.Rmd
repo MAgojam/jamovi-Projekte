@@ -27,21 +27,22 @@ rstatix::sign_test(Blutdruck ~ Horrorfilm,
 blood_coin <- data.frame(x1 = blood$Blutdruck[1:6],
                          x2 = blood$Blutdruck[7:12])
 get <- coin::sign_test(x1 ~ x2,
-                distribution = "exact",
-                data = blood_coin,
-                alternative = "less")
+                       distribution = "exact",
+                       data = blood_coin,
+                       alternative = "less")
 
-get@statistic@teststatistic
 coin::statistic(get)
 coin::pvalue(get)
-
 ```
 
 
 # Vorzeichen-Rangtest
 ```{r}
-coin::wilcoxsign_test(x1 ~ x2,
-                      distribution = "exact",
-                      data = blood_coin,
-                      alternative = "less")
+get2 <- coin::wilcoxsign_test(x1 ~ x2,
+                              distribution = "exact",
+                              data = blood_coin,
+                              alternative = "less")
+
+coin::statistic(get2)
+coin::pvalue(get2)
 ```

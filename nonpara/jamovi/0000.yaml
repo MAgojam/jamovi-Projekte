@@ -17,16 +17,21 @@ analyses:
     ns: nonpara
     menuGroup: nonpara
     menuTitle: Wilcoxon Rank-Sum Test
-  - title: Sign Rank Test
+  - title: Signed Rank Test
     name: signrank
     ns: nonpara
     menuGroup: nonpara
-    menuTitle: Sign Rank Test
+    menuTitle: Signed Rank Test
   - title: Sign Test
     name: signtest
     ns: nonpara
     menuGroup: nonpara
     menuTitle: Sign Test
+  - title: wrsTest
+    name: wrsTest
+    ns: nonpara
+    menuGroup: nonpara
+    menuTitle: wrsTest
 usesNative: true
 minApp: 1.0.8
 

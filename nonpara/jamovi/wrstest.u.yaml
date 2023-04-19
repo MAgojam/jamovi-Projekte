@@ -1,5 +1,5 @@
-title: Signed Rank Test
-name: signrank
+title: wrsTest
+name: wrsTest
 jus: '3.0'
 stage: 0
 compilerMode: aggressive
@@ -9,19 +9,24 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Sample One
+        label: Dependent Variable
         children:
           - type: VariablesListBox
-            name: samp1
+            name: dep
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Sample Two
+        label: Grouping Variable
         children:
           - type: VariablesListBox
-            name: samp2
+            name: group
             maxItemCount: 1
             isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: dist
   - type: LayoutBox
     margin: large
     children:

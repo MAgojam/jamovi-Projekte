@@ -5,7 +5,28 @@ jrs:   '1.1'
 
 items:
     - name:  text
-      title: Sign Test
+      title: text
       type:  Preformatted
-
+    
+    - name: table
+      title: Exact Sign Test
+      type: Table
+      rows: 1
+      columns:
+        - name: s1
+          title: "Sample One"
+          type: text
+        - name: alt
+          title: "Alternative"
+          type: text
+        - name: s2
+          title: "Sample Two"
+          type: text
+        - name: stat
+          title: "Statistic"
+          type: number
+        - name: p
+          title: "p-Value"
+          type: number
+          format: zto,pvalue
 ...

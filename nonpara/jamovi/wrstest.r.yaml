@@ -1,6 +1,6 @@
 ---
-name:  wilcoxRanksum
-title: Wilcoxon Rank-Sum Test
+name:  wrsTest
+title: wrsTest
 jrs:   '1.1'
 
 items:
