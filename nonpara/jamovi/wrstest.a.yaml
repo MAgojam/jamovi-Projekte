@@ -19,7 +19,7 @@ options:
       title: Grouping Variable
       type: Variable
       suggested: [nominal, ordinal]
-      permitted: [factor, numeric]
+      permitted: [factor]
 
     - name: dist
       title: Distribution

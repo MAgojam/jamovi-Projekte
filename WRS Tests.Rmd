@@ -12,18 +12,9 @@ mind2 <- data.frame(ID = as.factor(1:7),
                     Werte = c(4,6,8, 2,4,4,6), 
                     Gruppe = factor(c(1,1,1, 2,2,2,2)))
 
-mind2_verkehrt <- data.frame(ID = as.factor(1:7),
-                             Werte = c(4,6,8, 2,4,4,6), 
-                             Gruppe = factor(c(2,2,2, 1,1,1,1)))
-
 mind <- data.frame(ID = as.factor(1:7),
                    Werte = c(1,4,9, 8,3,6,7), 
                    Gruppe = factor(c(1,1,1, 2,2,2,2)))
-
-
-mind <- data.frame(ID = as.factor(1:7),
-                   Werte = c(1,4,9, 8,3,6,7), 
-                   Gruppe = factor(c(2,2,2, 1,1,1,1)))
 
 ```
 
@@ -35,10 +26,17 @@ levels(mind2$Gruppe)
 # Exakte Tests
 ## Exakter Test mit `coin::wilcox_test()`
 ```{r}
-coin::wilcox_test(Werte ~ Gruppe, 
-                  data = mind2_verkehrt, 
-                  distribution = "exact", 
-                  alternative = "less")
+exakt1 <- coin::wilcox_test(Werte ~ Gruppe, 
+                            data = mind, 
+                            distribution = "exact", 
+                            alternative = "less")
+exakt2 <- coin::wilcox_test(Werte ~ Gruppe, 
+                            data = mind2, 
+                            distribution = "exact", 
+                            alternative = "greater")
+
+exakt1
+exakt2
 ```
 Ergebnis ist identisch mit der Berechnung von Hand, scheint korrekt zu sein.
 
@@ -83,11 +81,12 @@ coin::wilcox_test(Werte ~ Gruppe,
 
 ## Asymptotischer Test mit `stats::wilcox.test()` ohne Kontinuitätskorrektur
 ```{r}
-stats::wilcox.test(Werte ~ Gruppe,
-                   data = mind2,
-                   exact = FALSE,
-                   correct = FALSE,
-                   alternative = "greater")
+asy <- stats::wilcox.test(Werte ~ Gruppe,
+                          data = mind,
+                          exact = FALSE,
+                          correct = FALSE,
+                          alternative = "less")
+asy
 ```
 ## Asymptotischer Test mit `stats::wilcox.test()` mit Kontinuitätskorrektur
 ```{r}
@@ -125,8 +124,8 @@ self$options$correct <- TRUE
 ```
 
 ```{r}
-coin::statistic(test)
-coin::pvalue(test)
+coin::statistic(exakt1)
+coin::pvalue(exakt1)
 ```
 
 

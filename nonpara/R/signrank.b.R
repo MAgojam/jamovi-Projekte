@@ -16,6 +16,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       results <- coin::wilcoxsign_test(formula = formula,
                                        data = data,
                                        distribution = "exact",
+                                       #zero.method einbauen
                                        alternative = self$options$alternative)
       
       self$results$text$setContent(results)

@@ -32,8 +32,7 @@ wrsTestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal",
                     "ordinal"),
                 permitted=list(
-                    "factor",
-                    "numeric"))
+                    "factor"))
             private$..dist <- jmvcore::OptionList$new(
                 "dist",
                 dist,
@@ -159,6 +158,7 @@ wrsTest <- function(
             `if`( ! missing(dep), dep, NULL),
             `if`( ! missing(group), group, NULL))
 
+    for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- wrsTestOptions$new(
         dep = dep,

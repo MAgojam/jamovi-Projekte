@@ -16,20 +16,18 @@ wrsTestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       dep <- self$options$dep
       group <- self$options$group
       
+      ################## To do ############
+      # Testen ob Gruppierungs-Variable integer oder character ist.
+      # vlt. mit is.character(data[[group[1]]]) und dann wenn ja, alle die den gleichen Wert haben ersetzen durch 1,
+      # also irgendwie eine integer-variante focieren. Vlt. gibt es auch bessere Alternativen
+      #####################################
+      
       data[[dep]] <- jmvcore::toNumeric(data[[dep]])
-      data[[group]] <- factor(data[[group]], levels = c("2", "1"))
+      data[[group]] <- factor(data[[group]], ordered = FALSE)
+      
       data <- na.omit(data)
       
       distribution <- self$options$dist
-      
-      # Umkehrung der Alternative
-      # Funktioniert für p-Wert, aber z-Wert ist ebenfalls verkehrt.
-      # Könnte den ebenfalls manuell umkehren, aber ich gehe davon aus,
-      # dass eher etwas mit den Daten nicht stimmt,
-      # bzw. mit der Art wie jamovi die Daten aufnimmt und verarbeitet.
-      # if (self$options$alternative == "less") {alternative <- "greater"}
-      # else if (self$options$alternative == "greater") {alternative <- "less"}
-      # else if (self$options$alternative == "two.sided") {alternative <- "two.sided"}
       
       ## if exact is selected
       if (distribution == "exact" || distribution == "approximate") {

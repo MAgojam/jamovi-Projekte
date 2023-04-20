@@ -1,3 +1,0 @@
-- Wilcoxon Rangsummen-Test: kommt darauf an, welches Format man für Variablen wählt, ob die Analyse korrekt ist oder nicht. Soll ich es limitieren? 
-	Oder kennst du eine Option, wie man machen könnte, dass es für beide Arten funktioniert?
-- Allgemein: wie sollte das UI aussehen, welche Optionen soll man haben?

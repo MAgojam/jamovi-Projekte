@@ -8,9 +8,11 @@ wilcoxRanksumOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         initialize = function(
             dep = NULL,
             group = NULL,
-            dist = "exact",
-            alternative = "two.sided",
-            correct = FALSE, ...) {
+            exact = TRUE,
+            approximate = FALSE,
+            asymptotic = FALSE,
+            cc = FALSE,
+            alternative = "two.sided", ...) {
 
             super$initialize(
                 package="nonpara",
@@ -20,18 +22,36 @@ wilcoxRanksumOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 
             private$..dep <- jmvcore::OptionVariable$new(
                 "dep",
-                dep)
+                dep,
+                suggested=list(
+                    "ordinal",
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
             private$..group <- jmvcore::OptionVariable$new(
                 "group",
-                group)
-            private$..dist <- jmvcore::OptionList$new(
-                "dist",
-                dist,
-                options=list(
-                    "exact",
-                    "asymptotic",
-                    "approximate"),
-                default="exact")
+                group,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"))
+            private$..exact <- jmvcore::OptionBool$new(
+                "exact",
+                exact,
+                default=TRUE)
+            private$..approximate <- jmvcore::OptionBool$new(
+                "approximate",
+                approximate,
+                default=FALSE)
+            private$..asymptotic <- jmvcore::OptionBool$new(
+                "asymptotic",
+                asymptotic,
+                default=FALSE)
+            private$..cc <- jmvcore::OptionBool$new(
+                "cc",
+                cc,
+                default=FALSE)
             private$..alternative <- jmvcore::OptionList$new(
                 "alternative",
                 alternative,
@@ -40,29 +60,31 @@ wilcoxRanksumOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "two.sided",
                     "greater"),
                 default="two.sided")
-            private$..correct <- jmvcore::OptionBool$new(
-                "correct",
-                correct,
-                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
-            self$.addOption(private$..dist)
+            self$.addOption(private$..exact)
+            self$.addOption(private$..approximate)
+            self$.addOption(private$..asymptotic)
+            self$.addOption(private$..cc)
             self$.addOption(private$..alternative)
-            self$.addOption(private$..correct)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
-        dist = function() private$..dist$value,
-        alternative = function() private$..alternative$value,
-        correct = function() private$..correct$value),
+        exact = function() private$..exact$value,
+        approximate = function() private$..approximate$value,
+        asymptotic = function() private$..asymptotic$value,
+        cc = function() private$..cc$value,
+        alternative = function() private$..alternative$value),
     private = list(
         ..dep = NA,
         ..group = NA,
-        ..dist = NA,
-        ..alternative = NA,
-        ..correct = NA)
+        ..exact = NA,
+        ..approximate = NA,
+        ..asymptotic = NA,
+        ..cc = NA,
+        ..alternative = NA)
 )
 
 wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -88,14 +110,69 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `title`="", 
                         `type`="text"),
                     list(
-                        `name`="stat", 
-                        `title`="Statistic", 
-                        `type`="text"),
+                        `name`="type[ex]", 
+                        `title`="Type", 
+                        `type`="text", 
+                        `visible`="(exact)"),
                     list(
-                        `name`="p", 
-                        `title`="p-Value", 
+                        `name`="stat[ex]", 
+                        `title`="Statistic", 
+                        `type`="text", 
+                        `visible`="(exact)"),
+                    list(
+                        `name`="p[ex]", 
+                        `title`="<i>p</i>-Value", 
                         `type`="number", 
-                        `format`="zto,pvalue"))))}))
+                        `format`="zto,pvalue", 
+                        `visible`="(exact)"),
+                    list(
+                        `name`="type[app]", 
+                        `title`="Type", 
+                        `type`="text", 
+                        `visible`="(approximate)"),
+                    list(
+                        `name`="stat[app]", 
+                        `title`="Statistic", 
+                        `type`="text", 
+                        `visible`="(approximate)"),
+                    list(
+                        `name`="p[app]", 
+                        `title`="<i>p</i>-Value", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(approximate)"),
+                    list(
+                        `name`="type[asy]", 
+                        `title`="Type", 
+                        `type`="text", 
+                        `visible`="(asymptotic)"),
+                    list(
+                        `name`="stat[asy]", 
+                        `title`="Statistic", 
+                        `type`="text", 
+                        `visible`="(asymptotic)"),
+                    list(
+                        `name`="p[asy]", 
+                        `title`="<i>p</i>-Value", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(asymptotic)"),
+                    list(
+                        `name`="type[cc]", 
+                        `title`="Type", 
+                        `type`="text", 
+                        `visible`="(cc)"),
+                    list(
+                        `name`="stat[cc]", 
+                        `title`="Statistic", 
+                        `type`="text", 
+                        `visible`="(cc)"),
+                    list(
+                        `name`="p[cc]", 
+                        `title`="<i>p</i>-Value", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(cc)"))))}))
 
 wilcoxRanksumBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "wilcoxRanksumBase",
@@ -120,12 +197,16 @@ wilcoxRanksumBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Wilcoxon Rank-Sum Test
 #'
 #' 
-#' @param data .
-#' @param dep .
-#' @param group .
-#' @param dist .
+#' @param data the data as a data frame
+#' @param dep Dependent variable. Does not neet to be specified when using a
+#'   formula.
+#' @param group Grouping variable, must have two levels. Does not neet to be
+#'   specified when using a formula.
+#' @param exact .
+#' @param approximate .
+#' @param asymptotic .
+#' @param cc .
 #' @param alternative .
-#' @param correct .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$wrs} \tab \tab \tab \tab \tab a table \cr
@@ -142,9 +223,11 @@ wilcoxRanksum <- function(
     data,
     dep,
     group,
-    dist = "exact",
-    alternative = "two.sided",
-    correct = FALSE) {
+    exact = TRUE,
+    approximate = FALSE,
+    asymptotic = FALSE,
+    cc = FALSE,
+    alternative = "two.sided") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("wilcoxRanksum requires jmvcore to be installed (restart may be required)")
@@ -157,13 +240,16 @@ wilcoxRanksum <- function(
             `if`( ! missing(dep), dep, NULL),
             `if`( ! missing(group), group, NULL))
 
+    for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- wilcoxRanksumOptions$new(
         dep = dep,
         group = group,
-        dist = dist,
-        alternative = alternative,
-        correct = correct)
+        exact = exact,
+        approximate = approximate,
+        asymptotic = asymptotic,
+        cc = cc,
+        alternative = alternative)
 
     analysis <- wilcoxRanksumClass$new(
         options = options,

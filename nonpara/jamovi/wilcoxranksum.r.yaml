@@ -12,11 +12,60 @@ items:
         - name: var
           title: ''
           type: text
-        - name: stat
+          
+        - name: type[ex]
+          title: Type
+          type: text
+          visible: (exact)
+        - name: stat[ex]
           title: Statistic
           type: text
-        - name: p
-          title: p-Value
+          visible: (exact)
+        - name: p[ex]
+          title: <i>p</i>-Value
           type: number
           format: zto,pvalue
+          visible: (exact)
+          
+        - name: type[app]
+          title: Type
+          type: text
+          visible: (approximate)
+        - name: stat[app]
+          title: Statistic
+          type: text
+          visible: (approximate)
+        - name: p[app]
+          title: <i>p</i>-Value
+          type: number
+          format: zto,pvalue
+          visible: (approximate)
+          
+        - name: type[asy]
+          title: Type
+          type: text
+          visible: (asymptotic)
+        - name: stat[asy]
+          title: Statistic
+          type: text
+          visible: (asymptotic)
+        - name: p[asy]
+          title: <i>p</i>-Value
+          type: number
+          format: zto,pvalue
+          visible: (asymptotic)
+          
+        - name: type[cc]
+          title: Type
+          type: text
+          visible: (cc)
+        - name: stat[cc]
+          title: Statistic
+          type: text
+          visible: (cc)
+        - name: p[cc]
+          title: <i>p</i>-Value
+          type: number
+          format: zto,pvalue
+          visible: (cc)
 ...

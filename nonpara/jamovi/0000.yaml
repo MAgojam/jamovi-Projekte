@@ -1,36 +1,42 @@
 ---
-title: What the Package Does (Title Case)
+title: Exact Nonparametric Tests
 name: nonpara
 version: 0.0.0
 jms: '1.0'
 authors:
-  - Who wrote it
-maintainer: The package maintainer <yourself@somewhere.net>
+  - 'Dan Studer, Boris Mayer'
+maintainer: Package Maintainer <example@mail.net>
 date: '2023-04-18'
 type: R
 description: >-
-  More about what it does (maybe more than one line) Use four spaces when
-  indenting paragraphs within the Description.
+  With nonparametric tests, it is often not clear, if the exact test has indeed
+  been used,  or if the function has quietly applied an asymptotic version
+  without explicitly saying so. This module aims to provide exact nonparametric
+  tests even for cases with ties.
 analyses:
   - title: Wilcoxon Rank-Sum Test
     name: wilcoxRanksum
     ns: nonpara
     menuGroup: nonpara
+    menuSubgroup: Rank-Tests
     menuTitle: Wilcoxon Rank-Sum Test
   - title: Signed Rank Test
     name: signrank
     ns: nonpara
     menuGroup: nonpara
+    menuSubgroup: Rank-Tests
     menuTitle: Signed Rank Test
   - title: Sign Test
     name: signtest
     ns: nonpara
     menuGroup: nonpara
+    menuSubgroup: Rank-Tests
     menuTitle: Sign Test
   - title: wrsTest
     name: wrsTest
     ns: nonpara
     menuGroup: nonpara
+    menuSubgroup: Rank-Tests
     menuTitle: wrsTest
 usesNative: true
 minApp: 1.0.8
