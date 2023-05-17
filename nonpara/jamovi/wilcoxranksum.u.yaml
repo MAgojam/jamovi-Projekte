@@ -24,44 +24,39 @@ children:
             isTarget: true
   - type: LayoutBox
     margin: large
-    stretchFactor: 1
     children:
-      - type: LayoutBox
-        cell:
-          column: 0
-          row: 0
-        stretchFactor: 1
-        children:
-          - type: Label
-            label: Method
-            children:
-              - type: CheckBox
-                name: exact
-                
-              - type: CheckBox
-                name: approximate
-                
-              - type: CheckBox
-                name: asymptotic
-                children:
-                  - type: CheckBox
-                    name: cc
-                    enable: (asymptotic)
-                 
-          - type: Label
-            label: Hypothesis
-            children:
-              - type: RadioButton
-                name: hypothesis_less
-                optionName: alternative
-                optionPart: less
-                
-              - type: RadioButton
-                name: hypothesis_two.sided
-                optionName: alternative
-                optionPart: two.sided
-              
-              - type: RadioButton
-                name: hypothesis_greater
-                optionName: alternative
-                optionPart: greater
+      - type: CheckBox
+        name: exact
+      - type: CheckBox
+        name: approximate
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: nsamples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: asymptotic
+      - type: CheckBox
+        name: cc
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: alternative
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: rs1
+      - type: CheckBox
+        name: u
+      - type: CheckBox
+        name: rankmean
+      - type: CheckBox
+        name: median
+      - type: CheckBox
+        name: plot

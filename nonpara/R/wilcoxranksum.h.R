@@ -10,9 +10,15 @@ wilcoxRanksumOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             group = NULL,
             exact = TRUE,
             approximate = FALSE,
+            nsamples = 10000,
             asymptotic = FALSE,
             cc = FALSE,
-            alternative = "two.sided", ...) {
+            alternative = "two.sided",
+            rs1 = FALSE,
+            u = FALSE,
+            rankmean = FALSE,
+            median = FALSE,
+            plot = FALSE, ...) {
 
             super$initialize(
                 package="nonpara",
@@ -44,6 +50,10 @@ wilcoxRanksumOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "approximate",
                 approximate,
                 default=FALSE)
+            private$..nsamples <- jmvcore::OptionInteger$new(
+                "nsamples",
+                nsamples,
+                default=10000)
             private$..asymptotic <- jmvcore::OptionBool$new(
                 "asymptotic",
                 asymptotic,
@@ -60,31 +70,69 @@ wilcoxRanksumOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "two.sided",
                     "greater"),
                 default="two.sided")
+            private$..rs1 <- jmvcore::OptionBool$new(
+                "rs1",
+                rs1,
+                default=FALSE)
+            private$..u <- jmvcore::OptionBool$new(
+                "u",
+                u,
+                default=FALSE)
+            private$..rankmean <- jmvcore::OptionBool$new(
+                "rankmean",
+                rankmean,
+                default=FALSE)
+            private$..median <- jmvcore::OptionBool$new(
+                "median",
+                median,
+                default=FALSE)
+            private$..plot <- jmvcore::OptionBool$new(
+                "plot",
+                plot,
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..exact)
             self$.addOption(private$..approximate)
+            self$.addOption(private$..nsamples)
             self$.addOption(private$..asymptotic)
             self$.addOption(private$..cc)
             self$.addOption(private$..alternative)
+            self$.addOption(private$..rs1)
+            self$.addOption(private$..u)
+            self$.addOption(private$..rankmean)
+            self$.addOption(private$..median)
+            self$.addOption(private$..plot)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
         exact = function() private$..exact$value,
         approximate = function() private$..approximate$value,
+        nsamples = function() private$..nsamples$value,
         asymptotic = function() private$..asymptotic$value,
         cc = function() private$..cc$value,
-        alternative = function() private$..alternative$value),
+        alternative = function() private$..alternative$value,
+        rs1 = function() private$..rs1$value,
+        u = function() private$..u$value,
+        rankmean = function() private$..rankmean$value,
+        median = function() private$..median$value,
+        plot = function() private$..plot$value),
     private = list(
         ..dep = NA,
         ..group = NA,
         ..exact = NA,
         ..approximate = NA,
+        ..nsamples = NA,
         ..asymptotic = NA,
         ..cc = NA,
-        ..alternative = NA)
+        ..alternative = NA,
+        ..rs1 = NA,
+        ..u = NA,
+        ..rankmean = NA,
+        ..median = NA,
+        ..plot = NA)
 )
 
 wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -116,9 +164,19 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `visible`="(exact)"),
                     list(
                         `name`="stat[ex]", 
-                        `title`="Statistic", 
+                        `title`="<i>z</i>-Value", 
                         `type`="text", 
                         `visible`="(exact)"),
+                    list(
+                        `name`="rs1[ex]", 
+                        `title`="RS<sub>1</sub>", 
+                        `type`="number", 
+                        `visible`="(ex && rs1)"),
+                    list(
+                        `name`="u[ex]", 
+                        `title`="U", 
+                        `type`="number", 
+                        `visible`="(ex && u)"),
                     list(
                         `name`="p[ex]", 
                         `title`="<i>p</i>-Value", 
@@ -132,9 +190,19 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `visible`="(approximate)"),
                     list(
                         `name`="stat[app]", 
-                        `title`="Statistic", 
+                        `title`="<i>z</i>-Value", 
                         `type`="text", 
                         `visible`="(approximate)"),
+                    list(
+                        `name`="rs1[app]", 
+                        `title`="RS<sub>1</sub>", 
+                        `type`="number", 
+                        `visible`="(app && rs1)"),
+                    list(
+                        `name`="u[app]", 
+                        `title`="U", 
+                        `type`="number", 
+                        `visible`="(app && u)"),
                     list(
                         `name`="p[app]", 
                         `title`="<i>p</i>-Value", 
@@ -148,9 +216,19 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `visible`="(asymptotic)"),
                     list(
                         `name`="stat[asy]", 
-                        `title`="Statistic", 
+                        `title`="<i>z</i>-Value", 
                         `type`="text", 
                         `visible`="(asymptotic)"),
+                    list(
+                        `name`="rs1[asy]", 
+                        `title`="RS<sub>1</sub>", 
+                        `type`="number", 
+                        `visible`="(asy && rs1)"),
+                    list(
+                        `name`="u[asy]", 
+                        `title`="U", 
+                        `type`="number", 
+                        `visible`="(asy && u)"),
                     list(
                         `name`="p[asy]", 
                         `title`="<i>p</i>-Value", 
@@ -164,9 +242,19 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `visible`="(cc)"),
                     list(
                         `name`="stat[cc]", 
-                        `title`="Statistic", 
+                        `title`="<i>z</i>-Value", 
                         `type`="text", 
                         `visible`="(cc)"),
+                    list(
+                        `name`="rs1[cc]", 
+                        `title`="RS<sub>1</sub>", 
+                        `type`="number", 
+                        `visible`="(cc && rs1)"),
+                    list(
+                        `name`="u[cc]", 
+                        `title`="U", 
+                        `type`="number", 
+                        `visible`="(cc && u)"),
                     list(
                         `name`="p[cc]", 
                         `title`="<i>p</i>-Value", 
@@ -204,9 +292,15 @@ wilcoxRanksumBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   specified when using a formula.
 #' @param exact .
 #' @param approximate .
+#' @param nsamples .
 #' @param asymptotic .
 #' @param cc .
 #' @param alternative .
+#' @param rs1 .
+#' @param u .
+#' @param rankmean .
+#' @param median .
+#' @param plot .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$wrs} \tab \tab \tab \tab \tab a table \cr
@@ -225,9 +319,15 @@ wilcoxRanksum <- function(
     group,
     exact = TRUE,
     approximate = FALSE,
+    nsamples = 10000,
     asymptotic = FALSE,
     cc = FALSE,
-    alternative = "two.sided") {
+    alternative = "two.sided",
+    rs1 = FALSE,
+    u = FALSE,
+    rankmean = FALSE,
+    median = FALSE,
+    plot = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("wilcoxRanksum requires jmvcore to be installed (restart may be required)")
@@ -247,9 +347,15 @@ wilcoxRanksum <- function(
         group = group,
         exact = exact,
         approximate = approximate,
+        nsamples = nsamples,
         asymptotic = asymptotic,
         cc = cc,
-        alternative = alternative)
+        alternative = alternative,
+        rs1 = rs1,
+        u = u,
+        rankmean = rankmean,
+        median = median,
+        plot = plot)
 
     analysis <- wilcoxRanksumClass$new(
         options = options,

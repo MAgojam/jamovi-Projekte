@@ -32,38 +32,21 @@ options:
           Grouping variable, must have two levels.
         R: >
           Grouping variable, must have two levels. Does not neet to be specified when using a formula.
-#
-    #    
-    # - name: dist
-    #   title: Type of Test
-    #   type: List
-    #   options:
-    #     - title: Exact
-    #       name: exact
-    #     - title: Approximate
-    #       name: approximate
-    #     - title: "Asymptotic, with Continuity Correction"
-    #       name: asymptoticCC
-    #     - title: "Asymptotic, without Continuity Correction"
-    #       name: asymptotic
-    #   default: exact
-    
-    
-    
-    # - name: dist
-    #   title: Type of Test
-    #   type: List
-      # options:
+
     - title: Exact
       name: exact
       type: Bool
       default: true
-    - title: Approximate
+    - title: Monte Carlo
       name: approximate
       type: Bool
       default: false
-    - name: asymptotic
-      title: Asymptotic
+    - title: 'Number of Samples:' 
+      name: nsamples
+      type: Integer
+      default: 10000
+    - title: Asymptotic
+      name: asymptotic
       type: Bool
       default: false
     - title: Continuity Correction
@@ -71,15 +54,36 @@ options:
       type: Bool
       default: false
     
-    - name: alternative
-      title: Alternative Hypothesis
+    - title: Alternative Hypothesis
+      name: alternative
       type: List
       options:
-        - title: "Group 1 < Group 2"
+        - title: 'Group 1 < Group 2'
           name:  less
-        - title: "Group 1 ≠ Group 2"
+        - title: 'Group 1 ≠ Group 2'
           name:  two.sided
-        - title: "Group 1 > Group 2"
+        - title: 'Group 1 > Group 2'
           name:  greater
       default: two.sided
+      
+    - title: 'RS<sub>1</sub>' 
+      name: rs1
+      type: Bool
+      default: false
+    - title: 'Mann-Whitney U'
+      name: u
+      type: Bool
+      default: false
+    - title: Rankmean
+      name: rankmean
+      type: Bool
+      default: false
+    - title: Median
+      name: median
+      type: Bool
+      default: false
+    - title: Descriptives Plot
+      name: plot
+      type: Bool
+      default: false
 ...

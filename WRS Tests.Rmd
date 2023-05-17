@@ -18,10 +18,7 @@ mind <- data.frame(ID = as.factor(1:7),
 
 ```
 
-```{r}
-str(mind2)
-levels(mind2$Gruppe)
-```
+
 
 # Exakte Tests
 ## Exakter Test mit `coin::wilcox_test()`
@@ -38,6 +35,8 @@ exakt2 <- coin::wilcox_test(Werte ~ Gruppe,
 exakt1
 exakt2
 ```
+
+
 Ergebnis ist identisch mit der Berechnung von Hand, scheint korrekt zu sein.
 
 
@@ -48,22 +47,22 @@ coin::independence_test(Werte ~ Gruppe,
                         distribution = "exact", 
                         alternative = "greater")
 ```
-Ergebnis ist identisch zu `coin::wilcox_test()` bzgl. p-Wert, aber z-Wert ist leicht anders!.
+Ergebnis ist identisch zu `coin::wilcox_test()` bzgl. p-Wert, aber z-Wert ist leicht anders!!!
+
 
 
 ## Exakter Test mit `stats::wilcox.test()`
 ```{r}
-stats::wilcox.test(Werte ~ Gruppe,
-                   data = mind2,
-                   exact = TRUE,
-                   correct = FALSE,
-                   alternative = "greater")
+stats <- stats::wilcox.test(Werte ~ Gruppe,
+                            data = mind2,
+                            exact = TRUE,
+                            correct = FALSE,
+                            alternative = "greater")
+
+stats
 ```
 
 Schlägt fehl, weil die Funktion bei Ties keinen exakten Test ausführen kann.
-
-
-
 
 
 

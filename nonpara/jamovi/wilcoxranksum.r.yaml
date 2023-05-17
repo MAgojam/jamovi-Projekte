@@ -12,60 +12,135 @@ items:
         - name: var
           title: ''
           type: text
-          
+
         - name: type[ex]
           title: Type
           type: text
           visible: (exact)
         - name: stat[ex]
-          title: Statistic
+          title: '<i>z</i>-Value'
           type: text
           visible: (exact)
+        - name: rs1[ex]
+          title: 'RS<sub>1</sub>'
+          type: number
+          visible: (ex && rs1)
+        - name: u[ex]
+          title: U
+          type: number
+          visible: (ex && u)
         - name: p[ex]
-          title: <i>p</i>-Value
+          title: '<i>p</i>-Value'
           type: number
           format: zto,pvalue
           visible: (exact)
-          
+
         - name: type[app]
           title: Type
           type: text
           visible: (approximate)
         - name: stat[app]
-          title: Statistic
+          title: '<i>z</i>-Value'
           type: text
           visible: (approximate)
+        - name: rs1[app]
+          title: 'RS<sub>1</sub>'
+          type: number
+          visible: (app && rs1)
+        - name: u[app]
+          title: U
+          type: number
+          visible: (app && u)
         - name: p[app]
-          title: <i>p</i>-Value
+          title: '<i>p</i>-Value'
           type: number
           format: zto,pvalue
           visible: (approximate)
-          
+
         - name: type[asy]
           title: Type
           type: text
           visible: (asymptotic)
         - name: stat[asy]
-          title: Statistic
+          title: '<i>z</i>-Value'
           type: text
           visible: (asymptotic)
+        - name: rs1[asy]
+          title: 'RS<sub>1</sub>'
+          type: number
+          visible: (asy && rs1)
+        - name: u[asy]
+          title: U
+          type: number
+          visible: (asy && u)
         - name: p[asy]
-          title: <i>p</i>-Value
+          title: '<i>p</i>-Value'
           type: number
           format: zto,pvalue
           visible: (asymptotic)
-          
+
         - name: type[cc]
           title: Type
           type: text
           visible: (cc)
         - name: stat[cc]
-          title: Statistic
+          title: '<i>z</i>-Value'
           type: text
           visible: (cc)
+        - name: rs1[cc]
+          title: 'RS<sub>1</sub>'
+          type: number
+          visible: (cc && rs1)
+        - name: u[cc]
+          title: U
+          type: number
+          visible: (cc && u)
         - name: p[cc]
-          title: <i>p</i>-Value
+          title: '<i>p</i>-Value'
           type: number
           format: zto,pvalue
           visible: (cc)
+
+    # - name: desc
+    #   title: Descriptive Statistics
+    #   type: Table
+    #   rows: 2           # weiss noch nicht ob rows: 2 der beste Ansatz ist, vlt. eher mit addRow oder rowKey arbeiten?
+    #   columns:
+    #     - name: rankmean_g1
+    #       title: 'Rankmean Group 1'
+    #       type: number
+    #       visible: (rankmean)
+    #     - name: rankmean_g2
+    #       title: 'Rankmean Group 2'
+    #       type: number
+    #       visible: (rankmean)
+    #     - name: median_g1
+    #       title: 'Median Group 1'
+    #       type: number
+    #       visible: (median)
+    #     - name: median_g2
+    #       title: 'Median Group 2'
+    #       type: number
+    #       visible: (median)
+        # - name: kind
+        #   title: ''
+        #   type: text
+        # - name: g1[rankmean]
+        #   title: 'Group 1'
+        #   type: number
+        #   visible: (rankmean)
+        # - name: g2[rankmean]
+        #   title: 'Group 2'
+        #   type: number
+        #   visible: (rankmean)
+        #   
+        # - name: g1[median]
+        #   title: 'Group 1'
+        #   type: number
+        #   visible: (median)
+        # - name: g2[median]
+        #   title: 'Group 2'
+        #   type: number
+        #   visible: (median)
+        
 ...
