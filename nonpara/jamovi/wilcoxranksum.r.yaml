@@ -13,74 +13,74 @@ items:
           title: ''
           type: text
 
-        - name: type[ex]
-          title: Type
+        - name: type[exact]
+          title: 'Type'
           type: text
           visible: (exact)
-        - name: stat[ex]
+        - name: stat[exact]
           title: '<i>z</i>-Value'
           type: text
           visible: (exact)
-        - name: rs1[ex]
+        - name: rs1[exact]
           title: 'RS<sub>1</sub>'
           type: number
-          visible: (ex && rs1)
-        - name: u[ex]
-          title: U
+          visible: (exact && rs1)
+        - name: u[exact]
+          title: 'U'
           type: number
-          visible: (ex && u)
-        - name: p[ex]
+          visible: (exact && u)
+        - name: p[exact]
           title: '<i>p</i>-Value'
           type: number
           format: zto,pvalue
           visible: (exact)
 
-        - name: type[app]
-          title: Type
+        - name: type[approximate]
+          title: 'Type'
           type: text
           visible: (approximate)
-        - name: stat[app]
+        - name: stat[approximate]
           title: '<i>z</i>-Value'
           type: text
           visible: (approximate)
-        - name: rs1[app]
+        - name: rs1[approximate]
           title: 'RS<sub>1</sub>'
           type: number
-          visible: (app && rs1)
-        - name: u[app]
-          title: U
+          visible: (approximate && rs1)
+        - name: u[approximate]
+          title: 'U'
           type: number
-          visible: (app && u)
-        - name: p[app]
+          visible: (approximate && u)
+        - name: p[approximate]
           title: '<i>p</i>-Value'
           type: number
           format: zto,pvalue
           visible: (approximate)
 
-        - name: type[asy]
-          title: Type
+        - name: type[asymptotic]
+          title: 'Type'
           type: text
           visible: (asymptotic)
-        - name: stat[asy]
+        - name: stat[asymptotic]
           title: '<i>z</i>-Value'
           type: text
           visible: (asymptotic)
-        - name: rs1[asy]
+        - name: rs1[asymptotic]
           title: 'RS<sub>1</sub>'
           type: number
-          visible: (asy && rs1)
-        - name: u[asy]
-          title: U
+          visible: (asymptotic && rs1)
+        - name: u[asymptotic]
+          title: 'U'
           type: number
-          visible: (asy && u)
-        - name: p[asy]
+          visible: (asymptotic && u)
+        - name: p[asymptotic]
           title: '<i>p</i>-Value'
           type: number
           format: zto,pvalue
           visible: (asymptotic)
 
         - name: type[cc]
-          title: Type
+          title: 'Type'
           type: text
           visible: (cc)
         - name: stat[cc]
@@ -92,7 +92,7 @@ items:
           type: number
           visible: (cc && rs1)
         - name: u[cc]
-          title: U
+          title: 'U'
           type: number
           visible: (cc && u)
         - name: p[cc]

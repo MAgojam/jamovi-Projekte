@@ -12,11 +12,92 @@ items:
         - name: var
           title: ''
           type: text
-        - name: stat
-          title: Statistic
+
+        - name: type[exact]
+          title: 'Type'
           type: text
-        - name: p
-          title: p-Value
+          visible: (exact)
+        - name: stat[exact]
+          title: '<i>z</i>-Value'
+          type: text
+          visible: (exact)
+        - name: rs1[exact]
+          title: 'RS<sub>1</sub>'
+          type: number
+          visible: (exact && rs1)
+        - name: u[ex]
+          title: 'U'
+          type: number
+          visible: (exact && u)
+        - name: p[exact]
+          title: '<i>p</i>-Value'
           type: number
           format: zto,pvalue
+          visible: (exact)
+
+        - name: type[approximate]
+          title: 'Type'
+          type: text
+          visible: (approximate)
+        - name: stat[approximate]
+          title: '<i>z</i>-Value'
+          type: text
+          visible: (approximate)
+        - name: rs1[approximate]
+          title: 'RS<sub>1</sub>'
+          type: number
+          visible: (approximate && rs1)
+        - name: u[approximate]
+          title: 'U'
+          type: number
+          visible: (approximate && u)
+        - name: p[approximate]
+          title: '<i>p</i>-Value'
+          type: number
+          format: zto,pvalue
+          visible: (approximate)
+
+        - name: type[asymptotic]
+          title: 'Type'
+          type: text
+          visible: (asymptotic)
+        - name: stat[asy]
+          title: '<i>z</i>-Value'
+          type: text
+          visible: (asymptotic)
+        - name: rs1[asymptotic]
+          title: 'RS<sub>1</sub>'
+          type: number
+          visible: (asymptotic && rs1)
+        - name: u[asymptotic]
+          title: 'U'
+          type: number
+          visible: (asymptotic && u)
+        - name: p[asymptotic]
+          title: '<i>p</i>-Value'
+          type: number
+          format: zto,pvalue
+          visible: (asymptotic)
+
+        - name: type[cc]
+          title: 'Type'
+          type: text
+          visible: (cc)
+        - name: stat[cc]
+          title: '<i>z</i>-Value'
+          type: text
+          visible: (cc)
+        - name: rs1[cc]
+          title: 'RS<sub>1</sub>'
+          type: number
+          visible: (cc && rs1)
+        - name: u[cc]
+          title: 'U'
+          type: number
+          visible: (cc && u)
+        - name: p[cc]
+          title: '<i>p</i>-Value'
+          type: number
+          format: zto,pvalue
+          visible: (cc)
 ...

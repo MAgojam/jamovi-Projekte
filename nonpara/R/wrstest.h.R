@@ -8,8 +8,17 @@ wrsTestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             dep = NULL,
             group = NULL,
-            dist = "exact",
-            alternative = "two.sided", ...) {
+            exact = TRUE,
+            approximate = FALSE,
+            nsamples = 100,
+            asymptotic = FALSE,
+            cc = FALSE,
+            alternative = "two.sided",
+            rs1 = FALSE,
+            u = FALSE,
+            rankmean = FALSE,
+            median = FALSE,
+            plot = FALSE, ...) {
 
             super$initialize(
                 package="nonpara",
@@ -33,15 +42,26 @@ wrsTestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal"),
                 permitted=list(
                     "factor"))
-            private$..dist <- jmvcore::OptionList$new(
-                "dist",
-                dist,
-                options=list(
-                    "exact",
-                    "approximate",
-                    "asymptoticCC",
-                    "asymptotic"),
-                default="exact")
+            private$..exact <- jmvcore::OptionBool$new(
+                "exact",
+                exact,
+                default=TRUE)
+            private$..approximate <- jmvcore::OptionBool$new(
+                "approximate",
+                approximate,
+                default=FALSE)
+            private$..nsamples <- jmvcore::OptionInteger$new(
+                "nsamples",
+                nsamples,
+                default=100)
+            private$..asymptotic <- jmvcore::OptionBool$new(
+                "asymptotic",
+                asymptotic,
+                default=FALSE)
+            private$..cc <- jmvcore::OptionBool$new(
+                "cc",
+                cc,
+                default=FALSE)
             private$..alternative <- jmvcore::OptionList$new(
                 "alternative",
                 alternative,
@@ -50,22 +70,69 @@ wrsTestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "two.sided",
                     "greater"),
                 default="two.sided")
+            private$..rs1 <- jmvcore::OptionBool$new(
+                "rs1",
+                rs1,
+                default=FALSE)
+            private$..u <- jmvcore::OptionBool$new(
+                "u",
+                u,
+                default=FALSE)
+            private$..rankmean <- jmvcore::OptionBool$new(
+                "rankmean",
+                rankmean,
+                default=FALSE)
+            private$..median <- jmvcore::OptionBool$new(
+                "median",
+                median,
+                default=FALSE)
+            private$..plot <- jmvcore::OptionBool$new(
+                "plot",
+                plot,
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
-            self$.addOption(private$..dist)
+            self$.addOption(private$..exact)
+            self$.addOption(private$..approximate)
+            self$.addOption(private$..nsamples)
+            self$.addOption(private$..asymptotic)
+            self$.addOption(private$..cc)
             self$.addOption(private$..alternative)
+            self$.addOption(private$..rs1)
+            self$.addOption(private$..u)
+            self$.addOption(private$..rankmean)
+            self$.addOption(private$..median)
+            self$.addOption(private$..plot)
         }),
     active = list(
         dep = function() private$..dep$value,
         group = function() private$..group$value,
-        dist = function() private$..dist$value,
-        alternative = function() private$..alternative$value),
+        exact = function() private$..exact$value,
+        approximate = function() private$..approximate$value,
+        nsamples = function() private$..nsamples$value,
+        asymptotic = function() private$..asymptotic$value,
+        cc = function() private$..cc$value,
+        alternative = function() private$..alternative$value,
+        rs1 = function() private$..rs1$value,
+        u = function() private$..u$value,
+        rankmean = function() private$..rankmean$value,
+        median = function() private$..median$value,
+        plot = function() private$..plot$value),
     private = list(
         ..dep = NA,
         ..group = NA,
-        ..dist = NA,
-        ..alternative = NA)
+        ..exact = NA,
+        ..approximate = NA,
+        ..nsamples = NA,
+        ..asymptotic = NA,
+        ..cc = NA,
+        ..alternative = NA,
+        ..rs1 = NA,
+        ..u = NA,
+        ..rankmean = NA,
+        ..median = NA,
+        ..plot = NA)
 )
 
 wrsTestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -91,14 +158,109 @@ wrsTestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="", 
                         `type`="text"),
                     list(
-                        `name`="stat", 
-                        `title`="Statistic", 
-                        `type`="text"),
+                        `name`="type[exact]", 
+                        `title`="Type", 
+                        `type`="text", 
+                        `visible`="(exact)"),
                     list(
-                        `name`="p", 
-                        `title`="p-Value", 
+                        `name`="stat[exact]", 
+                        `title`="<i>z</i>-Value", 
+                        `type`="text", 
+                        `visible`="(exact)"),
+                    list(
+                        `name`="rs1[exact]", 
+                        `title`="RS<sub>1</sub>", 
                         `type`="number", 
-                        `format`="zto,pvalue"))))}))
+                        `visible`="(exact && rs1)"),
+                    list(
+                        `name`="u[ex]", 
+                        `title`="U", 
+                        `type`="number", 
+                        `visible`="(exact && u)"),
+                    list(
+                        `name`="p[exact]", 
+                        `title`="<i>p</i>-Value", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(exact)"),
+                    list(
+                        `name`="type[approximate]", 
+                        `title`="Type", 
+                        `type`="text", 
+                        `visible`="(approximate)"),
+                    list(
+                        `name`="stat[approximate]", 
+                        `title`="<i>z</i>-Value", 
+                        `type`="text", 
+                        `visible`="(approximate)"),
+                    list(
+                        `name`="rs1[approximate]", 
+                        `title`="RS<sub>1</sub>", 
+                        `type`="number", 
+                        `visible`="(approximate && rs1)"),
+                    list(
+                        `name`="u[approximate]", 
+                        `title`="U", 
+                        `type`="number", 
+                        `visible`="(approximate && u)"),
+                    list(
+                        `name`="p[approximate]", 
+                        `title`="<i>p</i>-Value", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(approximate)"),
+                    list(
+                        `name`="type[asymptotic]", 
+                        `title`="Type", 
+                        `type`="text", 
+                        `visible`="(asymptotic)"),
+                    list(
+                        `name`="stat[asy]", 
+                        `title`="<i>z</i>-Value", 
+                        `type`="text", 
+                        `visible`="(asymptotic)"),
+                    list(
+                        `name`="rs1[asymptotic]", 
+                        `title`="RS<sub>1</sub>", 
+                        `type`="number", 
+                        `visible`="(asymptotic && rs1)"),
+                    list(
+                        `name`="u[asymptotic]", 
+                        `title`="U", 
+                        `type`="number", 
+                        `visible`="(asymptotic && u)"),
+                    list(
+                        `name`="p[asymptotic]", 
+                        `title`="<i>p</i>-Value", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(asymptotic)"),
+                    list(
+                        `name`="type[cc]", 
+                        `title`="Type", 
+                        `type`="text", 
+                        `visible`="(cc)"),
+                    list(
+                        `name`="stat[cc]", 
+                        `title`="<i>z</i>-Value", 
+                        `type`="text", 
+                        `visible`="(cc)"),
+                    list(
+                        `name`="rs1[cc]", 
+                        `title`="RS<sub>1</sub>", 
+                        `type`="number", 
+                        `visible`="(cc && rs1)"),
+                    list(
+                        `name`="u[cc]", 
+                        `title`="U", 
+                        `type`="number", 
+                        `visible`="(cc && u)"),
+                    list(
+                        `name`="p[cc]", 
+                        `title`="<i>p</i>-Value", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(cc)"))))}))
 
 wrsTestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "wrsTestBase",
@@ -123,11 +285,22 @@ wrsTestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' wrsTest
 #'
 #' 
-#' @param data .
-#' @param dep .
-#' @param group .
-#' @param dist .
+#' @param data the data as a data frame
+#' @param dep Dependent variable. Does not neet to be specified when using a
+#'   formula.
+#' @param group Grouping variable, must have two levels. Does not neet to be
+#'   specified when using a formula.
+#' @param exact .
+#' @param approximate .
+#' @param nsamples .
+#' @param asymptotic .
+#' @param cc .
 #' @param alternative .
+#' @param rs1 .
+#' @param u .
+#' @param rankmean .
+#' @param median .
+#' @param plot .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$wrs} \tab \tab \tab \tab \tab a table \cr
@@ -144,8 +317,17 @@ wrsTest <- function(
     data,
     dep,
     group,
-    dist = "exact",
-    alternative = "two.sided") {
+    exact = TRUE,
+    approximate = FALSE,
+    nsamples = 100,
+    asymptotic = FALSE,
+    cc = FALSE,
+    alternative = "two.sided",
+    rs1 = FALSE,
+    u = FALSE,
+    rankmean = FALSE,
+    median = FALSE,
+    plot = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("wrsTest requires jmvcore to be installed (restart may be required)")
@@ -163,8 +345,17 @@ wrsTest <- function(
     options <- wrsTestOptions$new(
         dep = dep,
         group = group,
-        dist = dist,
-        alternative = alternative)
+        exact = exact,
+        approximate = approximate,
+        nsamples = nsamples,
+        asymptotic = asymptotic,
+        cc = cc,
+        alternative = alternative,
+        rs1 = rs1,
+        u = u,
+        rankmean = rankmean,
+        median = median,
+        plot = plot)
 
     analysis <- wrsTestClass$new(
         options = options,
