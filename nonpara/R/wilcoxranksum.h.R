@@ -139,7 +139,8 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     "wilcoxRanksumResults",
     inherit = jmvcore::Group,
     active = list(
-        wrs = function() private$.items[["wrs"]]),
+        wrs = function() private$.items[["wrs"]],
+        desc = function() private$.items[["desc"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -260,7 +261,57 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `title`="<i>p</i>-Value", 
                         `type`="number", 
                         `format`="zto,pvalue", 
-                        `visible`="(cc)"))))}))
+                        `visible`="(cc)"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="desc",
+                title="Descriptive Statistics",
+                rows=2,
+                columns=list(
+                    list(
+                        `name`="rankmean_g1", 
+                        `title`="Rankmean Group 1", 
+                        `type`="number", 
+                        `visible`="(rankmean)"),
+                    list(
+                        `name`="rankmean_g2", 
+                        `title`="Rankmean Group 2", 
+                        `type`="number", 
+                        `visible`="(rankmean)"),
+                    list(
+                        `name`="median_g1", 
+                        `title`="Median Group 1", 
+                        `type`="number", 
+                        `visible`="(median)"),
+                    list(
+                        `name`="median_g2", 
+                        `title`="Median Group 2", 
+                        `type`="number", 
+                        `visible`="(median)"),
+                    list(
+                        `name`="kind", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="g1[rankmean]", 
+                        `title`="Group 1", 
+                        `type`="number", 
+                        `visible`="(rankmean)"),
+                    list(
+                        `name`="g2[rankmean]", 
+                        `title`="Group 2", 
+                        `type`="number", 
+                        `visible`="(rankmean)"),
+                    list(
+                        `name`="g1[median]", 
+                        `title`="Group 1", 
+                        `type`="number", 
+                        `visible`="(median)"),
+                    list(
+                        `name`="g2[median]", 
+                        `title`="Group 2", 
+                        `type`="number", 
+                        `visible`="(median)"))))}))
 
 wilcoxRanksumBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "wilcoxRanksumBase",
@@ -304,6 +355,7 @@ wilcoxRanksumBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$wrs} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

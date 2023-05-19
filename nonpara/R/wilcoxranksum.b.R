@@ -121,19 +121,19 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
 
 
 
-      # desk <- self$results$desc
-      # desk$setRow(rowNo = 1,
-      #             values = list(
-      #               kind = 'Mean',
-      #               "rankmean[g1]" = rankmean_R1,  #g1 = rankmean_R1
-      #               "rankmean[g2]" = rankmean_R2
-      #             ))
-      # desk$setRow(rowNo = 2,
-      #             values = list(
-      #               kind = 'Median',
-      #               "meadian[g1]" = median_g1,
-      #               "meadian[g2]" = median_g2
-      #             ))
+      desk <- self$results$desc
+      desk$setRow(rowNo = 1,
+                  values = list(
+                    kind = 'Mean',
+                    "rankmean[g1]" = rankmean_R1,  # g1 = rankmean_R1
+                    "rankmean[g2]" = rankmean_R2
+                  ))
+      desk$setRow(rowNo = 2,
+                  values = list(
+                    kind = 'Median',
+                    "meadian[g1]" = median_g1,
+                    "meadian[g2]" = median_g2
+                  ))
 
       ########## end of general statistics and descriptives
 

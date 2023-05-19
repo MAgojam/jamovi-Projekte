@@ -1,7 +1,6 @@
 title: Wilcoxon Rank-Sum Test
 name: wilcoxRanksum
 jus: '3.0'
-stage: 0
 compilerMode: tame
 children:
   - type: VariableSupplier
@@ -40,6 +39,11 @@ children:
                 
               - type: CheckBox
                 name: approximate
+                children:
+                  - type: TextBox
+                    name: nsamples
+                    format: number
+                    enable: (approximate)
                 
               - type: CheckBox
                 name: asymptotic
@@ -66,9 +70,27 @@ children:
                 optionName: alternative
                 optionPart: greater
                 
-                
-          # - type: LayoutBox
-          #   margin: large
-          #   children:
-          #     - type: ComboBox
-          #       name: alternative
+
+      - type: LayoutBox
+        stretchFactor: 1
+        cell:
+          column: 1
+          row: 0
+        children:
+          - type: Label
+            label: "Additional Statistics"
+            children:
+              - type: CheckBox
+                name: rs1
+              - type: CheckBox
+                name: u
+
+          - type: Label
+            label: Descriptives
+            children:
+              - type: CheckBox
+                name: rankmean
+              - type: CheckBox
+                name: median
+              - type: CheckBox
+                name: plot
