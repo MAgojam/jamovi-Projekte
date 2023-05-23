@@ -7,6 +7,10 @@ items:
     - name: wrs
       title: Wilcoxon Rank-Sum Test
       type: Table
+      clearWith:
+        - data
+        - dep
+        - group
       rows: 1
       columns:
         - name: var
@@ -104,46 +108,48 @@ items:
     - name: desc
       title: Descriptive Statistics
       type: Table
-      rows: 2           # weiss noch nicht ob rows: 2 der beste Ansatz ist, vlt. eher mit addRow oder rowKey arbeiten?
+      visible: (descriptives)
+      clearWith:
+        - group
+        - dep
+        - data
+      rows: 1
       columns:
-        - name: rankmean_g1
-          title: 'Rankmean Group 1'
-          type: number
-          visible: (rankmean)
-        - name: rankmean_g2
-          title: 'Rankmean Group 2'
-          type: number
-          visible: (rankmean)
-          
-        - name: median_g1
-          title: 'Median Group 1'
-          type: number
-          visible: (median)
-        - name: median_g2
-          title: 'Median Group 2'
-          type: number
-          visible: (median)
-          
-        - name: kind
+        - name: dep
           title: ''
           type: text
-          
-        - name: g1[rankmean]
-          title: 'Group 1'
-          type: number
-          visible: (rankmean)
-        - name: g2[rankmean]
-          title: 'Group 2'
-          type: number
-          visible: (rankmean)
-    
-        - name: g1[median]
-          title: 'Group 1'
-          type: number
-          visible: (median)
-        - name: g2[median]
-          title: 'Group 2'
-          type: number
-          visible: (median)
         
+        - name: group[1]
+          title: Group
+          type: text
+        - name: num[1]
+          title: "N"
+          type: integer
+        - name: median[1]
+          title: Median
+          type: number
+        - name: rankmean[1]
+          title: Rankmean
+          type: number
+        
+        - name: group[2]
+          title: Group
+          type: text
+        - name: num[2]
+          title: "N"
+          type: integer
+        - name: median[2]
+          title: Median
+          type: number
+        - name: rankmean[2]
+          title: Rankmean
+          type: number 
+          
+    - name: plot
+      title: Descriptives Plot
+      type: Image
+      width: 400
+      height: 300
+      visible: (plot)
+      renderFun: .descplot
 ...

@@ -89,8 +89,6 @@ children:
             label: Descriptives
             children:
               - type: CheckBox
-                name: rankmean
-              - type: CheckBox
-                name: median
+                name: descriptives
               - type: CheckBox
                 name: plot

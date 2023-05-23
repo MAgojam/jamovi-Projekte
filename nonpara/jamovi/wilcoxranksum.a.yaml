@@ -74,12 +74,8 @@ options:
       name: u
       type: Bool
       default: false
-    - title: Rankmean
-      name: rankmean
-      type: Bool
-      default: false
-    - title: Median
-      name: median
+    - title: Descriptives Table
+      name: descriptives
       type: Bool
       default: false
     - title: Descriptives Plot

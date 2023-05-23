@@ -16,8 +16,7 @@ wilcoxRanksumOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             alternative = "two.sided",
             rs1 = FALSE,
             u = FALSE,
-            rankmean = FALSE,
-            median = FALSE,
+            descriptives = FALSE,
             plot = FALSE, ...) {
 
             super$initialize(
@@ -78,13 +77,9 @@ wilcoxRanksumOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "u",
                 u,
                 default=FALSE)
-            private$..rankmean <- jmvcore::OptionBool$new(
-                "rankmean",
-                rankmean,
-                default=FALSE)
-            private$..median <- jmvcore::OptionBool$new(
-                "median",
-                median,
+            private$..descriptives <- jmvcore::OptionBool$new(
+                "descriptives",
+                descriptives,
                 default=FALSE)
             private$..plot <- jmvcore::OptionBool$new(
                 "plot",
@@ -101,8 +96,7 @@ wilcoxRanksumOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..alternative)
             self$.addOption(private$..rs1)
             self$.addOption(private$..u)
-            self$.addOption(private$..rankmean)
-            self$.addOption(private$..median)
+            self$.addOption(private$..descriptives)
             self$.addOption(private$..plot)
         }),
     active = list(
@@ -116,8 +110,7 @@ wilcoxRanksumOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         alternative = function() private$..alternative$value,
         rs1 = function() private$..rs1$value,
         u = function() private$..u$value,
-        rankmean = function() private$..rankmean$value,
-        median = function() private$..median$value,
+        descriptives = function() private$..descriptives$value,
         plot = function() private$..plot$value),
     private = list(
         ..dep = NA,
@@ -130,8 +123,7 @@ wilcoxRanksumOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..alternative = NA,
         ..rs1 = NA,
         ..u = NA,
-        ..rankmean = NA,
-        ..median = NA,
+        ..descriptives = NA,
         ..plot = NA)
 )
 
@@ -140,7 +132,8 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Group,
     active = list(
         wrs = function() private$.items[["wrs"]],
-        desc = function() private$.items[["desc"]]),
+        desc = function() private$.items[["desc"]],
+        plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -152,6 +145,10 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="wrs",
                 title="Wilcoxon Rank-Sum Test",
+                clearWith=list(
+                    "data",
+                    "dep",
+                    "group"),
                 rows=1,
                 columns=list(
                     list(
@@ -266,52 +263,57 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="desc",
                 title="Descriptive Statistics",
-                rows=2,
+                visible="(descriptives)",
+                clearWith=list(
+                    "group",
+                    "dep",
+                    "data"),
+                rows=1,
                 columns=list(
                     list(
-                        `name`="rankmean_g1", 
-                        `title`="Rankmean Group 1", 
-                        `type`="number", 
-                        `visible`="(rankmean)"),
-                    list(
-                        `name`="rankmean_g2", 
-                        `title`="Rankmean Group 2", 
-                        `type`="number", 
-                        `visible`="(rankmean)"),
-                    list(
-                        `name`="median_g1", 
-                        `title`="Median Group 1", 
-                        `type`="number", 
-                        `visible`="(median)"),
-                    list(
-                        `name`="median_g2", 
-                        `title`="Median Group 2", 
-                        `type`="number", 
-                        `visible`="(median)"),
-                    list(
-                        `name`="kind", 
+                        `name`="dep", 
                         `title`="", 
                         `type`="text"),
                     list(
-                        `name`="g1[rankmean]", 
-                        `title`="Group 1", 
-                        `type`="number", 
-                        `visible`="(rankmean)"),
+                        `name`="group[1]", 
+                        `title`="Group", 
+                        `type`="text"),
                     list(
-                        `name`="g2[rankmean]", 
-                        `title`="Group 2", 
-                        `type`="number", 
-                        `visible`="(rankmean)"),
+                        `name`="num[1]", 
+                        `title`="N", 
+                        `type`="integer"),
                     list(
-                        `name`="g1[median]", 
-                        `title`="Group 1", 
-                        `type`="number", 
-                        `visible`="(median)"),
+                        `name`="median[1]", 
+                        `title`="Median", 
+                        `type`="number"),
                     list(
-                        `name`="g2[median]", 
-                        `title`="Group 2", 
-                        `type`="number", 
-                        `visible`="(median)"))))}))
+                        `name`="rankmean[1]", 
+                        `title`="Rankmean", 
+                        `type`="number"),
+                    list(
+                        `name`="group[2]", 
+                        `title`="Group", 
+                        `type`="text"),
+                    list(
+                        `name`="num[2]", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="median[2]", 
+                        `title`="Median", 
+                        `type`="number"),
+                    list(
+                        `name`="rankmean[2]", 
+                        `title`="Rankmean", 
+                        `type`="number"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="Descriptives Plot",
+                width=400,
+                height=300,
+                visible="(plot)",
+                renderFun=".descplot"))}))
 
 wilcoxRanksumBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "wilcoxRanksumBase",
@@ -349,13 +351,13 @@ wilcoxRanksumBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param alternative .
 #' @param rs1 .
 #' @param u .
-#' @param rankmean .
-#' @param median .
+#' @param descriptives .
 #' @param plot .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$wrs} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -377,8 +379,7 @@ wilcoxRanksum <- function(
     alternative = "two.sided",
     rs1 = FALSE,
     u = FALSE,
-    rankmean = FALSE,
-    median = FALSE,
+    descriptives = FALSE,
     plot = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -405,8 +406,7 @@ wilcoxRanksum <- function(
         alternative = alternative,
         rs1 = rs1,
         u = u,
-        rankmean = rankmean,
-        median = median,
+        descriptives = descriptives,
         plot = plot)
 
     analysis <- wilcoxRanksumClass$new(

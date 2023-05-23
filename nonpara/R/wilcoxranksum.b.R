@@ -18,131 +18,159 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
       #   Wobei ich befürchte dass das auch nicht korrekt berechnet wird.
       # - Quelle hinzufügen für coin wahrscheinlich, evtl. stats, und sicher für den Hinweis,
       #   dass CC nicht empfohlen sei (siehe Zotero)
+      # - Wenn plot = TRUE aber descriptives = FALSE, dann zeigt es einen Fehler an, dass
+      #   'Group' nicht definiert sei
       #####################################################################
-
-
-
+      
+      
+      
       ########## start of data preparation
       # get formula
       formula <- jmvcore::constructFormula(self$options$dep, self$options$group)
       formula <- as.formula(formula)
-
+      
       data <- as.data.frame(self$data) # das as.data.frame kann evtl. weg?
       dep <- self$options$dep
       group <- self$options$group
-
+      
       data[[dep]] <- jmvcore::toNumeric(data[[dep]])
       data[[group]] <- factor(data[[group]], ordered = FALSE)
-
+      
       data <- na.omit(data)
-
-
+      
+      
       ########## end of data preparation
-
-
-
+      
+      
+      
       ########## start of general statistics and descriptives
       # Create ranked dataframe
       data_ranked <- data.frame(Group = data[[group]],       # group to factor
                                 Ranks = rank(data[[dep]]))   # values are ranked
-
+      
       count <- data_ranked$Group |>                          # take group
         table() |>                                           # count observations per group
         as.data.frame()
-
+      
       gr1 <- count |>                                        # format as df
         dplyr::filter(Freq == min(Freq)) |>                  # filter for the least observations
         dplyr::select(Var1) |>                               # select the group-variable
         unlist() |> 
         as.integer()                                         # this gets the name of the group with the least observations
-
-
+      
+      
       # get z-statistic
       results <- try(coin::wilcox_test(formula = formula,
                                        data = data,
                                        distribution = "exact",
                                        alternative = self$options$alternative),
                      silent = TRUE)
-
+      
       zval <- coin::statistic(results)
-
-
-
-
-
-      ## calculate RS 1 if selected
-        RS1 <- data_ranked |>                           # get data
-          dplyr::filter(Group == gr1) |>                # filter for first level
-          dplyr::select(Ranks) |>                       # select ranks
-          sum()                                         # sum of ranks
-
-
+      
+      
+      
+      
+      
+      ## calculate RS 1
+      RS1 <- data_ranked |>                           # get data
+        dplyr::filter(Group == gr1) |>                # filter for first level
+        dplyr::select(Ranks) |>                       # select ranks
+        sum()                                         # sum of ranks
+      
+      
       ## calculate Mann-Whitney U
-        n1 <- count[order(count$Freq), 2][1]
-        n2 <- count[order(count$Freq), 2][2]
-        u <- RS1 - ((n1+1)*n1/2)
-
-
-
-      ## get descriptives
+      n1 <- count[order(count$Freq), 2][1]
+      n2 <- count[order(count$Freq), 2][2]
+      u <- RS1 - ((n1+1)*n1/2)
+      
+      
+      
+      ## get descriptives if selected
       #### mean ranks per group
-      if(self$options$rankmean) {
+      if(self$options$descriptives || self$options$plot) {
         rankmean_R1 <- data_ranked |>
           dplyr::filter(Group == gr1) |>
           dplyr::select(Ranks) |>
           colMeans() |>
-          as.integer()
-
+          as.vector()
+        
         rankmean_R2 <- data_ranked |>
           dplyr::filter(Group != gr1) |>
           dplyr::select(Ranks) |>
           colMeans() |>
-          as.integer()
-      }
-
-
-
-      #### median per group
-      if(self$options$median) {
+          as.vector()
+        
+        
+        #### median per group
         median_g1 <- data |>
           dplyr::filter(data[[group]] == gr1) |>
           dplyr::select(all_of(dep)) |>
           unlist() |>
-          as.integer() |>
+          as.vector() |>
           median()
-
+        
         median_g2 <- data |>
           dplyr::filter(data[[group]] != gr1) |>
           dplyr::select(all_of(dep)) |>
           unlist() |>
-          as.integer() |>
+          as.vector() |>
           median()
+        
+        
+        #### write table
+        desk <- self$results$desc
+        desk$setRow(rowNo = 1,
+                    values = list(
+                      "dep" = dep,
+                      "group[1]" = "1",
+                      "group[2]" = "2",
+                      
+                      "num[1]" = n1,
+                      "num[2]" = n2,
+                      
+                      "median[1]" = median_g1,
+                      "median[2]" = median_g2,
+                      
+                      "rankmean[1]" = rankmean_R1,
+                      "rankmean[2]" = rankmean_R2
+                    ))
+        
+        #### get descriptives for plot
+        sd1 <- data |> 
+          dplyr::filter(data[[group]] == gr1) |> 
+          dplyr::select(all_of(dep)) |> 
+          unlist() |> 
+          sd()
+        
+        sd2 <- data |> 
+          dplyr::filter(data[[group]] != gr1) |> 
+          dplyr::select(all_of(dep)) |> 
+          unlist() |> 
+          sd()
+        
+        se1 <- sd1/sqrt(n1)
+        se2 <- sd2/sqrt(n2)
+        
+        plotData <- data.frame(
+          Group = rep(c("Group 1", "Group 2"), 2),
+          Values = c(rankmean_R1, rankmean_R2, median_g1, median_g2),
+          se = c(se1, se2, NA, NA),
+          type = c("rankmean", "rankmean", "median", "median")
+        )
+        
+        image <- self$results$plot
+        image$setState(plotData)
+        
       }
-
-
-
-      desk <- self$results$desc
-      desk$setRow(rowNo = 1,
-                  values = list(
-                    kind = 'Mean',
-                    "rankmean[g1]" = rankmean_R1,  # g1 = rankmean_R1
-                    "rankmean[g2]" = rankmean_R2
-                  ))
-      desk$setRow(rowNo = 2,
-                  values = list(
-                    kind = 'Median',
-                    "meadian[g1]" = median_g1,
-                    "meadian[g2]" = median_g2
-                  ))
-
       ########## end of general statistics and descriptives
-
-
+      
+      
       ########## start of exact analysis
       if (self$options$exact) {
-
+        
         ## wurde auskommentiert, da jetzt der exakte Test schon weiter oben gemacht wird für die z-Statistik
-
+        
         # results <- try(coin::wilcox_test(formula = formula,
         #                                  data = data,
         #                                  distribution = "exact",
@@ -158,45 +186,45 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         #   siehe hier: https://github.com/jamovi/jmv/blob/master/R/ttestis.b.R#L122
         # 
         # } else {
-
-          # create table
-          table <- self$results$wrs
-          table$setRow(rowNo = 1,
-                       values = list(
-                         var = self$options$dep,
-                         "type[exact]" = "Exact",
-                         "stat[exact]" = zval,
-                         "rs1[exact]" = RS1,
-                         "u[exact]" = u,
-                         "p[exact]" = coin::pvalue(results)
-                       ))
-
+        
+        # create table
+        table <- self$results$wrs
+        table$setRow(rowNo = 1,
+                     values = list(
+                       var = self$options$dep,
+                       "type[exact]" = "Exact",
+                       "stat[exact]" = zval,
+                       "rs1[exact]" = RS1,
+                       "u[exact]" = u,
+                       "p[exact]" = coin::pvalue(results)
+                     ))
+        
         # }
-
+        
       }
       ########## End of exact analysis
-
-
-
+      
+      
+      
       ########## Start of approximate analysis
       if (self$options$approximate) {
-
+        
         results <- try(coin::wilcox_test(formula = formula,
                                          data = data,
                                          distribution = "approximate",
                                          alternative = self$options$alternative),
                        silent = TRUE)
-
+        
         if (jmvcore::isError(results)) {
-
+          
           # table$setRow(rowKey = depName,
           #              list(
           #                "stat[stud]" = NaN
           #              ))
           # siehe hier: https://github.com/jamovi/jmv/blob/master/R/ttestis.b.R#L122
-
+          
         } else {
-
+          
           # create table
           table <- self$results$wrs
           table$setRow(rowNo = 1,
@@ -208,17 +236,17 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                          "u[approximate]" = u,
                          "p[approximate]" = coin::pvalue(results)
                        ))
-
+          
         }
-
+        
       }
       ########## End of approximate analysis
-
-
-
+      
+      
+      
       ########## Start of asymptotic analysis WITHOUT CC
       if (self$options$asymptotic) {
-
+        
         # ... calculate the wilcoxon test with stats
         results <- try(stats::wilcox.test(formula = formula,
                                           data = data,
@@ -227,17 +255,17 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                                           correct = FALSE,
                                           alternative = self$options$alternative),
                        silent = TRUE)
-
+        
         if (jmvcore::isError(results)) {
-
+          
           # table$setRow(rowKey = depName,
           #              list(
           #                "stat[stud]" = NaN
           #              ))
           # siehe hier: https://github.com/jamovi/jmv/blob/master/R/ttestis.b.R#L122
-
+          
         } else {
-
+          
           # write table
           table <- self$results$wrs
           table$setRow(rowNo = 1,
@@ -249,17 +277,17 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                          "u[asymptotic]" = u,
                          "p[asymptotic]" = results$p.value
                        ))
-
+          
         }
-
+        
       }
       ########## End of asymptotic analysis WITHOUT CC
-
-
-
+      
+      
+      
       ########## Start of asymptotic analysis WITH CC
       if (self$options$cc) {
-
+        
         # ... calculate the wilcoxon test with stats
         results <- try(stats::wilcox.test(formula = formula,
                                           data = data,
@@ -268,17 +296,17 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                                           correct = TRUE,
                                           alternative = self$options$alternative),
                        silent = TRUE)
-
+        
         if (jmvcore::isError(results)) {
-
+          
           # table$setRow(rowKey = depName,
           #              list(
           #                "stat[stud]" = NaN
           #              ))
           # siehe hier: https://github.com/jamovi/jmv/blob/master/R/ttestis.b.R#L122
-
+          
         } else {
-
+          
           # write table
           table <- self$results$wrs
           table$setRow(rowNo = 1,
@@ -290,30 +318,30 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                          "u[cc]" = u,
                          "p[cc]" = results$p.value
                        ))
-
+          
         }
-
+        
       }
       ########## End of asymptotic analysis WITH CC
-
-
-
+      
+      
+      
       # Warnings / remarks
       ## Empty note-object
       note1 <- note2 <- c()
-
+      
       ## Write a note, if these conditions are met
       if(self$options$approximate){
         note1 <-  paste('Monte Carlo Approximation with', self$options$nsamples, 'samples was applied. <i>p</i>-value might differ for each execution.')
       }
-
+      
       if(self$options$cc){
         note2 <-  '
         The use of the continuity correction is generally not recommended, if an exact test is possible.
         We recommend using the exact test instead.
         '
       }
-
+      
       ## Paste the notes together
       ## ("" ) is so that the string is never empty, which would lead to 'character(0)'
       if(is.null(note1) & !is.null(note2)) {
@@ -327,8 +355,46 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         note <- paste('a)', note1, "<br> b)", note2)
         table$setNote('remark', note)
       } else{print('keine')}
-
-
+      
+      
+    },
+    
+    .descplot = function(image, ...) {
+      
+      pd = position_dodge(0.2)
+      
+      plot <- ggplot(data = image$state, 
+                     aes(x = Group, 
+                         y = Values, 
+                         shape = type)) + 
+        geom_errorbar(data = image$state,
+                      aes(x = Group, 
+                          ymin = Values - se, 
+                          ymax = Values + se, 
+                          width = .2), 
+                      linewidth = .8, 
+                      position = pd) + 
+        geom_point(data = image$state,
+                   aes(x = Group, 
+                       y = Values), 
+                   size = 3,
+                   position = pd) +
+        labs(x = self$options$group, y = self$options$dep) +
+        scale_shape_manual(name = '',
+                           values = c(rankmean = 21,
+                                      median = 22),
+                           labels = c(median = "Median",
+                                      rankmean = "Rankmean")) +
+        theme_classic() +
+        theme(axis.text = element_text(size = 12),
+              axis.title = element_text(size = 16),
+              axis.ticks.length = unit(.2, "cm"),
+              legend.text = element_text(size = 16),
+              plot.margin = margin(5.5, 5.5, 5.5, 5.5))
+      
+      print(plot)
+      TRUE
+      
     }
   )
 )

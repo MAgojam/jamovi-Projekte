@@ -2,6 +2,9 @@ self <- list()
 self$data <- data.frame(ID = as.factor(1:7),
                         Werte = c(4,6,8, 2,4,4,6), 
                         Gruppe = factor(c(1,1,1, 2,2,2,2)))
+self$data <- data.frame(ID = as.factor(1:7),
+                        Werte = c(1,4,9, 3,6,7,8), 
+                        Gruppe = factor(c(1,1,1, 2,2,2,2)))
 self$options$exact <- TRUE
 self$options$app <- TRUE
 self$options$asy <- TRUE
@@ -96,15 +99,15 @@ if(self$options$u) {
 if(self$options$rankmean) {
   rankmean_R1 <- data_ranked |>
     dplyr::filter(Group == gr1) |>
-    dplyr::select(Ranks) |>
-    colMeans() |>
-    as.integer()
+    dplyr::select(Ranks) |> 
+    colMeans() |> 
+    as.vector()
   
   rankmean_R2 <- data_ranked |>
     dplyr::filter(Group != gr1) |>
     dplyr::select(Ranks) |>
-    colMeans() |>
-    as.integer()
+    colMeans() |> 
+    as.vector()
 }
 
 
@@ -114,33 +117,71 @@ if(self$options$median) {
   median_g1 <- data |>
     dplyr::filter(data[[group]] == gr1) |>
     dplyr::select(all_of(dep)) |>
-    unlist() |>
-    as.integer() |>
+    unlist() |>  
+    as.vector() |>
     median()
   
   median_g2 <- data |>
     dplyr::filter(data[[group]] != gr1) |>
     dplyr::select(all_of(dep)) |>
-    unlist() |>
-    as.integer() |>
+    unlist() |> 
+    as.vector() |>
     median()
 }
 
+#### get descriptives for plot
+sd1 <- data |> 
+  dplyr::filter(data[[group]] == gr1) |> 
+  dplyr::select(all_of(dep)) |> 
+  unlist() |> 
+  sd()
+
+sd2 <- data |> 
+  dplyr::filter(data[[group]] != gr1) |> 
+  dplyr::select(all_of(dep)) |> 
+  unlist() |> 
+  sd()
+
+se1 <- sd1/sqrt(n1)
+se2 <- sd2/sqrt(n2)
 
 
-# desk <- self$results$desc
-# desk$setRow(rowNo = 1,
-#             values = list(
-#               kind = 'Mean',
-#               "rankmean[g1]" = rankmean_R1,  #g1 = rankmean_R1
-#               "rankmean[g2]" = rankmean_R2
-#             ))
-# desk$setRow(rowNo = 2,
-#             values = list(
-#               kind = 'Median',
-#               "meadian[g1]" = median_g1,
-#               "meadian[g2]" = median_g2
-#             ))
+plotData <- data.frame(Group = rep(c("Group 1", "Group 2"), 2),
+                       Values = c(rankmean_R1, rankmean_R2, median_g1, median_g2),
+                       se = c(se1, se2, NA, NA),
+                       type = c("rankmean", "rankmean", "median", "median"))
+
+
+pd = position_dodge(0.2)
+
+ggplot(data = plotData, 
+       aes(x = Group, 
+           y = means, 
+           shape = type)) + 
+  geom_errorbar(data = plotData,
+                aes(x = Group, 
+                    ymin = means - se, 
+                    ymax = means + se, 
+                    width = .2), 
+                linewidth = .8, 
+                position = pd) + 
+  geom_point(data = plotData,
+             aes(x = Group, 
+                 y = means), 
+             size = 3,
+             position = pd) +
+  labs(x = group, y = dep) +
+  scale_shape_manual(name = '',
+                     values = c(rankmean = 21,
+                                median = 22),
+                     labels = c(median = "Median",
+                                rankmean = "Rankmean")) +
+  theme_classic() +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 16),
+        axis.ticks.length = unit(.2, "cm"),
+        legend.text = element_text(size = 16),
+        plot.margin = margin(5.5, 5.5, 5.5, 5.5))
 
 ########## end of general statistics and descriptives
 
@@ -336,7 +377,12 @@ if(is.null(note1) & !is.null(note2)) {
 } else{print('keine')}
 
 
-}
-)
-)
+
+
+
+
+
+
+
+
 

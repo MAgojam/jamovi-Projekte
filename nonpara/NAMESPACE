@@ -1,3 +1,4 @@
 exportPattern("^[[:alpha:]]+")
 import(coin)
+import(ggplot2)
 import(stats)
