@@ -152,6 +152,20 @@ plotData <- data.frame(Group = rep(c("Group 1", "Group 2"), 2),
                        type = c("rankmean", "rankmean", "median", "median"))
 
 
+data |> 
+  ggplot(aes(x = Gruppe, 
+             y = Werte, 
+             fill = Gruppe)) + 
+  geom_boxplot() +
+  scale_fill_viridis_d(alpha = 0.6) +
+  geom_jitter(color = "black", 
+              size = 1,
+              width = 0.1,
+              alpha = 0.9) +
+  theme(legend.position = "none")
+
+
+
 pd = position_dodge(0.2)
 
 ggplot(data = plotData, 

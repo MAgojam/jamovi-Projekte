@@ -361,36 +361,17 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
     
     .descplot = function(image, ...) {
       
-      pd = position_dodge(0.2)
-      
-      plot <- ggplot(data = image$state, 
-                     aes(x = Group, 
-                         y = Values, 
-                         shape = type)) + 
-        geom_errorbar(data = image$state,
-                      aes(x = Group, 
-                          ymin = Values - se, 
-                          ymax = Values + se, 
-                          width = .2), 
-                      linewidth = .8, 
-                      position = pd) + 
-        geom_point(data = image$state,
-                   aes(x = Group, 
-                       y = Values), 
-                   size = 3,
-                   position = pd) +
-        labs(x = self$options$group, y = self$options$dep) +
-        scale_shape_manual(name = '',
-                           values = c(rankmean = 21,
-                                      median = 22),
-                           labels = c(median = "Median",
-                                      rankmean = "Rankmean")) +
-        theme_classic() +
-        theme(axis.text = element_text(size = 12),
-              axis.title = element_text(size = 16),
-              axis.ticks.length = unit(.2, "cm"),
-              legend.text = element_text(size = 16),
-              plot.margin = margin(5.5, 5.5, 5.5, 5.5))
+      # data |>
+      #   ggplot(aes(x = Gruppe,
+      #              y = Werte,
+      #              fill = Gruppe)) +
+      #   geom_boxplot() +
+      #   scale_fill_viridis_d(alpha = 0.6) +
+      #   geom_jitter(color = "black",
+      #               size = 1,
+      #               width = 0.1,
+      #               alpha = 0.9) +
+      #   theme(legend.position = "none")
       
       print(plot)
       TRUE
