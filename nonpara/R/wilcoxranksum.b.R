@@ -13,13 +13,8 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
       # - Testen ob alle fehlerhaften Datenytypen abgefangen werden
       # - Bei den Berechnungen mit try() die allfälligen Fehler abfangen
       # - Bevor Daten eingefüllt werden, wird schon Fehlermeldung angezeigt und Tabelle sieht anders aus
-      # - Statistic ist beim exakten Wert z aber beim asymptotischen keine Ahnung was.
-      #   -> kann man evtl. immer den stats::wilcox.test() laufen lassen und dort W+ rausziehen?
-      #   Wobei ich befürchte dass das auch nicht korrekt berechnet wird.
       # - Quelle hinzufügen für coin wahrscheinlich, evtl. stats, und sicher für den Hinweis,
       #   dass CC nicht empfohlen sei (siehe Zotero)
-      # - Wenn plot = TRUE aber descriptives = FALSE, dann zeigt es einen Fehler an, dass
-      #   'Group' nicht definiert sei
       #####################################################################
       
       
@@ -67,8 +62,6 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                      silent = TRUE)
       
       zval <- coin::statistic(results)
-      
-      
       
       
       
@@ -136,31 +129,14 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                       "rankmean[2]" = rankmean_R2
                     ))
         
-        #### get descriptives for plot
-        sd1 <- data |> 
-          dplyr::filter(data[[group]] == gr1) |> 
-          dplyr::select(all_of(dep)) |> 
-          unlist() |> 
-          sd()
-        
-        sd2 <- data |> 
-          dplyr::filter(data[[group]] != gr1) |> 
-          dplyr::select(all_of(dep)) |> 
-          unlist() |> 
-          sd()
-        
-        se1 <- sd1/sqrt(n1)
-        se2 <- sd2/sqrt(n2)
-        
-        plotData <- data.frame(
-          Group = rep(c("Group 1", "Group 2"), 2),
-          Values = c(rankmean_R1, rankmean_R2, median_g1, median_g2),
-          se = c(se1, se2, NA, NA),
-          type = c("rankmean", "rankmean", "median", "median")
-        )
+
+        plotData <- data.frame(value = data[[dep]],
+                               group = data[[group]])
         
         image <- self$results$plot
         image$setState(plotData)
+        
+        
         
       }
       ########## end of general statistics and descriptives
@@ -359,19 +335,27 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
       
     },
     
-    .descplot = function(image, ...) {
+    .descplot = function(image, ggtheme, theme...) {
       
-      # data |>
-      #   ggplot(aes(x = Gruppe,
-      #              y = Werte,
-      #              fill = Gruppe)) +
-      #   geom_boxplot() +
-      #   scale_fill_viridis_d(alpha = 0.6) +
-      #   geom_jitter(color = "black",
-      #               size = 1,
-      #               width = 0.1,
-      #               alpha = 0.9) +
-      #   theme(legend.position = "none")
+      plot <- ggplot(data = image$state,
+                     aes(x = group,
+                         y = value, 
+                         fill = group)) + 
+        geom_boxplot() +
+        scale_fill_viridis_d(begin = 0.3, alpha = 0.6) +
+        geom_jitter(color = "black", 
+                    size = 1,
+                    width = 0.1,
+                    alpha = 0.9) +
+        labs(x = self$options$group, 
+             y = self$options$dep) +
+        theme_classic() +
+        ggtheme +
+        theme(axis.text = element_text(size = 12),
+              axis.title = element_text(size = 16),
+              axis.ticks.length = unit(.2, "cm"),
+              legend.position = "none",
+              plot.margin = margin(5.5, 5.5, 5.5, 5.5))
       
       print(plot)
       TRUE
@@ -392,11 +376,3 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
 ###############
 
 
-
-
-
-#   alter <- results$alternative
-#   table$addFootnote(rowNo = 1,
-#                     "p",
-#                     alter)
-#   
