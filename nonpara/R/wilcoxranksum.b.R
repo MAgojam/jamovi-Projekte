@@ -20,19 +20,32 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
       
       
       ########## start of data preparation
+      # get dep and group
+      dep <- self$options$dep
+      group <- self$options$group
+      
+      if(is.null(dep) || is.null(group)) {
+        
+        return()  # do nothing, as long as not both of group and dep are specified
+      } 
+        
+      
       # get formula
       formula <- jmvcore::constructFormula(self$options$dep, self$options$group)
       formula <- as.formula(formula)
       
-      data <- as.data.frame(self$data) # das as.data.frame kann evtl. weg?
-      dep <- self$options$dep
-      group <- self$options$group
+      # create and control data
+      data <- as.data.frame(self$data)
       
       data[[dep]] <- jmvcore::toNumeric(data[[dep]])
       data[[group]] <- factor(data[[group]], ordered = FALSE)
       
-      data <- na.omit(data)
+      groupLevels <- base::levels(data[[group]])
+      if (length(groupLevels) != 2) {jmvcore::reject("Grouping variable must have exactly 2 levels",
+                        code = "grouping_var_must_have_2_levels")
+        }
       
+      data <- na.omit(data)
       
       ########## end of data preparation
       
@@ -49,6 +62,7 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
       
       gr1 <- count |>                                        # format as df
         dplyr::filter(Freq == min(Freq)) |>                  # filter for the least observations
+        dplyr::filter(Var1 == Var1[1]) |>                    # select the Variab
         dplyr::select(Var1) |>                               # select the group-variable
         unlist() |> 
         as.integer()                                         # this gets the name of the group with the least observations
@@ -61,7 +75,25 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                                        alternative = self$options$alternative),
                      silent = TRUE)
       
-      zval <- coin::statistic(results)
+      if(jmvcore::isError(results)) {
+        
+        table <- self$results$wrs
+        table$setRow(rowNo = 1,
+                     values = list(
+                       var = "",
+                       "type[exact]" = "",
+                       "stat[exact]" = "",
+                       "rs1[exact]" = "",
+                       "u[exact]" = "",
+                       "p[exact]" = ""
+                     ))
+      } else {
+        
+        zval <- coin::statistic(results)
+        
+      }
+      
+      
       
       
       
@@ -73,15 +105,15 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
       
       
       ## calculate Mann-Whitney U
-      n1 <- count[order(count$Freq), 2][1]
-      n2 <- count[order(count$Freq), 2][2]
+      n1 <- count[order(count$Freq), 2][1]            # frequency of group, order them ascending, count,
+      n2 <- count[order(count$Freq), 2][2]            # assign the lower value to n1, the higher value to n2
       u <- RS1 - ((n1+1)*n1/2)
       
       
       
       ## get descriptives if selected
       #### mean ranks per group
-      if(self$options$descriptives || self$options$plot) {
+      if(self$options$descriptives) {
         rankmean_R1 <- data_ranked |>
           dplyr::filter(Group == gr1) |>
           dplyr::select(Ranks) |>
@@ -97,19 +129,18 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         
         #### median per group
         median_g1 <- data |>
-          dplyr::filter(data[[group]] == gr1) |>
+          dplyr::filter(!! dplyr::sym(group) == gr1) |>
           dplyr::select(all_of(dep)) |>
           unlist() |>
           as.vector() |>
           median()
         
         median_g2 <- data |>
-          dplyr::filter(data[[group]] != gr1) |>
+          dplyr::filter(!! dplyr::sym(group) != gr1) |>      # dplyr::filter(data[[group]] != gr1) |>  
           dplyr::select(all_of(dep)) |>
           unlist() |>
           as.vector() |>
           median()
-        
         
         #### write table
         desk <- self$results$desc
@@ -128,42 +159,37 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                       "rankmean[1]" = rankmean_R1,
                       "rankmean[2]" = rankmean_R2
                     ))
+      }
+      
+      
+      
+      if(self$options$plot) {  
         
-
+        # if plot is selected, send a simplified dataframe to self$results$plot
         plotData <- data.frame(value = data[[dep]],
                                group = data[[group]])
         
         image <- self$results$plot
         image$setState(plotData)
         
-        
-        
       }
+      
       ########## end of general statistics and descriptives
+
+      
+      ########## start of default table
+     
+      
+      
+      
+      
+      ##########
       
       
       ########## start of exact analysis
       if (self$options$exact) {
         
-        ## wurde auskommentiert, da jetzt der exakte Test schon weiter oben gemacht wird für die z-Statistik
-        
-        # results <- try(coin::wilcox_test(formula = formula,
-        #                                  data = data,
-        #                                  distribution = "exact",
-        #                                  alternative = self$options$alternative),
-        #                silent = TRUE)
-        # 
-        # if (jmvcore::isError(results)) {
-        # 
-        #   table$setRow(rowKey = depName,
-        #                list(
-        #                  "stat[stud]" = NaN
-        #                ))
-        #   siehe hier: https://github.com/jamovi/jmv/blob/master/R/ttestis.b.R#L122
-        # 
-        # } else {
-        
-        # create table
+        # create table (calculations were already done in the section above)
         table <- self$results$wrs
         table$setRow(rowNo = 1,
                      values = list(
@@ -174,9 +200,7 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                        "u[exact]" = u,
                        "p[exact]" = coin::pvalue(results)
                      ))
-        
-        # }
-        
+      
       }
       ########## End of exact analysis
       
@@ -193,11 +217,17 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         
         if (jmvcore::isError(results)) {
           
-          # table$setRow(rowKey = depName,
-          #              list(
-          #                "stat[stud]" = NaN
-          #              ))
-          # siehe hier: https://github.com/jamovi/jmv/blob/master/R/ttestis.b.R#L122
+          # create table
+          table <- self$results$wrs
+          table$setRow(rowNo = 1,
+                       values = list(
+                         var = self$options$dep,
+                         "type[approximate]" = "",
+                         "stat[approximate]" = "",
+                         "rs1[approximate]" = "",
+                         "u[approximate]" = "",
+                         "p[approximate]" = ""
+                       ))
           
         } else {
           
@@ -234,11 +264,17 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         
         if (jmvcore::isError(results)) {
           
-          # table$setRow(rowKey = depName,
-          #              list(
-          #                "stat[stud]" = NaN
-          #              ))
-          # siehe hier: https://github.com/jamovi/jmv/blob/master/R/ttestis.b.R#L122
+          # write table
+          table <- self$results$wrs
+          table$setRow(rowNo = 1,
+                       values = list(
+                         var = dep,
+                         "type[asymptotic]" = "",
+                         "stat[asymptotic]" = "",
+                         "rs1[asymptotic]" = "",
+                         "u[asymptotic]" = "",
+                         "p[asymptotic]" = ""
+                       ))
           
         } else {
           
@@ -275,11 +311,16 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         
         if (jmvcore::isError(results)) {
           
-          # table$setRow(rowKey = depName,
-          #              list(
-          #                "stat[stud]" = NaN
-          #              ))
-          # siehe hier: https://github.com/jamovi/jmv/blob/master/R/ttestis.b.R#L122
+          table <- self$results$wrs
+          table$setRow(rowNo = 1,
+                       values = list(
+                         var = dep,
+                         "type[cc]" = "",
+                         "stat[cc]" = "",
+                         "rs1[cc]" = "",
+                         "u[cc]" = "",
+                         "p[cc]" = ""
+                       ))
           
         } else {
           
@@ -300,6 +341,13 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
       }
       ########## End of asymptotic analysis WITH CC
       
+      
+      
+      ########## Throw error if no method is selected
+      if(!self$options$exact && !self$options$approximate && !self$options$asymptotic && !self$options$cc) {
+        jmvcore::reject("Must select at least one method",
+                        code = "min_one_method")
+      }
       
       
       # Warnings / remarks
@@ -337,12 +385,17 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
     
     .descplot = function(image, ggtheme, theme...) {
       
+      if(is.null(self$options$dep) || is.null(self$options$group)) {
+        
+        return()  # do nothing, as long as not both of group and dep are specified
+      }
+      
       plot <- ggplot(data = image$state,
                      aes(x = group,
                          y = value, 
                          fill = group)) + 
-        geom_boxplot() +
-        scale_fill_viridis_d(begin = 0.3, alpha = 0.6) +
+        geom_boxplot(outlier.shape = 1,
+                     outlier.size = 2) +
         geom_jitter(color = "black", 
                     size = 1,
                     width = 0.1,

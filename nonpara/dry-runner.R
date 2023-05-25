@@ -1,22 +1,27 @@
 self <- list()
-self$data <- data.frame(ID = as.factor(1:7),
-                        Werte = c(4,6,8, 2,4,4,6), 
-                        Gruppe = factor(c(1,1,1, 2,2,2,2)))
-self$data <- data.frame(ID = as.factor(1:7),
-                        Werte = c(1,4,9, 3,6,7,8), 
-                        Gruppe = factor(c(1,1,1, 2,2,2,2)))
+# self$data <- data.frame(ID = as.factor(1:7),
+#                         Werte = c(4,6,8, 2,4,4,6),
+#                         Gruppe = factor(c(1,1,1, 2,2,2,2)))
+# self$data <- data.frame(ID = as.factor(1:7),
+#                         Werte = c(1,4,9, 3,6,7,8),
+#                         Gruppe = factor(c(1,1,1, 2,2,2,2)))
+self$data <- data.frame(value = mtcars[, 1], group = rep(c(1,2), each = 16))
+self$data[32, 1] <- 66
+
 self$options$exact <- TRUE
 self$options$app <- TRUE
 self$options$asy <- TRUE
 self$options$cc <- TRUE
 self$options$exact <- TRUE
-self$options$dep <- "Werte"
-self$options$group <- "Gruppe"
+# self$options$dep <- "Werte"
+self$options$dep <- "value"
+# self$options$group <- "Gruppe"
+self$options$group <- "group"
 self$options$alternative <- "greater"
 self$options$correct <- TRUE
 self$options$rs1 <- TRUE
 self$options$u <- TRUE
-self$options$desc <- TRUE
+self$options$descriptives <- TRUE
 self$options$descplot <- TRUE
 
 image <- list()
@@ -158,17 +163,18 @@ plotData <- data.frame(value = data[[dep]],
 # image$setState(plotData)
 image$state <- plotData
 
+library(ggplot2)
 
 plot <- ggplot(data = image$state,
                aes(x = group,
                    y = value, 
                    fill = group)) + 
-  geom_boxplot() +
-  scale_fill_viridis_d(begin = 0.3, alpha = 0.6) +
-  geom_jitter(color = "black", 
-              size = 1,
-              width = 0.1,
-              alpha = 0.9) +
+  geom_boxplot(outlier.shape = 1,
+               outlier.size = 2) +
+  # geom_jitter(color = "black", 
+  #             size = 1,
+  #             width = 0.1,
+  #             alpha = 0.9) +
   theme(legend.position = "none")
 
 print(plot)

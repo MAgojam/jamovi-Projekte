@@ -341,7 +341,7 @@ wilcoxRanksumBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data the data as a data frame
 #' @param dep Dependent variable. Does not neet to be specified when using a
 #'   formula.
-#' @param group Grouping variable, must have two levels. Does not neet to be
+#' @param group Grouping variable, must have two levels. Does not need to be
 #'   specified when using a formula.
 #' @param exact .
 #' @param approximate .

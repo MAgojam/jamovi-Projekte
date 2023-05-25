@@ -31,7 +31,7 @@ options:
         ui: >
           Grouping variable, must have two levels.
         R: >
-          Grouping variable, must have two levels. Does not neet to be specified when using a formula.
+          Grouping variable, must have two levels. Does not need to be specified when using a formula.
 
     - title: Exact
       name: exact
