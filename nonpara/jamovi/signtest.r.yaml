@@ -8,25 +8,60 @@ items:
       title: text
       type:  Preformatted
     
-    - name: table
-      title: Exact Sign Test
+    - name: vzr
+      title: Sign Test
       type: Table
+      clearWith:
+        - data
+        - dep
+        - group
       rows: 1
       columns:
-        - name: s1
-          title: "Sample One"
+        - name: var
+          title: ''
           type: text
-        - name: alt
-          title: "Alternative"
+
+        - name: type[exact]
+          title: 'Type'
           type: text
-        - name: s2
-          title: "Sample Two"
+          visible: (exact)
+        - name: stat[exact]
+          title: '<i>z</i>-Value'
           type: text
-        - name: stat
-          title: "Statistic"
-          type: number
-        - name: p
-          title: "p-Value"
+          visible: (exact)
+        - name: s[exact]
+          title: '<i>S</i>-Value'
+          type: text
+          visible: (exact)
+        - name: df[exact]
+          title: '<i>df</i>-Value'
+          type: text
+          visible: (exact)
+        - name: p[exact]
+          title: '<i>p</i>-Value'
           type: number
           format: zto,pvalue
+          visible: (exact)
+
+        - name: type[asymptotic]
+          title: 'Type'
+          type: text
+          visible: (asymptotic)
+        - name: stat[asymptotic]
+          title: '<i>z</i>-Value'
+          type: text
+          visible: (asymptotic)
+        - name: s[asymptotic]
+          title: '<i>S</i>-Value'
+          type: text
+          visible: (asymptotic)
+        - name: df[asymptotic]
+          title: '<i>df</i>-Value'
+          type: text
+          visible: (asymptotic)
+        - name: p[asymptotic]
+          title: '<i>p</i>-Value'
+          type: number
+          format: zto,pvalue
+          visible: (asymptotic)
 ...

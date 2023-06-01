@@ -8,24 +8,58 @@ jas: '1.2'
 options:
     - name: data
       type: Data
+      description:
+        R: the data as a data frame
 
-    - name: samp1
-      title: Sample One
+    - name: dep
+      title: Dependent Variable
       type: Variable
-
-    - name: samp2
-      title: Sample Two
+      suggested: [ordinal, continuous]
+      permitted: [numeric]
+      description:
+        ui: >
+          Dependent variable
+        R: >
+          Dependent variable. Does not neet to be specified when using a formula.
+      
+    - name: group
+      title: Grouping Variable
       type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+        ui: >
+          Grouping variable, must have two levels.
+        R: >
+          Grouping variable, must have two levels. Does not need to be specified when using a formula.
 
-    - name: alternative
-      title: Alternative hypothesis
+    - title: Exact
+      name: exact
+      type: Bool
+      default: true
+
+    - title: Alternative Hypothesis
+      name: alternative
       type: List
       options:
-        - title: Not equal
-          name:  two.sided
-        - title: One greater
-          name:  greater
-        - title: Two greater
+        - title: 'Group 1 < Group 2'
           name:  less
+        - title: 'Group 1 ≠ Group 2'
+          name:  two.sided
+        - title: 'Group 1 > Group 2'
+          name:  greater
       default: two.sided
+      
+    - title: Descriptives Table
+      name: descriptives
+      type: Bool
+      default: false
+    - title: Descriptives Plot
+      name: plot
+      type: Bool
+      default: false
+    - title: Plot Observed Scores
+      name: observed
+      type: Bool
+      default: false
 ...

@@ -17,7 +17,8 @@ wilcoxRanksumOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             rs1 = FALSE,
             u = FALSE,
             descriptives = FALSE,
-            plot = FALSE, ...) {
+            plot = FALSE,
+            observed = FALSE, ...) {
 
             super$initialize(
                 package="nonpara",
@@ -85,6 +86,10 @@ wilcoxRanksumOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "plot",
                 plot,
                 default=FALSE)
+            private$..observed <- jmvcore::OptionBool$new(
+                "observed",
+                observed,
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -98,6 +103,7 @@ wilcoxRanksumOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..u)
             self$.addOption(private$..descriptives)
             self$.addOption(private$..plot)
+            self$.addOption(private$..observed)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -111,7 +117,8 @@ wilcoxRanksumOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         rs1 = function() private$..rs1$value,
         u = function() private$..u$value,
         descriptives = function() private$..descriptives$value,
-        plot = function() private$..plot$value),
+        plot = function() private$..plot$value,
+        observed = function() private$..observed$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -124,7 +131,8 @@ wilcoxRanksumOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..rs1 = NA,
         ..u = NA,
         ..descriptives = NA,
-        ..plot = NA)
+        ..plot = NA,
+        ..observed = NA)
 )
 
 wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -242,7 +250,9 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `name`="stat[cc]", 
                         `title`="<i>z</i>-Value", 
                         `type`="text", 
-                        `visible`="(cc)"),
+                        `visible`="(cc)", 
+                        `refs`=list(
+                            "cf")),
                     list(
                         `name`="rs1[cc]", 
                         `title`="RS<sub>1</sub>", 
@@ -313,7 +323,12 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=400,
                 height=300,
                 visible="(plot)",
-                renderFun=".descplot"))}))
+                renderFun=".descplot",
+                clearWith=list(
+                    "group",
+                    "dep",
+                    "data",
+                    "observed")))}))
 
 wilcoxRanksumBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "wilcoxRanksumBase",
@@ -353,6 +368,7 @@ wilcoxRanksumBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param u .
 #' @param descriptives .
 #' @param plot .
+#' @param observed .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$wrs} \tab \tab \tab \tab \tab a table \cr
@@ -380,7 +396,8 @@ wilcoxRanksum <- function(
     rs1 = FALSE,
     u = FALSE,
     descriptives = FALSE,
-    plot = FALSE) {
+    plot = FALSE,
+    observed = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("wilcoxRanksum requires jmvcore to be installed (restart may be required)")
@@ -407,7 +424,8 @@ wilcoxRanksum <- function(
         rs1 = rs1,
         u = u,
         descriptives = descriptives,
-        plot = plot)
+        plot = plot,
+        observed = observed)
 
     analysis <- wilcoxRanksumClass$new(
         options = options,

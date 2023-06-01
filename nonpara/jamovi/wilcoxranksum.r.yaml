@@ -91,6 +91,7 @@ items:
           title: '<i>z</i>-Value'
           type: text
           visible: (cc)
+          refs: [cf]
         - name: rs1[cc]
           title: 'RS<sub>1</sub>'
           type: number
@@ -152,4 +153,9 @@ items:
       height: 300
       visible: (plot)
       renderFun: .descplot
+      clearWith:
+        - group
+        - dep
+        - data
+        - observed
 ...

@@ -23,7 +23,7 @@ self$options$rs1 <- TRUE
 self$options$u <- TRUE
 self$options$descriptives <- TRUE
 self$options$descplot <- TRUE
-
+self$options$observed <- TRUE
 image <- list()
 
 
@@ -171,12 +171,23 @@ plot <- ggplot(data = image$state,
                    fill = group)) + 
   geom_boxplot(outlier.shape = 1,
                outlier.size = 2) +
-  # geom_jitter(color = "black", 
-  #             size = 1,
-  #             width = 0.1,
-  #             alpha = 0.9) +
-  theme(legend.position = "none")
+  labs(x = self$options$group, 
+       y = self$options$dep) +
+  theme_classic() +
+  # ggtheme +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 16),
+        axis.ticks.length = unit(.2, "cm"),
+        legend.position = "none",
+        plot.margin = margin(5.5, 5.5, 5.5, 5.5))
 
+if(self$options$observed) {
+  plot <- plot + 
+    geom_jitter(color = "black", 
+                size = 1,
+                width = 0.1,
+                alpha = 0.9)
+}
 print(plot)
 TRUE
 

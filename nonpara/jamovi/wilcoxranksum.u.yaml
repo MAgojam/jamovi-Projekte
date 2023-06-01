@@ -92,3 +92,7 @@ children:
                 name: descriptives
               - type: CheckBox
                 name: plot
+                children:
+                  - type: CheckBox
+                    name: observed
+                    enable: (plot)

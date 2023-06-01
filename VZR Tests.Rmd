@@ -18,19 +18,23 @@ blood <- data.frame(ID = as.factor(rep(1:6, times = 2)),
 
 # Vorzeichentest
 ```{r}
-rstatix::sign_test(Blutdruck ~ Horrorfilm, 
-                   data = blood, 
-                   alternative = "less")
+statix <- rstatix::sign_test(Blutdruck ~ Horrorfilm, 
+                             data = blood, 
+                             alternative = "less")
+
+statix$statistic
+statix$df
 ```
 
 ```{r}
 blood_coin <- data.frame(x1 = blood$Blutdruck[1:6],
                          x2 = blood$Blutdruck[7:12])
 get <- coin::sign_test(x1 ~ x2,
-                       distribution = "exact",
+                       distribution = "asymptotic",
                        data = blood_coin,
                        alternative = "less")
 
+get
 coin::statistic(get)
 coin::pvalue(get)
 ```

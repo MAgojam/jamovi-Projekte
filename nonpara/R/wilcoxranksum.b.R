@@ -28,7 +28,7 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         
         return()  # do nothing, as long as not both of group and dep are specified
       } 
-        
+      
       
       # get formula
       formula <- jmvcore::constructFormula(self$options$dep, self$options$group)
@@ -42,8 +42,8 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
       
       groupLevels <- base::levels(data[[group]])
       if (length(groupLevels) != 2) {jmvcore::reject("Grouping variable must have exactly 2 levels",
-                        code = "grouping_var_must_have_2_levels")
-        }
+                                                     code = "grouping_var_must_have_2_levels")
+      }
       
       data <- na.omit(data)
       
@@ -175,10 +175,10 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
       }
       
       ########## end of general statistics and descriptives
-
+      
       
       ########## start of default table
-     
+      
       
       
       
@@ -200,7 +200,7 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                        "u[exact]" = u,
                        "p[exact]" = coin::pvalue(results)
                      ))
-      
+        
       }
       ########## End of exact analysis
       
@@ -396,10 +396,6 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                          fill = group)) + 
         geom_boxplot(outlier.shape = 1,
                      outlier.size = 2) +
-        geom_jitter(color = "black", 
-                    size = 1,
-                    width = 0.1,
-                    alpha = 0.9) +
         labs(x = self$options$group, 
              y = self$options$dep) +
         theme_classic() +
@@ -410,6 +406,13 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
               legend.position = "none",
               plot.margin = margin(5.5, 5.5, 5.5, 5.5))
       
+      if(self$options$observed) {
+        plot <- plot + 
+          geom_jitter(color = "black", 
+                      size = 1,
+                      width = 0.1,
+                      alpha = 0.9)
+      }
       print(plot)
       TRUE
       

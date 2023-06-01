@@ -74,12 +74,17 @@ options:
       name: u
       type: Bool
       default: false
+      
     - title: Descriptives Table
       name: descriptives
       type: Bool
       default: false
     - title: Descriptives Plot
       name: plot
+      type: Bool
+      default: false
+    - title: Plot Observed Scores
+      name: observed
       type: Bool
       default: false
 ...
