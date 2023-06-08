@@ -383,6 +383,11 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
       
     },
     
+    
+    
+    
+    
+    
     .descplot = function(image, ggtheme, theme...) {
       
       if(is.null(self$options$dep) || is.null(self$options$group)) {

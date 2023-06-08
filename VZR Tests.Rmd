@@ -19,12 +19,15 @@ blood <- data.frame(ID = as.factor(rep(1:6, times = 2)),
 # Vorzeichentest
 ```{r}
 statix <- rstatix::sign_test(Blutdruck ~ Horrorfilm, 
-                             data = blood, 
+                             data = blood,
                              alternative = "less")
 
 statix$statistic
 statix$df
+statix$p
 ```
+
+
 
 ```{r}
 blood_coin <- data.frame(x1 = blood$Blutdruck[1:6],

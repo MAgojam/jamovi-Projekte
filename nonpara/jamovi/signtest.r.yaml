@@ -4,10 +4,6 @@ title: Sign Test
 jrs:   '1.1'
 
 items:
-    - name:  text
-      title: text
-      type:  Preformatted
-    
     - name: vzr
       title: Sign Test
       type: Table
@@ -27,41 +23,111 @@ items:
           visible: (exact)
         - name: stat[exact]
           title: '<i>z</i>-Value'
-          type: text
+          type: number
           visible: (exact)
         - name: s[exact]
-          title: '<i>S</i>-Value'
-          type: text
+          title: '<i>S</i>'
+          type: integer
           visible: (exact)
         - name: df[exact]
-          title: '<i>df</i>-Value'
-          type: text
+          title: '<i>df</i>'
+          type: integer
           visible: (exact)
         - name: p[exact]
           title: '<i>p</i>-Value'
           type: number
           format: zto,pvalue
           visible: (exact)
-
-        - name: type[asymptotic]
+          
+        - name: type[app]
           title: 'Type'
           type: text
-          visible: (asymptotic)
-        - name: stat[asymptotic]
+          visible: (app)
+        - name: stat[app]
           title: '<i>z</i>-Value'
-          type: text
-          visible: (asymptotic)
-        - name: s[asymptotic]
-          title: '<i>S</i>-Value'
-          type: text
-          visible: (asymptotic)
-        - name: df[asymptotic]
-          title: '<i>df</i>-Value'
-          type: text
-          visible: (asymptotic)
-        - name: p[asymptotic]
+          type: number
+          visible: (app)
+        - name: s[app]
+          title: '<i>S</i>'
+          type: integer
+          visible: (app)
+        - name: df[app]
+          title: '<i>df</i>'
+          type: integer
+          visible: (app)
+        - name: p[app]
           title: '<i>p</i>-Value'
           type: number
           format: zto,pvalue
-          visible: (asymptotic)
+          visible: (app)
+
+        - name: type[asy]
+          title: 'Type'
+          type: text
+          visible: (asy)
+        - name: stat[asy]
+          title: '<i>z</i>-Value'
+          type: number
+          visible: (asy)
+        - name: s[asy]
+          title: '<i>S</i>'
+          type: integer
+          format: int
+          visible: (asy)
+        - name: df[asy]
+          title: '<i>df</i>'
+          type: integer
+          visible: (asy)
+        - name: p[asy]
+          title: '<i>p</i>-Value'
+          type: number
+          format: zto,pvalue
+          visible: (asy)
+          
+    - name: desc
+      title: Descriptive Statistics
+      type: Table
+      visible: (descriptives)
+      clearWith:
+        - group
+        - dep
+        - data
+      rows: 1
+      columns:
+        - name: dep
+          title: ''
+          type: text
+        
+        - name: nobs[1]
+          title: Observations
+          type: integer
+        - name: time[1]
+          title: Timepoint
+          type: text
+        - name: median[1]
+          title: Median
+          type: text
+        
+        - name: nobs[2]
+          title: Observations
+          type: integer
+        - name: time[2]
+          title: Timepoint
+          type: text
+        - name: median[2]
+          title: Median
+          type: text
+          
+    - name: plot
+      title: Descriptives Plot
+      type: Image
+      width: 400
+      height: 300
+      visible: (plot)
+      renderFun: .descplot
+      clearWith:
+        - group
+        - dep
+        - data
+        - observed
 ...

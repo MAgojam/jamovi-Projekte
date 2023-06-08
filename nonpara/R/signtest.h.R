@@ -6,9 +6,17 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            samp1 = NULL,
-            samp2 = NULL,
-            alternative = "two.sided", ...) {
+            ID = NULL,
+            dep = NULL,
+            group = NULL,
+            exact = TRUE,
+            app = TRUE,
+            nsamples = 10000,
+            asy = TRUE,
+            alternative = "two.sided",
+            descriptives = FALSE,
+            plot = FALSE,
+            observed = FALSE, ...) {
 
             super$initialize(
                 package="nonpara",
@@ -16,41 +24,111 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..samp1 <- jmvcore::OptionVariable$new(
-                "samp1",
-                samp1)
-            private$..samp2 <- jmvcore::OptionVariable$new(
-                "samp2",
-                samp2)
+            private$..ID <- jmvcore::OptionVariable$new(
+                "ID",
+                ID,
+                suggested=list(
+                    "id"),
+                permitted=list(
+                    "id"))
+            private$..dep <- jmvcore::OptionVariable$new(
+                "dep",
+                dep,
+                suggested=list(
+                    "ordinal",
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..group <- jmvcore::OptionVariable$new(
+                "group",
+                group,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"))
+            private$..exact <- jmvcore::OptionBool$new(
+                "exact",
+                exact,
+                default=TRUE)
+            private$..app <- jmvcore::OptionBool$new(
+                "app",
+                app,
+                default=TRUE)
+            private$..nsamples <- jmvcore::OptionInteger$new(
+                "nsamples",
+                nsamples,
+                default=10000)
+            private$..asy <- jmvcore::OptionBool$new(
+                "asy",
+                asy,
+                default=TRUE)
             private$..alternative <- jmvcore::OptionList$new(
                 "alternative",
                 alternative,
                 options=list(
+                    "less",
                     "two.sided",
-                    "greater",
-                    "less"),
+                    "greater"),
                 default="two.sided")
+            private$..descriptives <- jmvcore::OptionBool$new(
+                "descriptives",
+                descriptives,
+                default=FALSE)
+            private$..plot <- jmvcore::OptionBool$new(
+                "plot",
+                plot,
+                default=FALSE)
+            private$..observed <- jmvcore::OptionBool$new(
+                "observed",
+                observed,
+                default=FALSE)
 
-            self$.addOption(private$..samp1)
-            self$.addOption(private$..samp2)
+            self$.addOption(private$..ID)
+            self$.addOption(private$..dep)
+            self$.addOption(private$..group)
+            self$.addOption(private$..exact)
+            self$.addOption(private$..app)
+            self$.addOption(private$..nsamples)
+            self$.addOption(private$..asy)
             self$.addOption(private$..alternative)
+            self$.addOption(private$..descriptives)
+            self$.addOption(private$..plot)
+            self$.addOption(private$..observed)
         }),
     active = list(
-        samp1 = function() private$..samp1$value,
-        samp2 = function() private$..samp2$value,
-        alternative = function() private$..alternative$value),
+        ID = function() private$..ID$value,
+        dep = function() private$..dep$value,
+        group = function() private$..group$value,
+        exact = function() private$..exact$value,
+        app = function() private$..app$value,
+        nsamples = function() private$..nsamples$value,
+        asy = function() private$..asy$value,
+        alternative = function() private$..alternative$value,
+        descriptives = function() private$..descriptives$value,
+        plot = function() private$..plot$value,
+        observed = function() private$..observed$value),
     private = list(
-        ..samp1 = NA,
-        ..samp2 = NA,
-        ..alternative = NA)
+        ..ID = NA,
+        ..dep = NA,
+        ..group = NA,
+        ..exact = NA,
+        ..app = NA,
+        ..nsamples = NA,
+        ..asy = NA,
+        ..alternative = NA,
+        ..descriptives = NA,
+        ..plot = NA,
+        ..observed = NA)
 )
 
 signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "signtestResults",
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]],
-        table = function() private$.items[["table"]]),
+        vzr = function() private$.items[["vzr"]],
+        desc = function() private$.items[["desc"]],
+        plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -58,37 +136,151 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="",
                 title="Sign Test")
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text",
-                title="text"))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="table",
-                title="Exact Sign Test",
+                name="vzr",
+                title="Sign Test",
+                clearWith=list(
+                    "data",
+                    "dep",
+                    "group"),
                 rows=1,
                 columns=list(
                     list(
-                        `name`="s1", 
-                        `title`="Sample One", 
+                        `name`="var", 
+                        `title`="", 
                         `type`="text"),
                     list(
-                        `name`="alt", 
-                        `title`="Alternative", 
-                        `type`="text"),
+                        `name`="type[exact]", 
+                        `title`="Type", 
+                        `type`="text", 
+                        `visible`="(exact)"),
                     list(
-                        `name`="s2", 
-                        `title`="Sample Two", 
-                        `type`="text"),
-                    list(
-                        `name`="stat", 
-                        `title`="Statistic", 
-                        `type`="number"),
-                    list(
-                        `name`="p", 
-                        `title`="p-Value", 
+                        `name`="stat[exact]", 
+                        `title`="<i>z</i>-Value", 
                         `type`="number", 
-                        `format`="zto,pvalue"))))}))
+                        `visible`="(exact)"),
+                    list(
+                        `name`="s[exact]", 
+                        `title`="<i>S</i>", 
+                        `type`="integer", 
+                        `visible`="(exact)"),
+                    list(
+                        `name`="df[exact]", 
+                        `title`="<i>df</i>", 
+                        `type`="integer", 
+                        `visible`="(exact)"),
+                    list(
+                        `name`="p[exact]", 
+                        `title`="<i>p</i>-Value", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(exact)"),
+                    list(
+                        `name`="type[app]", 
+                        `title`="Type", 
+                        `type`="text", 
+                        `visible`="(app)"),
+                    list(
+                        `name`="stat[app]", 
+                        `title`="<i>z</i>-Value", 
+                        `type`="number", 
+                        `visible`="(app)"),
+                    list(
+                        `name`="s[app]", 
+                        `title`="<i>S</i>", 
+                        `type`="integer", 
+                        `visible`="(app)"),
+                    list(
+                        `name`="df[app]", 
+                        `title`="<i>df</i>", 
+                        `type`="integer", 
+                        `visible`="(app)"),
+                    list(
+                        `name`="p[app]", 
+                        `title`="<i>p</i>-Value", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(app)"),
+                    list(
+                        `name`="type[asy]", 
+                        `title`="Type", 
+                        `type`="text", 
+                        `visible`="(asy)"),
+                    list(
+                        `name`="stat[asy]", 
+                        `title`="<i>z</i>-Value", 
+                        `type`="number", 
+                        `visible`="(asy)"),
+                    list(
+                        `name`="s[asy]", 
+                        `title`="<i>S</i>", 
+                        `type`="integer", 
+                        `format`="int", 
+                        `visible`="(asy)"),
+                    list(
+                        `name`="df[asy]", 
+                        `title`="<i>df</i>", 
+                        `type`="integer", 
+                        `visible`="(asy)"),
+                    list(
+                        `name`="p[asy]", 
+                        `title`="<i>p</i>-Value", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(asy)"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="desc",
+                title="Descriptive Statistics",
+                visible="(descriptives)",
+                clearWith=list(
+                    "group",
+                    "dep",
+                    "data"),
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="dep", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="nobs[1]", 
+                        `title`="Observations", 
+                        `type`="integer"),
+                    list(
+                        `name`="time[1]", 
+                        `title`="Timepoint", 
+                        `type`="text"),
+                    list(
+                        `name`="median[1]", 
+                        `title`="Median", 
+                        `type`="text"),
+                    list(
+                        `name`="nobs[2]", 
+                        `title`="Observations", 
+                        `type`="integer"),
+                    list(
+                        `name`="time[2]", 
+                        `title`="Timepoint", 
+                        `type`="text"),
+                    list(
+                        `name`="median[2]", 
+                        `title`="Median", 
+                        `type`="text"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="Descriptives Plot",
+                width=400,
+                height=300,
+                visible="(plot)",
+                renderFun=".descplot",
+                clearWith=list(
+                    "group",
+                    "dep",
+                    "data",
+                    "observed")))}))
 
 signtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "signtestBase",
@@ -113,45 +305,75 @@ signtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Sign Test
 #'
 #' 
-#' @param data .
-#' @param samp1 .
-#' @param samp2 .
+#' @param data the data as a data frame
+#' @param ID .
+#' @param dep Dependent variable. Does not neet to be specified when using a
+#'   formula.
+#' @param group Grouping variable, must have two levels. Does not need to be
+#'   specified when using a formula.
+#' @param exact .
+#' @param app .
+#' @param nsamples .
+#' @param asy .
 #' @param alternative .
+#' @param descriptives .
+#' @param plot .
+#' @param observed .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$vzr} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$table$asDF}
+#' \code{results$vzr$asDF}
 #'
-#' \code{as.data.frame(results$table)}
+#' \code{as.data.frame(results$vzr)}
 #'
 #' @export
 signtest <- function(
     data,
-    samp1,
-    samp2,
-    alternative = "two.sided") {
+    ID,
+    dep,
+    group,
+    exact = TRUE,
+    app = TRUE,
+    nsamples = 10000,
+    asy = TRUE,
+    alternative = "two.sided",
+    descriptives = FALSE,
+    plot = FALSE,
+    observed = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("signtest requires jmvcore to be installed (restart may be required)")
 
-    if ( ! missing(samp1)) samp1 <- jmvcore::resolveQuo(jmvcore::enquo(samp1))
-    if ( ! missing(samp2)) samp2 <- jmvcore::resolveQuo(jmvcore::enquo(samp2))
+    if ( ! missing(ID)) ID <- jmvcore::resolveQuo(jmvcore::enquo(ID))
+    if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
+    if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(samp1), samp1, NULL),
-            `if`( ! missing(samp2), samp2, NULL))
+            `if`( ! missing(ID), ID, NULL),
+            `if`( ! missing(dep), dep, NULL),
+            `if`( ! missing(group), group, NULL))
 
+    for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- signtestOptions$new(
-        samp1 = samp1,
-        samp2 = samp2,
-        alternative = alternative)
+        ID = ID,
+        dep = dep,
+        group = group,
+        exact = exact,
+        app = app,
+        nsamples = nsamples,
+        asy = asy,
+        alternative = alternative,
+        descriptives = descriptives,
+        plot = plot,
+        observed = observed)
 
     analysis <- signtestClass$new(
         options = options,

@@ -12,7 +12,6 @@ self$options$exact <- TRUE
 self$options$app <- TRUE
 self$options$asy <- TRUE
 self$options$cc <- TRUE
-self$options$exact <- TRUE
 # self$options$dep <- "Werte"
 self$options$dep <- "value"
 # self$options$group <- "Gruppe"

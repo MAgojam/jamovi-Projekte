@@ -11,6 +11,11 @@ options:
       description:
         R: the data as a data frame
 
+    - name: ID
+      type: Variable
+      suggested: [id]
+      permitted: [id]
+      
     - name: dep
       title: Dependent Variable
       type: Variable
@@ -35,6 +40,18 @@ options:
 
     - title: Exact
       name: exact
+      type: Bool
+      default: true
+    - title: 'Monte-Carlo Approximation'
+      name: app
+      type: Bool
+      default: true
+    - title: 'Number of Samples:' 
+      name: nsamples
+      type: Integer
+      default: 10000
+    - title: Asymptotic
+      name: asy
       type: Bool
       default: true
 
