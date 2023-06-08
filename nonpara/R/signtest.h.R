@@ -6,17 +6,19 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            ID = NULL,
+            id = NULL,
             dep = NULL,
             group = NULL,
             exact = TRUE,
-            app = TRUE,
+            approximate = TRUE,
             nsamples = 10000,
-            asy = TRUE,
+            asymptotic = TRUE,
             alternative = "two.sided",
+            s = FALSE,
+            df = FALSE,
             descriptives = FALSE,
             plot = FALSE,
-            observed = FALSE, ...) {
+            observed = "line", ...) {
 
             super$initialize(
                 package="nonpara",
@@ -24,13 +26,13 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..ID <- jmvcore::OptionVariable$new(
-                "ID",
-                ID,
+            private$..id <- jmvcore::OptionVariable$new(
+                "id",
+                id,
                 suggested=list(
-                    "id"),
-                permitted=list(
-                    "id"))
+                    "nominal",
+                    "ordinal",
+                    "continuous"))
             private$..dep <- jmvcore::OptionVariable$new(
                 "dep",
                 dep,
@@ -51,17 +53,17 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "exact",
                 exact,
                 default=TRUE)
-            private$..app <- jmvcore::OptionBool$new(
-                "app",
-                app,
+            private$..approximate <- jmvcore::OptionBool$new(
+                "approximate",
+                approximate,
                 default=TRUE)
             private$..nsamples <- jmvcore::OptionInteger$new(
                 "nsamples",
                 nsamples,
                 default=10000)
-            private$..asy <- jmvcore::OptionBool$new(
-                "asy",
-                asy,
+            private$..asymptotic <- jmvcore::OptionBool$new(
+                "asymptotic",
+                asymptotic,
                 default=TRUE)
             private$..alternative <- jmvcore::OptionList$new(
                 "alternative",
@@ -71,6 +73,14 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "two.sided",
                     "greater"),
                 default="two.sided")
+            private$..s <- jmvcore::OptionBool$new(
+                "s",
+                s,
+                default=FALSE)
+            private$..df <- jmvcore::OptionBool$new(
+                "df",
+                df,
+                default=FALSE)
             private$..descriptives <- jmvcore::OptionBool$new(
                 "descriptives",
                 descriptives,
@@ -79,44 +89,54 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "plot",
                 plot,
                 default=FALSE)
-            private$..observed <- jmvcore::OptionBool$new(
+            private$..observed <- jmvcore::OptionList$new(
                 "observed",
                 observed,
-                default=FALSE)
+                options=list(
+                    "none",
+                    "line",
+                    "jitter"),
+                default="line")
 
-            self$.addOption(private$..ID)
+            self$.addOption(private$..id)
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..exact)
-            self$.addOption(private$..app)
+            self$.addOption(private$..approximate)
             self$.addOption(private$..nsamples)
-            self$.addOption(private$..asy)
+            self$.addOption(private$..asymptotic)
             self$.addOption(private$..alternative)
+            self$.addOption(private$..s)
+            self$.addOption(private$..df)
             self$.addOption(private$..descriptives)
             self$.addOption(private$..plot)
             self$.addOption(private$..observed)
         }),
     active = list(
-        ID = function() private$..ID$value,
+        id = function() private$..id$value,
         dep = function() private$..dep$value,
         group = function() private$..group$value,
         exact = function() private$..exact$value,
-        app = function() private$..app$value,
+        approximate = function() private$..approximate$value,
         nsamples = function() private$..nsamples$value,
-        asy = function() private$..asy$value,
+        asymptotic = function() private$..asymptotic$value,
         alternative = function() private$..alternative$value,
+        s = function() private$..s$value,
+        df = function() private$..df$value,
         descriptives = function() private$..descriptives$value,
         plot = function() private$..plot$value,
         observed = function() private$..observed$value),
     private = list(
-        ..ID = NA,
+        ..id = NA,
         ..dep = NA,
         ..group = NA,
         ..exact = NA,
-        ..app = NA,
+        ..approximate = NA,
         ..nsamples = NA,
-        ..asy = NA,
+        ..asymptotic = NA,
         ..alternative = NA,
+        ..s = NA,
+        ..df = NA,
         ..descriptives = NA,
         ..plot = NA,
         ..observed = NA)
@@ -164,12 +184,12 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="s[exact]", 
                         `title`="<i>S</i>", 
                         `type`="integer", 
-                        `visible`="(exact)"),
+                        `visible`="(exact && s)"),
                     list(
                         `name`="df[exact]", 
                         `title`="<i>df</i>", 
                         `type`="integer", 
-                        `visible`="(exact)"),
+                        `visible`="(exact && df)"),
                     list(
                         `name`="p[exact]", 
                         `title`="<i>p</i>-Value", 
@@ -177,64 +197,65 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `format`="zto,pvalue", 
                         `visible`="(exact)"),
                     list(
-                        `name`="type[app]", 
+                        `name`="type[approximate]", 
                         `title`="Type", 
                         `type`="text", 
-                        `visible`="(app)"),
+                        `visible`="(approximate)"),
                     list(
-                        `name`="stat[app]", 
+                        `name`="stat[approximate]", 
                         `title`="<i>z</i>-Value", 
                         `type`="number", 
-                        `visible`="(app)"),
+                        `visible`="(approximate)"),
                     list(
-                        `name`="s[app]", 
+                        `name`="s[approximate]", 
                         `title`="<i>S</i>", 
                         `type`="integer", 
-                        `visible`="(app)"),
+                        `visible`="(approximate && s)"),
                     list(
-                        `name`="df[app]", 
+                        `name`="df[approximate]", 
                         `title`="<i>df</i>", 
                         `type`="integer", 
-                        `visible`="(app)"),
+                        `visible`="(approximate && df)"),
                     list(
-                        `name`="p[app]", 
+                        `name`="p[approximate]", 
                         `title`="<i>p</i>-Value", 
                         `type`="number", 
                         `format`="zto,pvalue", 
-                        `visible`="(app)"),
+                        `visible`="(approximate)"),
                     list(
-                        `name`="type[asy]", 
+                        `name`="type[asymptotic]", 
                         `title`="Type", 
                         `type`="text", 
-                        `visible`="(asy)"),
+                        `visible`="(asymptotic)"),
                     list(
-                        `name`="stat[asy]", 
+                        `name`="stat[asymptotic]", 
                         `title`="<i>z</i>-Value", 
                         `type`="number", 
-                        `visible`="(asy)"),
+                        `visible`="(asymptotic)"),
                     list(
-                        `name`="s[asy]", 
+                        `name`="s[asymptotic]", 
                         `title`="<i>S</i>", 
                         `type`="integer", 
                         `format`="int", 
-                        `visible`="(asy)"),
+                        `visible`="(asymptotic && s)"),
                     list(
-                        `name`="df[asy]", 
+                        `name`="df[asymptotic]", 
                         `title`="<i>df</i>", 
                         `type`="integer", 
-                        `visible`="(asy)"),
+                        `visible`="(asymptotic && df)"),
                     list(
-                        `name`="p[asy]", 
+                        `name`="p[asymptotic]", 
                         `title`="<i>p</i>-Value", 
                         `type`="number", 
                         `format`="zto,pvalue", 
-                        `visible`="(asy)"))))
+                        `visible`="(asymptotic)"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="desc",
                 title="Descriptive Statistics",
                 visible="(descriptives)",
                 clearWith=list(
+                    "id",
                     "group",
                     "dep",
                     "data"),
@@ -245,25 +266,25 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="", 
                         `type`="text"),
                     list(
+                        `name`="time[1]", 
+                        `title`="Sample", 
+                        `type`="text"),
+                    list(
                         `name`="nobs[1]", 
                         `title`="Observations", 
                         `type`="integer"),
-                    list(
-                        `name`="time[1]", 
-                        `title`="Timepoint", 
-                        `type`="text"),
                     list(
                         `name`="median[1]", 
                         `title`="Median", 
                         `type`="text"),
                     list(
+                        `name`="time[2]", 
+                        `title`="Sample", 
+                        `type`="text"),
+                    list(
                         `name`="nobs[2]", 
                         `title`="Observations", 
                         `type`="integer"),
-                    list(
-                        `name`="time[2]", 
-                        `title`="Timepoint", 
-                        `type`="text"),
                     list(
                         `name`="median[2]", 
                         `title`="Median", 
@@ -277,6 +298,7 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(plot)",
                 renderFun=".descplot",
                 clearWith=list(
+                    "id",
                     "group",
                     "dep",
                     "data",
@@ -306,16 +328,18 @@ signtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' 
 #' @param data the data as a data frame
-#' @param ID .
+#' @param id .
 #' @param dep Dependent variable. Does not neet to be specified when using a
 #'   formula.
 #' @param group Grouping variable, must have two levels. Does not need to be
 #'   specified when using a formula.
 #' @param exact .
-#' @param app .
+#' @param approximate .
 #' @param nsamples .
-#' @param asy .
+#' @param asymptotic .
 #' @param alternative .
+#' @param s .
+#' @param df .
 #' @param descriptives .
 #' @param plot .
 #' @param observed .
@@ -335,42 +359,46 @@ signtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 signtest <- function(
     data,
-    ID,
+    id,
     dep,
     group,
     exact = TRUE,
-    app = TRUE,
+    approximate = TRUE,
     nsamples = 10000,
-    asy = TRUE,
+    asymptotic = TRUE,
     alternative = "two.sided",
+    s = FALSE,
+    df = FALSE,
     descriptives = FALSE,
     plot = FALSE,
-    observed = FALSE) {
+    observed = "line") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("signtest requires jmvcore to be installed (restart may be required)")
 
-    if ( ! missing(ID)) ID <- jmvcore::resolveQuo(jmvcore::enquo(ID))
+    if ( ! missing(id)) id <- jmvcore::resolveQuo(jmvcore::enquo(id))
     if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
     if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(ID), ID, NULL),
+            `if`( ! missing(id), id, NULL),
             `if`( ! missing(dep), dep, NULL),
             `if`( ! missing(group), group, NULL))
 
     for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- signtestOptions$new(
-        ID = ID,
+        id = id,
         dep = dep,
         group = group,
         exact = exact,
-        app = app,
+        approximate = approximate,
         nsamples = nsamples,
-        asy = asy,
+        asymptotic = asymptotic,
         alternative = alternative,
+        s = s,
+        df = df,
         descriptives = descriptives,
         plot = plot,
         observed = observed)

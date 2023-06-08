@@ -14,8 +14,8 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # - Quelle hinzufügen für coin wahrscheinlich, evtl. stats
       # - überprüfen ob df wirklich nur Integer sein kann
       # - evtl. S und df als additional statistics, wie beim WRS U und RS1
-      # - bin gerade dran die ID als variable hinzuzufügen, weil sie für
-      #   die grafik nötig ist.
+      # - evtl. bei der Aufteilung der Daten auch auf die ID achten?
+      #   Reihenfolge der Daten ist ja relevant für den Test
       #####################################################################
       
       
@@ -24,6 +24,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # get dep and group
       dep <- self$options$dep
       group <- self$options$group
+      id <- self$options$id
       
       if(is.null(dep) || is.null(group) || is.null(id)) {
         
@@ -48,6 +49,8 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       }
       
       data <- na.omit(data)
+      # Daten sortieren zuerst nach Gruppe dann nach ID
+      data <- dplyr::arrange(data, data[[group]], data[[id]])
       
       # of the dependent variables, take those that have level 1 for group as group 1
       g1 <- data[[dep]][data[[group]] == groupLevels[1]]
@@ -108,8 +111,9 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       if(self$options$plot) {  
         
-        # if plot is selected, send a simplified dataframe to self$results$plot
-        plotData <- data.frame(value = data[[dep]],
+        # copy of data, but easier to handle in ggplot
+        plotData <- data.frame(id = data[[id]],
+                               value = data[[dep]],
                                group = data[[group]])
         
         image <- self$results$plot
@@ -165,21 +169,21 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         table$setRow(rowNo = 1,
                      values = list(
                        var = "",
-                       "type[exact]" = "",
-                       "stat[exact]" = "",
-                       "s[exact]" = "",
-                       "df[exact]" = "",
-                       "p[exact]" = ""
+                       "type[approximate]" = "",
+                       "stat[approximate]" = "",
+                       "s[approximate]" = "",
+                       "df[approximate]" = "",
+                       "p[approximate]" = ""
                      ))
       } else {
         table$setRow(rowNo = 1, 
                      values = list(
                        var = dep,
-                       "type[app]" = "Monte-Carlo Approximation",
-                       "stat[app]" = coin::statistic(mc),
-                       "s[app]" = s,
-                       "df[app]" = df,
-                       "p[app]" = coin::pvalue(mc)
+                       "type[approximate]" = "Monte-Carlo Approximation",
+                       "stat[approximate]" = coin::statistic(mc),
+                       "s[approximate]" = s,
+                       "df[approximate]" = df,
+                       "p[approximate]" = coin::pvalue(mc)
                      ))
       }
       
@@ -197,25 +201,40 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         table$setRow(rowNo = 1,
                      values = list(
                        var = "",
-                       "type[exact]" = "",
-                       "stat[exact]" = "",
-                       "s[exact]" = "",
-                       "df[exact]" = "",
-                       "p[exact]" = ""
+                       "type[asymptotic]" = "",
+                       "stat[asymptotic]" = "",
+                       "s[asymptotic]" = "",
+                       "df[asymptotic]" = "",
+                       "p[asymptotic]" = ""
                      ))
       } else {
         table$setRow(rowNo = 1, 
                      values = list(
                        var = dep,
-                       "type[asy]" = "Asymptotic",
-                       "stat[asy]" = coin::statistic(asymp),
-                       "s[asy]" = s,
-                       "df[asy]" = df,
-                       "p[asy]" = coin::pvalue(asymp)
+                       "type[asymptotic]" = "Asymptotic",
+                       "stat[asymptotic]" = coin::statistic(asymp),
+                       "s[asymptotic]" = s,
+                       "df[asymptotic]" = df,
+                       "p[asymptotic]" = coin::pvalue(asymp)
                      ))
       }
       ########## end of analysis
       
+      
+      
+      ########## start of warnings
+      # Warnings / remarks
+      ## Empty note-object
+      note <- c()
+      
+      ## Write a note, if these conditions are met
+      if(self$options$approximate){
+        note <-  paste('Monte Carlo Approximation with', 
+                       self$options$nsamples, 
+                       'samples was applied. <i>p</i>-value might differ for each execution.')
+        table$setNote('remark', note)
+      }
+      ########## end of warnings
     },
     
     
@@ -229,26 +248,9 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         return()  # do nothing, as long as not both of group and dep are specified
       }
       
-      
-      # transposed = as.data.frame(t(vzr[1:3, -1]))
-      # colnames(transposed) = c("Person", "vorher", "nachher")
-      # transposed = melt(transposed, id = "Person")
-      # colnames(transposed) = c("Person", "Messzeitpunkt", "Blutdruck")
-      # transposed$Blutdruck = as.numeric(transposed$Blutdruck)
-      # 
-      # ggplot(data = transposed, aes(x = Messzeitpunkt,
-      #                               y = Blutdruck,
-      #                               group = Person)) +
-      #   geom_line(aes(color = Person)) +
-      #   geom_point() +
-      #   scale_y_continuous(breaks = seq(120, 220, 10)) +
-      #   theme(text = element_text(size = 12))
-      
-      
-      
       plot <- ggplot(data = image$state,
                      aes(x = group,
-                         y = value, 
+                         y = value,
                          fill = group)) + 
         geom_boxplot(outlier.shape = 1,
                      outlier.size = 2) +
@@ -262,13 +264,18 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               legend.position = "none",
               plot.margin = margin(5.5, 5.5, 5.5, 5.5))
       
-      if(self$options$observed) {
-        plot <- plot + 
-          geom_jitter(color = "black", 
-                      size = 1,
-                      width = 0.1,
-                      alpha = 0.9)
-      }
+      # if(self$options$observed == "line"){
+      #   plot <- plot + 
+      #     geom_line(aes(color = id, group = id)) +
+      #     geom_point()
+      # } else if(self$options$observed == "jitter"){
+      #   plot <- plot + 
+      #     geom_jitter(color = "black", 
+      #                 size = 1,
+      #                 width = 0.1,
+      #                 alpha = 0.9)
+      # }
+      
       print(plot)
       TRUE
       

@@ -8,4 +8,4 @@ Description: This package provides a number of exact nonparametric methods for j
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-Imports: jmvcore (>= 0.8.5), R6, coin, ggplot2
+Imports: jmvcore (>= 0.8.5), R6, coin, dplyr, ggplot2

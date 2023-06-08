@@ -26,11 +26,11 @@ items:
           type: text
           visible: (exact)
         - name: rs1[exact]
-          title: 'RS<sub>1</sub>'
+          title: '<i>RS</i><sub>1</sub>'
           type: number
           visible: (exact && rs1)
         - name: u[exact]
-          title: 'U'
+          title: '<i>U</i>'
           type: number
           visible: (exact && u)
         - name: p[exact]
@@ -48,11 +48,11 @@ items:
           type: text
           visible: (approximate)
         - name: rs1[approximate]
-          title: 'RS<sub>1</sub>'
+          title: '<i>RS</i><sub>1</sub>'
           type: number
           visible: (approximate && rs1)
         - name: u[approximate]
-          title: 'U'
+          title: '<i>U</i>'
           type: number
           visible: (approximate && u)
         - name: p[approximate]
@@ -70,11 +70,11 @@ items:
           type: text
           visible: (asymptotic)
         - name: rs1[asymptotic]
-          title: 'RS<sub>1</sub>'
+          title: '<i>RS</i><sub>1</sub>'
           type: number
           visible: (asymptotic && rs1)
         - name: u[asymptotic]
-          title: 'U'
+          title: '<i>U</i>'
           type: number
           visible: (asymptotic && u)
         - name: p[asymptotic]
@@ -93,11 +93,11 @@ items:
           visible: (cc)
           refs: [cf]
         - name: rs1[cc]
-          title: 'RS<sub>1</sub>'
+          title: '<i>RS</i><sub>1</sub>'
           type: number
           visible: (cc && rs1)
         - name: u[cc]
-          title: 'U'
+          title: '<i>U</i>'
           type: number
           visible: (cc && u)
         - name: p[cc]

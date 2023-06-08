@@ -13,6 +13,7 @@ blood <- data.frame(ID = as.factor(rep(1:6, times = 2)),
                                   136.9, 201.4, 166.8, 150.0, 173.2, 169.3), 
                     Horrorfilm = factor(rep(c("vorher","nachher"), each = 6),
                                         levels = c("vorher", "nachher")))
+blood_scrambled <- rbind(blood[c(1,3,5,7,9,11,2,4,6,8,10,12), ])
 ```
 
 

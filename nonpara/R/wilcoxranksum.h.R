@@ -175,12 +175,12 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `visible`="(exact)"),
                     list(
                         `name`="rs1[exact]", 
-                        `title`="RS<sub>1</sub>", 
+                        `title`="<i>RS</i><sub>1</sub>", 
                         `type`="number", 
                         `visible`="(exact && rs1)"),
                     list(
                         `name`="u[exact]", 
-                        `title`="U", 
+                        `title`="<i>U</i>", 
                         `type`="number", 
                         `visible`="(exact && u)"),
                     list(
@@ -201,12 +201,12 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `visible`="(approximate)"),
                     list(
                         `name`="rs1[approximate]", 
-                        `title`="RS<sub>1</sub>", 
+                        `title`="<i>RS</i><sub>1</sub>", 
                         `type`="number", 
                         `visible`="(approximate && rs1)"),
                     list(
                         `name`="u[approximate]", 
-                        `title`="U", 
+                        `title`="<i>U</i>", 
                         `type`="number", 
                         `visible`="(approximate && u)"),
                     list(
@@ -227,12 +227,12 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `visible`="(asymptotic)"),
                     list(
                         `name`="rs1[asymptotic]", 
-                        `title`="RS<sub>1</sub>", 
+                        `title`="<i>RS</i><sub>1</sub>", 
                         `type`="number", 
                         `visible`="(asymptotic && rs1)"),
                     list(
                         `name`="u[asymptotic]", 
-                        `title`="U", 
+                        `title`="<i>U</i>", 
                         `type`="number", 
                         `visible`="(asymptotic && u)"),
                     list(
@@ -255,12 +255,12 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                             "cf")),
                     list(
                         `name`="rs1[cc]", 
-                        `title`="RS<sub>1</sub>", 
+                        `title`="<i>RS</i><sub>1</sub>", 
                         `type`="number", 
                         `visible`="(cc && rs1)"),
                     list(
                         `name`="u[cc]", 
-                        `title`="U", 
+                        `title`="<i>U</i>", 
                         `type`="number", 
                         `visible`="(cc && u)"),
                     list(

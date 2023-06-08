@@ -28,67 +28,68 @@ items:
         - name: s[exact]
           title: '<i>S</i>'
           type: integer
-          visible: (exact)
+          visible: (exact && s)
         - name: df[exact]
           title: '<i>df</i>'
           type: integer
-          visible: (exact)
+          visible: (exact && df)
         - name: p[exact]
           title: '<i>p</i>-Value'
           type: number
           format: zto,pvalue
           visible: (exact)
           
-        - name: type[app]
+        - name: type[approximate]
           title: 'Type'
           type: text
-          visible: (app)
-        - name: stat[app]
+          visible: (approximate)
+        - name: stat[approximate]
           title: '<i>z</i>-Value'
           type: number
-          visible: (app)
-        - name: s[app]
+          visible: (approximate)
+        - name: s[approximate]
           title: '<i>S</i>'
           type: integer
-          visible: (app)
-        - name: df[app]
+          visible: (approximate && s)
+        - name: df[approximate]
           title: '<i>df</i>'
           type: integer
-          visible: (app)
-        - name: p[app]
+          visible: (approximate && df)
+        - name: p[approximate]
           title: '<i>p</i>-Value'
           type: number
           format: zto,pvalue
-          visible: (app)
+          visible: (approximate)
 
-        - name: type[asy]
+        - name: type[asymptotic]
           title: 'Type'
           type: text
-          visible: (asy)
-        - name: stat[asy]
+          visible: (asymptotic)
+        - name: stat[asymptotic]
           title: '<i>z</i>-Value'
           type: number
-          visible: (asy)
-        - name: s[asy]
+          visible: (asymptotic)
+        - name: s[asymptotic]
           title: '<i>S</i>'
           type: integer
           format: int
-          visible: (asy)
-        - name: df[asy]
+          visible: (asymptotic && s)
+        - name: df[asymptotic]
           title: '<i>df</i>'
           type: integer
-          visible: (asy)
-        - name: p[asy]
+          visible: (asymptotic && df)
+        - name: p[asymptotic]
           title: '<i>p</i>-Value'
           type: number
           format: zto,pvalue
-          visible: (asy)
+          visible: (asymptotic)
           
     - name: desc
       title: Descriptive Statistics
       type: Table
       visible: (descriptives)
       clearWith:
+        - id
         - group
         - dep
         - data
@@ -98,22 +99,22 @@ items:
           title: ''
           type: text
         
+        - name: time[1]
+          title: Sample
+          type: text
         - name: nobs[1]
           title: Observations
           type: integer
-        - name: time[1]
-          title: Timepoint
-          type: text
         - name: median[1]
           title: Median
           type: text
         
+        - name: time[2]
+          title: Sample
+          type: text
         - name: nobs[2]
           title: Observations
           type: integer
-        - name: time[2]
-          title: Timepoint
-          type: text
         - name: median[2]
           title: Median
           type: text
@@ -126,6 +127,7 @@ items:
       visible: (plot)
       renderFun: .descplot
       clearWith:
+        - id
         - group
         - dep
         - data

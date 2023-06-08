@@ -13,8 +13,9 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
       # - Testen ob alle fehlerhaften Datenytypen abgefangen werden
       # - Bei den Berechnungen mit try() die allfälligen Fehler abfangen
       # - Bevor Daten eingefüllt werden, wird schon Fehlermeldung angezeigt und Tabelle sieht anders aus
-      # - Quelle hinzufügen für coin wahrscheinlich, evtl. stats, und sicher für den Hinweis,
-      #   dass CC nicht empfohlen sei (siehe Zotero)
+      # - Quelle hinzufügen für coin wahrscheinlich, evtl. stats
+      # - Quelle für Empfehlung gegen cc wird immer angezeigt,
+      #   sollte aber weg wenn keine CC gemacht wird.
       #####################################################################
       
       
@@ -236,7 +237,7 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
           table$setRow(rowNo = 1,
                        values = list(
                          var = self$options$dep,
-                         "type[approximate]" = 'Approximate',
+                         "type[approximate]" = 'Monte-Carlo Approximation',
                          "stat[approximate]" = zval,
                          "rs1[approximate]" = RS1,
                          "u[approximate]" = u,

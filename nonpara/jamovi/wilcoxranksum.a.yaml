@@ -66,11 +66,11 @@ options:
           name:  greater
       default: two.sided
       
-    - title: 'RS<sub>1</sub>' 
+    - title: '<i>RS</i><sub>1</sub>' 
       name: rs1
       type: Bool
       default: false
-    - title: 'Mann-Whitney U'
+    - title: 'Mann-Whitney <i>U</i>'
       name: u
       type: Bool
       default: false

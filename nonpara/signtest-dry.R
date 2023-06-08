@@ -7,11 +7,12 @@ self$data <- data.frame(
   Horrorfilm = factor(rep(c("vorher","nachher"), each = 6),
                       levels = c("vorher", "nachher")))
 self$options$exact <- TRUE
-self$options$app <- TRUE
+self$options$approximate <- TRUE
 self$options$nsamples <- 10000
-self$options$asy <- TRUE
+self$options$asymptotic <- TRUE
 self$options$dep <- "Blutdruck"
 self$options$group <- "Horrorfilm"
+self$options$id <- "ID"
 self$options$alternative <- "less"
 
 self$options$descriptives <- FALSE
@@ -24,12 +25,13 @@ self$options$observed <- FALSE
 
 
 
-
-
 ########## start of data preparation
 # get dep and group
 dep <- self$options$dep
 group <- self$options$group
+id <- self$options$id
+
+
 
 if(is.null(dep) || is.null(group)) {
   
