@@ -4,13 +4,25 @@ title: Sign Test
 jrs:   '1.1'
 
 items:
+    - name: na_warning
+      title: Warning
+      type: Preformatted
+      clearWith:
+        - data
+        - id
+        - dep
+        - samp
+    
+    - name: control
+      type: Preformatted
+    
     - name: vzr
       title: Sign Test
       type: Table
       clearWith:
         - data
         - dep
-        - group
+        - samp
       rows: 1
       columns:
         - name: var
@@ -90,7 +102,7 @@ items:
       visible: (descriptives)
       clearWith:
         - id
-        - group
+        - samp
         - dep
         - data
       rows: 1
@@ -128,7 +140,7 @@ items:
       renderFun: .descplot
       clearWith:
         - id
-        - group
+        - samp
         - dep
         - data
         - observed

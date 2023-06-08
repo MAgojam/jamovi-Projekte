@@ -46,7 +46,7 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                                                      code = "grouping_var_must_have_2_levels")
       }
       
-      data <- na.omit(data)
+      data <- jmvcore::naOmit(data)
       
       ########## end of data preparation
       

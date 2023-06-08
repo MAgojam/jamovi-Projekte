@@ -97,12 +97,6 @@ children:
               - type: CheckBox
                 name: plot
                 children:
-                  - type: CheckBox
+                  - type: ComboBox
                     name: observed
                     enable: (plot)
-                    children:
-                      - type: LayoutBox
-                        margin: large
-                        children:
-                          - type: ComboBox
-                            name: plottype

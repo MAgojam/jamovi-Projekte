@@ -27,7 +27,7 @@ options:
         R: >
           Dependent variable. Does not neet to be specified when using a formula.
       
-    - name: group
+    - name: samp
       title: Grouping Variable
       type: Variable
       suggested: [nominal, ordinal]

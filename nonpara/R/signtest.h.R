@@ -8,7 +8,7 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             id = NULL,
             dep = NULL,
-            group = NULL,
+            samp = NULL,
             exact = TRUE,
             approximate = TRUE,
             nsamples = 10000,
@@ -41,9 +41,9 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "continuous"),
                 permitted=list(
                     "numeric"))
-            private$..group <- jmvcore::OptionVariable$new(
-                "group",
-                group,
+            private$..samp <- jmvcore::OptionVariable$new(
+                "samp",
+                samp,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -100,7 +100,7 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             self$.addOption(private$..id)
             self$.addOption(private$..dep)
-            self$.addOption(private$..group)
+            self$.addOption(private$..samp)
             self$.addOption(private$..exact)
             self$.addOption(private$..approximate)
             self$.addOption(private$..nsamples)
@@ -115,7 +115,7 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         id = function() private$..id$value,
         dep = function() private$..dep$value,
-        group = function() private$..group$value,
+        samp = function() private$..samp$value,
         exact = function() private$..exact$value,
         approximate = function() private$..approximate$value,
         nsamples = function() private$..nsamples$value,
@@ -129,7 +129,7 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     private = list(
         ..id = NA,
         ..dep = NA,
-        ..group = NA,
+        ..samp = NA,
         ..exact = NA,
         ..approximate = NA,
         ..nsamples = NA,
@@ -146,6 +146,8 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "signtestResults",
     inherit = jmvcore::Group,
     active = list(
+        na_warning = function() private$.items[["na_warning"]],
+        control = function() private$.items[["control"]],
         vzr = function() private$.items[["vzr"]],
         desc = function() private$.items[["desc"]],
         plot = function() private$.items[["plot"]]),
@@ -156,6 +158,18 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="",
                 title="Sign Test")
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="na_warning",
+                title="Warning",
+                clearWith=list(
+                    "data",
+                    "id",
+                    "dep",
+                    "samp")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="control"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="vzr",
@@ -163,7 +177,7 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "data",
                     "dep",
-                    "group"),
+                    "samp"),
                 rows=1,
                 columns=list(
                     list(
@@ -256,7 +270,7 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(descriptives)",
                 clearWith=list(
                     "id",
-                    "group",
+                    "samp",
                     "dep",
                     "data"),
                 rows=1,
@@ -299,7 +313,7 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 renderFun=".descplot",
                 clearWith=list(
                     "id",
-                    "group",
+                    "samp",
                     "dep",
                     "data",
                     "observed")))}))
@@ -331,7 +345,7 @@ signtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param id .
 #' @param dep Dependent variable. Does not neet to be specified when using a
 #'   formula.
-#' @param group Grouping variable, must have two levels. Does not need to be
+#' @param samp Grouping variable, must have two levels. Does not need to be
 #'   specified when using a formula.
 #' @param exact .
 #' @param approximate .
@@ -345,6 +359,8 @@ signtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param observed .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$na_warning} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$control} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$vzr} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
@@ -361,7 +377,7 @@ signtest <- function(
     data,
     id,
     dep,
-    group,
+    samp,
     exact = TRUE,
     approximate = TRUE,
     nsamples = 10000,
@@ -378,20 +394,20 @@ signtest <- function(
 
     if ( ! missing(id)) id <- jmvcore::resolveQuo(jmvcore::enquo(id))
     if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
-    if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
+    if ( ! missing(samp)) samp <- jmvcore::resolveQuo(jmvcore::enquo(samp))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(id), id, NULL),
             `if`( ! missing(dep), dep, NULL),
-            `if`( ! missing(group), group, NULL))
+            `if`( ! missing(samp), samp, NULL))
 
-    for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in samp) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- signtestOptions$new(
         id = id,
         dep = dep,
-        group = group,
+        samp = samp,
         exact = exact,
         approximate = approximate,
         nsamples = nsamples,
