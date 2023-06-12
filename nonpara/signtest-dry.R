@@ -8,7 +8,7 @@ self <- list()
 #   Horrorfilm = factor(rep(c("vorher","nachher"), each = 6),
 #                       levels = c("vorher", "nachher")))
 
-self$data <- data.frame( 
+self$data <- data.frame(
   ID = as.factor(rep(1:7, times = 2)),
   Blutdruck = c(6,4,1,4,10,3,8,
                 3,9,2,4, 3,1,4),
@@ -16,6 +16,17 @@ self$data <- data.frame(
                       levels = c("vorher", "nachher")))
 
 self$data$Horrorfilm[13:14] <- NA
+
+
+# self$data <- data.frame( 
+#   ID = as.factor(rep(1:6, times = 2)),
+#   Blutdruck = c(1,2,3,4,5,6,
+#                 1,2,4,4,5,6),
+#   Horrorfilm = factor(rep(c("vorher","nachher"), each = 6),
+#                       levels = c("vorher", "nachher")))
+
+
+
 
 # self$data <- data.frame( 
 #   ID = as.factor(rep(1:7, times = 2)),
@@ -133,6 +144,21 @@ if(length(NAid) > 0) {
 }
 
 
+# find IDs which have identical values for both samples and remove them from the dataset
+## for each ID get the according dependent values
+for (id in data$ID) {
+  vals <- data |> 
+    dplyr::filter(ID == id) |> 
+    dplyr::select(dep) |>  
+    unlist() |>
+    as.vector() 
+  # if the dependent vals are equal, remove them from the dataset
+  if(all(vals == vals[1])) { 
+    data <- data[data$ID != id,]
+  }
+}
+
+
 # Daten sortieren zuerst nach Gruppe dann nach ID
 data <- dplyr::arrange(data, data$samp, data$id)
 
@@ -140,7 +166,7 @@ data <- dplyr::arrange(data, data$samp, data$id)
 g1 <- data$dep[data$samp == sampLevels[1]]
 g2 <- data$dep[data$samp == sampLevels[2]]
 
-table <- self$results$vzr
+# table <- self$results$vzr
 # self$results$control$setContent(data)
 
 ########## end of data preparation 
@@ -148,50 +174,70 @@ table <- self$results$vzr
 
 
 ########## start of general statistics and descriptives
+# calculate df and s
 df = 0
 s = 0
 
 for(i in 1:length(g1)) {
-  if(g1[i] != g2[i]) { df = df + 1 }
+  # if a value does not change between t1 and t2, 
+  # it is excluded from the analysis, so df is reduced by 1
+  # coin does this automatically, so no need to change the dataset
+  if(g1[i] != g2[i]) { df = df + 1 }  
   if(g1[i]  > g2[i]) { s = s + 1 }
 }
 
 ## get descriptives if selected
 if(self$options$descriptives) {
-  ### n per samp
-  nobs <- length(data$samp)/2
+  try_desk <- try({
+    ### n per samp
+    nobs <- length(data$samp)/2 # or rather df, I figure?
+    
+    #### median per samp
+    median_g1 <- data |>
+      dplyr::filter(samp == sampLevels[1]) |>
+      dplyr::select(dep) |>
+      unlist() |>
+      as.vector() |>
+      median() |> 
+      format(nsmall = 2)
+    
+    median_g2 <- data |>
+      dplyr::filter(samp == sampLevels[2]) |> 
+      dplyr::select(dep) |>
+      unlist() |>
+      as.vector() |>
+      median() |> 
+      format(nsmall = 2)
+    
+  }, silent = TRUE)
   
-  #### median per samp
-  median_g1 <- data |>
-    dplyr::filter(samp == sampLevels[1]) |>
-    dplyr::select(dep) |>
-    unlist() |>
-    as.vector() |>
-    median() |> 
-    format(nsmall = 2)
-  
-  median_g2 <- data |>
-    dplyr::filter(samp == sampLevels[2]) |> 
-    dplyr::select(dep) |>
-    unlist() |>
-    as.vector() |>
-    median() |> 
-    format(nsmall = 2)
-  
-  #### write table
-  desk <- self$results$desc
-  # desk$setRow(rowNo = 1,
-  #             values = list(
-  #               "dep" = dep,
-  #               "nobs[1]" = nobs,
-  #               "nobs[2]" = nobs,
-  #               
-  #               "time[1]" = sampLevels[1],
-  #               "time[2]" = sampLevels[2],
-  #               
-  #               "median[1]" = median_g1,
-  #               "median[2]" = median_g2
-  #             ))
+  if(jmvcore::isError(try_desk)) {
+    # desk$setRow(rowNo = 1,
+    #             values = list(
+    #               "dep" = "",
+    #               "nobs[1]" = "",
+    #               "nobs[2]" = "",
+    #               
+    #               "time[1]" = "",
+    #               "time[2]" = "",
+    #               
+    #               "median[1]" = "",
+    #               "median[2]" = ""
+    #             ))
+  } else {
+    # desk$setRow(rowNo = 1,
+    #             values = list(
+    #               "dep" = dep,
+    #               "nobs[1]" = nobs,  # or df? see above
+    #               "nobs[2]" = nobs,
+    #               
+    #               "time[1]" = sampLevels[1],
+    #               "time[2]" = sampLevels[2],
+    #               
+    #               "median[1]" = median_g1,
+    #               "median[2]" = median_g2
+    #             ))
+  }
 }
 
 

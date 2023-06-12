@@ -11,15 +11,8 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       ############################### To Do ###############################
       # - Testen ob alle fehlerhaften Datenytypen abgefangen werden
-      # - Quelle hinzufügen für coin wahrscheinlich, evtl. stats
       # - überprüfen ob df wirklich nur Integer sein kann
-      # - sollte evtl. bei den Deskriptivstatistiken als Observations auch
-      #   nur die tatsächlich verwendeten observations angezeigt werden?
-      #   Also auch df statt einfach nrow/2?
-      # - arrange ordner zur Zeit die Daten falsch an. Vlt. Factor doch ordered?
       # - am Schluss im Code und im r.yaml results$control entfernen
-      # - Errors abfange bei Deskriptiv-Tabelle? Da noch kein try() und
-      #   keine empty Tabelle bei Fehler
       #####################################################################
       
       
@@ -56,7 +49,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         jmvcore::reject("Unable to determine factors of grouping variable. Please check for missing values.")
       } else if(length(base::levels(samErr)) != 2) {
         jmvcore::reject("Grouping variable must have exactly 2 levels")
-      } else { # if successful, overwrite sample als factor
+      } else { # if successful, overwrite sample as factor
         data$samp <- factor(data$samp, ordered = FALSE)
         sampLevels <- base::levels(data$samp) #count extract levels
       }
@@ -75,7 +68,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       # counts all IDs and if there are less than 2 of any ID, the ID is stored
       NAid <- data$ID |>                     # take ID
-        table() |>                           # creates crequency table
+        table() |>                           # creates frequency table
         as.data.frame() |>                   # to df for easier filtering
         dplyr::filter(Freq < 2) |>           # get IDs with frequency < 2
         `colnames<-`(c("ID", "Freq")) |>     # rename variables for easier selection
@@ -89,6 +82,23 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           dplyr::filter(!data$ID %in% NAid)  # filter for all IDs that are not in NAid
       }
       
+      
+      
+      # find IDs which have identical values for both samples and remove them from the dataset
+      ## for each ID get the according dependent values
+      for (id in data$ID) {
+        vals <- data |> 
+          dplyr::filter(ID == id) |> 
+          dplyr::select(dep) |>  
+          unlist() |>
+          as.vector() 
+        # if the dependent vals are equal, remove them from the dataset
+        if(all(vals == vals[1])) { 
+          data <- data[data$ID != id,]
+        }
+      }
+      
+      
       # sort data for group then for ID
       data <- dplyr::arrange(data, data$samp, data$ID)
       
@@ -96,8 +106,9 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       g1 <- data$dep[data$samp == sampLevels[1]]
       g2 <- data$dep[data$samp == sampLevels[2]]
       
-      # prepare output table
+      # prepare output tables
       table <- self$results$vzr
+      desk <- self$results$desc
       
       # self$results$control$setContent(data)
       ########## end of data preparation 
@@ -105,54 +116,74 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       
       ########## start of general statistics and descriptives
-      # calculate df and s
-      df = 0
-      s = 0
+      # calculate df
+      if(all.equal(length(g1), length(g2), nrow(data)/2)) {
+        df <- length(g1)
+      } else {
+        df <- NA
+      }
       
-      for(i in 1:length(g1)) {
-        # if a value does not change between t1 and t2, 
-        # it is excluded from the analysis, so df is reduced by 1
-        # coin does this automatically, so no need to change the dataset
-        if(g1[i] != g2[i]) { df = df + 1 }  
+      
+      # calculate s
+      s <- 0
+      
+      # if a value is greater in sample 1 than in sample 2, increase s by 1
+      for(i in 1:length(g1)) { 
         if(g1[i]  > g2[i]) { s = s + 1 }
       }
       
       ## get descriptives if selected
       if(self$options$descriptives) {
-        ### n per samp
-        nobs <- length(data$samp)/2 # or rather df, I figure?
+        try_desk <- try({
+          #### median per samp
+          median_g1 <- data |>
+            dplyr::filter(samp == sampLevels[1]) |>
+            dplyr::select(dep) |>
+            unlist() |>
+            as.vector() |>
+            median() |> 
+            format(nsmall = 2)
+          
+          median_g2 <- data |>
+            dplyr::filter(samp == sampLevels[2]) |> 
+            dplyr::select(dep) |>
+            unlist() |>
+            as.vector() |>
+            median() |> 
+            format(nsmall = 2)
+          
+        }, silent = TRUE)
         
-        #### median per samp
-        median_g1 <- data |>
-          dplyr::filter(samp == sampLevels[1]) |>
-          dplyr::select(dep) |>
-          unlist() |>
-          as.vector() |>
-          median() |> 
-          format(nsmall = 2)
-        
-        median_g2 <- data |>
-          dplyr::filter(samp == sampLevels[2]) |> 
-          dplyr::select(dep) |>
-          unlist() |>
-          as.vector() |>
-          median() |> 
-          format(nsmall = 2)
-        
-        #### write table
-        desk <- self$results$desc
-        desk$setRow(rowNo = 1,
-                    values = list(
-                      "dep" = dep,
-                      "nobs[1]" = nobs,  # or df? see above
-                      "nobs[2]" = nobs,
-                      
-                      "time[1]" = sampLevels[1],
-                      "time[2]" = sampLevels[2],
-                      
-                      "median[1]" = median_g1,
-                      "median[2]" = median_g2
-                    ))
+        if(jmvcore::isError(try_desk)) {
+          desk$setRow(rowNo = 1,
+                      values = list(
+                        "dep" = "",
+                        "nobs[1]" = "",
+                        "nobs[2]" = "",
+                        
+                        "time[1]" = "",
+                        "time[2]" = "",
+                        
+                        "median[1]" = "",
+                        "median[2]" = ""
+                      ))
+        } else {
+          desk$setRow(rowNo = 1,
+                      values = list(
+                        "dep" = dep,
+                        "nobs[1]" = df,
+                        "nobs[2]" = df,
+                        
+                        "time[1]" = sampLevels[1],
+                        "time[2]" = sampLevels[2],
+                        
+                        "median[1]" = median_g1,
+                        "median[2]" = median_g2
+                      ))
+          
+          note_obs <- "Observations with identical values for both samples are disregarded for this test and therefore don't count as observations."
+          desk$setNote(key = 'observs', note = note_obs)
+        }
       }
       
       

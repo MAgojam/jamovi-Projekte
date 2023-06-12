@@ -19,6 +19,7 @@ items:
     - name: vzr
       title: Sign Test
       type: Table
+      refs: [coin]
       clearWith:
         - data
         - dep

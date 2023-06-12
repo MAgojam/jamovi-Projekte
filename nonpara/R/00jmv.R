@@ -8,4 +8,11 @@
         `year`=2003, 
         `title`="Introductory biostatistics for the health sciences: Modern applications including bootstrap", 
         `publisher`="Wiley-Interscience. https://doi.org/10.1002/0471458716", 
-        `url`="https://doi.org/10.1002/0471458716"))
+        `url`="https://doi.org/10.1002/0471458716"), 
+    `coin`=list(
+        `type`="software", 
+        `author`="Hothorn, Torsten & Hornik, Kurt, & van de Wiel, Mark A., & Zeileis, Achim.", 
+        `year`=2006, 
+        `title`="Implementing a class of permutation tests: The coin package", 
+        `publisher`="[R package]. Retrieved from https://cran.r-project.org/package=coin", 
+        `url`="https://cran.r-project.org/package=coin"))

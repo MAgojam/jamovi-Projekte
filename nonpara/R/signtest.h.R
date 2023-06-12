@@ -174,6 +174,8 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="vzr",
                 title="Sign Test",
+                refs=list(
+                    "coin"),
                 clearWith=list(
                     "data",
                     "dep",
