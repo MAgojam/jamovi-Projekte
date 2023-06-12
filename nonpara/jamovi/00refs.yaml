@@ -2,7 +2,7 @@
 refs:
     cf:
       type: 'book'
-      author: Chernik, Michael R., & Friis, Robert H.
+      author: Chernik, M. R., & Friis, R. H.
       year: 2003
       title: 'Introductory biostatistics for the health sciences: Modern applications including bootstrap'
       publisher: 'Wiley-Interscience. https://doi.org/10.1002/0471458716'

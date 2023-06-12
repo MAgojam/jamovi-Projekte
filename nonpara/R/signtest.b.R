@@ -181,7 +181,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         "median[2]" = median_g2
                       ))
           
-          note_obs <- "Observations with identical values for both samples are disregarded for this test and therefore don't count as observations."
+          note_obs <- "Observations with identical values for both samples are disregarded for this test and do therefore not count as observations."
           desk$setNote(key = 'observs', note = note_obs)
         }
       }

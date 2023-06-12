@@ -153,6 +153,8 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="wrs",
                 title="Wilcoxon Rank-Sum Test",
+                refs=list(
+                    "coin"),
                 clearWith=list(
                     "data",
                     "dep",

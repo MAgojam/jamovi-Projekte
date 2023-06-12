@@ -4,14 +4,14 @@
 .jmvrefs <- list(
     `cf`=list(
         `type`="book", 
-        `author`="Chernik, Michael R., & Friis, Robert H.", 
+        `author`="Chernik, M. R., & Friis, R. H.", 
         `year`=2003, 
         `title`="Introductory biostatistics for the health sciences: Modern applications including bootstrap", 
         `publisher`="Wiley-Interscience. https://doi.org/10.1002/0471458716", 
         `url`="https://doi.org/10.1002/0471458716"), 
     `coin`=list(
         `type`="software", 
-        `author`="Hothorn, Torsten & Hornik, Kurt, & van de Wiel, Mark A., & Zeileis, Achim.", 
+        `author`="Hothorn, T. & Hornik, K., & van de Wiel, M. A., & Zeileis, A.", 
         `year`=2006, 
         `title`="Implementing a class of permutation tests: The coin package", 
         `publisher`="[R package]. Retrieved from https://cran.r-project.org/package=coin", 
