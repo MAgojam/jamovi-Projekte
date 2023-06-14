@@ -240,6 +240,11 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                          "u[approximate]" = u,
                          "p[approximate]" = coin::pvalue(results)
                        ))
+
+          footnote1 <- paste('Monte Carlo Approximation with',
+                             self$options$nsamples, 
+                             'samples was applied. <i>p</i>-value might differ for each execution.')
+          table$addFootnote(rowNo=1, col="type[approximate]", footnote1)
           
         }
         
@@ -333,7 +338,10 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                          "u[cc]" = u,
                          "p[cc]" = results$p.value
                        ))
-          
+
+          footnote2 <- 'The use of the continuity correction is generally not recommended, if an exact test is possible.
+                        We recommend using the exact test instead.'
+          table$addFootnote(rowNo=1, col="type[cc]", footnote2)
         }
         
       }
@@ -348,35 +356,35 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
       }
       
       
-      # Warnings / remarks
-      ## Empty note-object
-      note1 <- note2 <- c()
-      
-      ## Write a note, if these conditions are met
-      if(self$options$approximate){
-        note1 <-  paste('Monte Carlo Approximation with', self$options$nsamples, 'samples was applied. <i>p</i>-value might differ for each execution.')
-      }
-      
-      if(self$options$cc){
-        note2 <-  '
-        The use of the continuity correction is generally not recommended, if an exact test is possible.
-        We recommend using the exact test instead.
-        '
-      }
-      
-      ## Paste the notes together
-      ## ("" ) is so that the string is never empty, which would lead to 'character(0)'
-      if(is.null(note1) & !is.null(note2)) {
-        # print("note2")
-        table$setNote('remark', note2)
-      } else if(is.null(note2) & !is.null(note1)) {
-        # print("note1")
-        table$setNote('remark', note1)
-      } else if(!is.null(c(note1, note2))) {
-        # print("beide")
-        note <- paste('a)', note1, "<br> b)", note2)
-        table$setNote('remark', note)
-      } else{print('keine')}
+      # # Warnings / remarks
+      # ## Empty note-object
+      # note1 <- note2 <- c()
+      # 
+      # ## Write a note, if these conditions are met
+      # if(self$options$approximate){
+      #   note1 <-  paste('Monte Carlo Approximation with', self$options$nsamples, 'samples was applied. <i>p</i>-value might differ for each execution.')
+      # }
+      # 
+      # if(self$options$cc){
+      #   note2 <-  '
+      #   The use of the continuity correction is generally not recommended, if an exact test is possible.
+      #   We recommend using the exact test instead.
+      #   '
+      # }
+      # 
+      # ## Paste the notes together
+      # ## ("" ) is so that the string is never empty, which would lead to 'character(0)'
+      # if(is.null(note1) & !is.null(note2)) {
+      #   # print("note2")
+      #   table$setNote('remark', note2)
+      # } else if(is.null(note2) & !is.null(note1)) {
+      #   # print("note1")
+      #   table$setNote('remark', note1)
+      # } else if(!is.null(c(note1, note2))) {
+      #   # print("beide")
+      #   note <- paste('a)', note1, "<br> b)", note2)
+      #   table$setNote('remark', note)
+      # } else{print('keine')}
       
       
     },
