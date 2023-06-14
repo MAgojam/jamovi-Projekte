@@ -7,6 +7,7 @@ items:
     - name: na_warning
       title: Warning
       type: Preformatted
+      visible: false
       clearWith:
         - data
         - id

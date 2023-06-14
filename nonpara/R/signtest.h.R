@@ -180,6 +180,7 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="na_warning",
                 title="Warning",
+                visible=FALSE,
                 clearWith=list(
                     "data",
                     "id",

@@ -11,11 +11,9 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       ############################### To Do ###############################
       # - Testen ob alle fehlerhaften Datenytypen abgefangen werden
-      # - evtl. test auf long-format hinzufügen und abfangen, falls daten nicht long sind?
-      #   Andernfalls sonst irgendeinen Hinweis machen irgendwo dass Daten long sein müssen,
-      #   weil Rest von jamovi ist wide.
       # - am Schluss im Code und im r.yaml results$control entfernen
       # - ig ha gad random chönne ID (nominal) bi dependent drizieh... sött eig nid müglech si
+      #   GLOUBS da chame nüt mache ussert uf intelligenti Benutzer hoffe
       #####################################################################
       
       
@@ -66,11 +64,9 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       if(anyNA.data.frame(data)){
         self$results$na_warning$setContent("Missings found in dataset. Corresponding observations were removed.")
         self$results$na_warning$setTitle("Warning")
-        # after warning, remove rows with missings
+        # after warning, remove rows with missings and set visibility to TRUE
         data <- jmvcore::naOmit(data)
-        
-      } else {
-        self$results$na_warning$setVisible(visible = FALSE)
+        self$results$na_warning$setVisible(visible = TRUE)
       }
       
       # counts all IDs and if there are less than 2 of any ID, the ID is stored
@@ -427,7 +423,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     .init=function() {
       
       table <- self$results$get("stest")
-
+      
       ciTitle <- jmvcore::format('{ciWidth}% Confidence Interval', 
                                  ciWidth = self$options$ciWidth)
       
