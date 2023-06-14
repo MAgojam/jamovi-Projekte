@@ -16,7 +16,7 @@ items:
     - name: control
       type: Preformatted
     
-    - name: vzr
+    - name: stest
       title: Sign Test
       type: Table
       refs: [coin]
@@ -24,6 +24,7 @@ items:
         - data
         - dep
         - samp
+        - effectSize
       rows: 1
       columns:
         - name: var
@@ -51,6 +52,18 @@ items:
           type: number
           format: zto,pvalue
           visible: (exact)
+        - name: es[exact]
+          title: 'Effect Size <a>&gamma;</a>'
+          type: number
+          visible: (exact && effectSize)
+        - name: ciles[exact]
+          title: Lower
+          type: number
+          visible: (exact && effectSize && ciES)
+        - name: ciues[exact]
+          title: Upper
+          type: number
+          visible: (exact && effectSize && ciES)
           
         - name: type[approximate]
           title: 'Type'
@@ -73,6 +86,18 @@ items:
           type: number
           format: zto,pvalue
           visible: (approximate)
+        - name: es[approximate]
+          title: 'Effect Size <a>&gamma;</a>'
+          type: number
+          visible: (approximate && effectSize)
+        - name: ciles[approximate]
+          title: Lower
+          type: number
+          visible: (approximate && effectSize && ciES)
+        - name: ciues[approximate]
+          title: Upper
+          type: number
+          visible: (approximate && effectSize && ciES)
 
         - name: type[asymptotic]
           title: 'Type'
@@ -96,6 +121,18 @@ items:
           type: number
           format: zto,pvalue
           visible: (asymptotic)
+        - name: es[asymptotic]
+          title: 'Effect Size <a>&gamma;</a>'
+          type: number
+          visible: (asymptotic && effectSize)
+        - name: ciles[asymptotic]
+          title: Lower
+          type: number
+          visible: (asymptotic && effectSize && ciES)
+        - name: ciues[asymptotic]
+          title: Upper
+          type: number
+          visible: (asymptotic && effectSize && ciES)
           
     - name: desc
       title: Descriptive Statistics

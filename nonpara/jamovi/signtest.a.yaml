@@ -75,6 +75,14 @@ options:
       name: nobs
       type: Bool
       default: false
+    - title: 'Effect size'
+      name: effectSize
+      type: Bool
+      default: false
+    - title: 'Confidence interval'
+      name: ciES
+      type: Bool
+      default: false
       
     - title: Descriptives Table
       name: descriptives

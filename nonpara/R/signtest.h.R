@@ -15,6 +15,8 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             asymptotic = TRUE,
             alternative = "two.sided",
             nobs = FALSE,
+            effectSize = FALSE,
+            ciES = FALSE,
             descriptives = FALSE,
             plot = FALSE,
             observed = "line", ...) {
@@ -76,6 +78,14 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "nobs",
                 nobs,
                 default=FALSE)
+            private$..effectSize <- jmvcore::OptionBool$new(
+                "effectSize",
+                effectSize,
+                default=FALSE)
+            private$..ciES <- jmvcore::OptionBool$new(
+                "ciES",
+                ciES,
+                default=FALSE)
             private$..descriptives <- jmvcore::OptionBool$new(
                 "descriptives",
                 descriptives,
@@ -102,6 +112,8 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..asymptotic)
             self$.addOption(private$..alternative)
             self$.addOption(private$..nobs)
+            self$.addOption(private$..effectSize)
+            self$.addOption(private$..ciES)
             self$.addOption(private$..descriptives)
             self$.addOption(private$..plot)
             self$.addOption(private$..observed)
@@ -116,6 +128,8 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         asymptotic = function() private$..asymptotic$value,
         alternative = function() private$..alternative$value,
         nobs = function() private$..nobs$value,
+        effectSize = function() private$..effectSize$value,
+        ciES = function() private$..ciES$value,
         descriptives = function() private$..descriptives$value,
         plot = function() private$..plot$value,
         observed = function() private$..observed$value),
@@ -129,6 +143,8 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..asymptotic = NA,
         ..alternative = NA,
         ..nobs = NA,
+        ..effectSize = NA,
+        ..ciES = NA,
         ..descriptives = NA,
         ..plot = NA,
         ..observed = NA)
@@ -140,7 +156,7 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         na_warning = function() private$.items[["na_warning"]],
         control = function() private$.items[["control"]],
-        vzr = function() private$.items[["vzr"]],
+        stest = function() private$.items[["stest"]],
         desc = function() private$.items[["desc"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
@@ -164,14 +180,15 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="control"))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="vzr",
+                name="stest",
                 title="Sign Test",
                 refs=list(
                     "coin"),
                 clearWith=list(
                     "data",
                     "dep",
-                    "samp"),
+                    "samp",
+                    "effectSize"),
                 rows=1,
                 columns=list(
                     list(
@@ -205,6 +222,21 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `format`="zto,pvalue", 
                         `visible`="(exact)"),
                     list(
+                        `name`="es[exact]", 
+                        `title`="Effect Size <a>&gamma;</a>", 
+                        `type`="number", 
+                        `visible`="(exact && effectSize)"),
+                    list(
+                        `name`="ciles[exact]", 
+                        `title`="Lower", 
+                        `type`="number", 
+                        `visible`="(exact && effectSize && ciES)"),
+                    list(
+                        `name`="ciues[exact]", 
+                        `title`="Upper", 
+                        `type`="number", 
+                        `visible`="(exact && effectSize && ciES)"),
+                    list(
                         `name`="type[approximate]", 
                         `title`="Type", 
                         `type`="text", 
@@ -231,6 +263,21 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `format`="zto,pvalue", 
                         `visible`="(approximate)"),
                     list(
+                        `name`="es[approximate]", 
+                        `title`="Effect Size <a>&gamma;</a>", 
+                        `type`="number", 
+                        `visible`="(approximate && effectSize)"),
+                    list(
+                        `name`="ciles[approximate]", 
+                        `title`="Lower", 
+                        `type`="number", 
+                        `visible`="(approximate && effectSize && ciES)"),
+                    list(
+                        `name`="ciues[approximate]", 
+                        `title`="Upper", 
+                        `type`="number", 
+                        `visible`="(approximate && effectSize && ciES)"),
+                    list(
                         `name`="type[asymptotic]", 
                         `title`="Type", 
                         `type`="text", 
@@ -256,7 +303,22 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="<i>p</i>-Value", 
                         `type`="number", 
                         `format`="zto,pvalue", 
-                        `visible`="(asymptotic)"))))
+                        `visible`="(asymptotic)"),
+                    list(
+                        `name`="es[asymptotic]", 
+                        `title`="Effect Size <a>&gamma;</a>", 
+                        `type`="number", 
+                        `visible`="(asymptotic && effectSize)"),
+                    list(
+                        `name`="ciles[asymptotic]", 
+                        `title`="Lower", 
+                        `type`="number", 
+                        `visible`="(asymptotic && effectSize && ciES)"),
+                    list(
+                        `name`="ciues[asymptotic]", 
+                        `title`="Upper", 
+                        `type`="number", 
+                        `visible`="(asymptotic && effectSize && ciES)"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="desc",
@@ -347,6 +409,8 @@ signtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param asymptotic .
 #' @param alternative .
 #' @param nobs .
+#' @param effectSize .
+#' @param ciES .
 #' @param descriptives .
 #' @param plot .
 #' @param observed .
@@ -354,16 +418,16 @@ signtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$na_warning} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$control} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$vzr} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stest} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$vzr$asDF}
+#' \code{results$stest$asDF}
 #'
-#' \code{as.data.frame(results$vzr)}
+#' \code{as.data.frame(results$stest)}
 #'
 #' @export
 signtest <- function(
@@ -377,6 +441,8 @@ signtest <- function(
     asymptotic = TRUE,
     alternative = "two.sided",
     nobs = FALSE,
+    effectSize = FALSE,
+    ciES = FALSE,
     descriptives = FALSE,
     plot = FALSE,
     observed = "line") {
@@ -406,6 +472,8 @@ signtest <- function(
         asymptotic = asymptotic,
         alternative = alternative,
         nobs = nobs,
+        effectSize = effectSize,
+        ciES = ciES,
         descriptives = descriptives,
         plot = plot,
         observed = observed)

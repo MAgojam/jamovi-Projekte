@@ -11,6 +11,9 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       ############################### To Do ###############################
       # - Testen ob alle fehlerhaften Datenytypen abgefangen werden
+      # - evtl. test auf long-format hinzufügen und abfangen, falls daten nicht long sind?
+      #   Andernfalls sonst irgendeinen Hinweis machen irgendwo dass Daten long sein müssen,
+      #   weil Rest von jamovi ist wide.
       # - am Schluss im Code und im r.yaml results$control entfernen
       #####################################################################
       
@@ -106,7 +109,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       g2 <- data$dep[data$samp == sampLevels[2]]
       
       # prepare output tables
-      table <- self$results$vzr
+      table <- self$results$stest
       desk <- self$results$desc
       
       # self$results$control$setContent(data)
@@ -114,7 +117,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       
       
-      ########## start of general statistics and descriptives
+      ########## start of general  statistics and descriptives
       # calculate the observed n 'nobs'
       if(all.equal(length(g1), length(g2), nrow(data)/2)) {
         nobs <- length(g1)
@@ -130,6 +133,31 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       for(i in 1:length(g1)) { 
         if(g1[i]  > g2[i]) { s = s + 1 }
       }
+      
+      
+      # calculate expected s, variance of s and z
+      eS <- nobs * 0.5
+      varS <- nobs * 0.25
+      z <- (nobs - eS) / sqrt(varS)
+      
+      # calculate effect size of exact test if selected
+      if(self$options$effectSize) {
+        pi0 <- 0.5
+        pi <- s/nobs
+        effsize <- pi - pi0
+        
+        if(self$options$ciES){
+          ci <- c(((2*nobs*pi + z^2 - (z*sqrt(z^2+4*nobs*pi*(1-pi)))) /
+                     (2*(nobs+z^2)) - 0.5),
+                  ((2*nobs*pi + z^2 + (z*sqrt(z^2+4*nobs*pi*(1-pi)))) /
+                     (2*(nobs+z^2)) - 0.5))
+          ciLower <- min(ci)
+          ciUpper <- max(ci)}
+        
+        self$results$control$setContent(effsize)
+      }
+      
+      
       
       ## get descriptives if selected
       if(self$options$descriptives) {
@@ -210,19 +238,26 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                        "stat[exact]" = "",
                        "s[exact]" = "",
                        "nobs[exact]" = "",
-                       "p[exact]" = ""
+                       "p[exact]" = "",
+                       "es[exact]" = "",
+                       "ciles[exact]" = "",
+                       "ciues[exact]" = ""
                      ))
       } else {
         table$setRow(rowNo = 1, 
                      values = list(
                        var = self$options$dep,
                        "type[exact]" = "Exact",
-                       "stat[exact]" = coin::statistic(exakt),
+                       "stat[exact]" = z,
                        "s[exact]" = s,
                        "nobs[exact]" = nobs,
-                       "p[exact]" = coin::pvalue(exakt)
+                       "p[exact]" = coin::pvalue(exakt),
+                       "es[exact]" = effsize,
+                       "ciles[exact]" = ciLower,
+                       "ciues[exact]" = ciUpper
                      ))
       }
+      
       
       ####       Monte carlo
       mc <- try(coin::sign_test(formula = g1 ~ g2,
@@ -241,17 +276,23 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                        "stat[approximate]" = "",
                        "s[approximate]" = "",
                        "nobs[approximate]" = "",
-                       "p[approximate]" = ""
+                       "p[approximate]" = "",
+                       "es[approximate]" = "",
+                       "ciles[approximate]" = "",
+                       "ciues[approximate]" = ""
                      ))
       } else {
         table$setRow(rowNo = 1, 
                      values = list(
                        var = self$options$dep,
                        "type[approximate]" = "Monte-Carlo Approximation",
-                       "stat[approximate]" = coin::statistic(mc),
+                       "stat[approximate]" = z,
                        "s[approximate]" = s,
                        "nobs[approximate]" = nobs,
-                       "p[approximate]" = coin::pvalue(mc)
+                       "p[approximate]" = coin::pvalue(mc),
+                       "es[approximate]" = effsize,
+                       "ciles[approximate]" = ciLower,
+                       "ciues[approximate]" = ciUpper
                      ))
       }
       
@@ -272,17 +313,23 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                        "stat[asymptotic]" = "",
                        "s[asymptotic]" = "",
                        "nobs[asymptotic]" = "",
-                       "p[asymptotic]" = ""
+                       "p[asymptotic]" = "",
+                       "es[asymptotic]" = "",
+                       "ciles[asymptotic]" = "",
+                       "ciues[asymptotic]" = ""
                      ))
       } else {
         table$setRow(rowNo = 1, 
                      values = list(
                        var = self$options$dep,
                        "type[asymptotic]" = "Asymptotic",
-                       "stat[asymptotic]" = coin::statistic(asymp),
+                       "stat[asymptotic]" = z,
                        "s[asymptotic]" = s,
                        "nobs[asymptotic]" = nobs,
-                       "p[asymptotic]" = coin::pvalue(asymp)
+                       "p[asymptotic]" = coin::pvalue(asymp),
+                       "es[asymptotic]" = effsize,
+                       "ciles[asymptotic]" = ciLower,
+                       "ciues[asymptotic]" = ciUpper
                      ))
       }
       ########## end of analysis
@@ -292,13 +339,23 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       ########## start of warnings
       # Warnings / remarks
       ## Empty note-object
-      note <- c()
+      note1 <- note2 <- c()
       
       ## Write a note, if these conditions are met
+      note1 <- 'Test statistic <i>S</i> is calculated as the number of positive differences between values of sample 1 - sample 2.'
+      
       if(self$options$approximate){
-        note <-  paste('Monte Carlo Approximation with', 
-                       self$options$nsamples, 
-                       'samples was applied. <i>p</i>-value might differ for each execution.')
+        note2 <-  paste('Monte Carlo Approximation with', 
+                        self$options$nsamples, 
+                        'samples was applied. <i>p</i>-value might differ for each execution.')
+      }
+      
+      ## Paste the notes together
+      ## ("" ) is so that the string is never empty, which would lead to 'character(0)'
+      if(is.null(note2)) {
+        table$setNote('remark', note1)
+      } else {
+        note <- paste('a)', note1, "<br> b)", note2)
         table$setNote('remark', note)
       }
       ########## end of warnings
@@ -345,6 +402,21 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       print(plot)
       TRUE
       
+    },
+    
+    
+    .init=function() {
+      
+      table <- self$results$get("stest")
+      
+      ciTitle <- '90% Confidence Interval'
+      
+      table$getColumn('ciles[exact]')$setSuperTitle(ciTitle)
+      table$getColumn('ciues[exact]')$setSuperTitle(ciTitle)
+      table$getColumn('ciles[approximate]')$setSuperTitle(ciTitle)
+      table$getColumn('ciues[approximate]')$setSuperTitle(ciTitle)
+      table$getColumn('ciles[asymptotic]')$setSuperTitle(ciTitle)
+      table$getColumn('ciues[asymptotic]')$setSuperTitle(ciTitle)
     }
   )
 )

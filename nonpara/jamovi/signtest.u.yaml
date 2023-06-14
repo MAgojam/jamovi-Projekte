@@ -87,6 +87,16 @@ children:
               #   children:
               #     - type: CheckBox
               #       name: s
+              - type: CheckBox
+                name: effectSize
+                label: Effect size
+                children:
+                  - type: LayoutBox
+                    children:
+                    - type: CheckBox
+                      name: ciES
+                      label: Confidence interval
+                      enable: (effectSize)
           - type: Label
             label: Descriptives
             children:
