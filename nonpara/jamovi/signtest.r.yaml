@@ -41,11 +41,11 @@ items:
         - name: s[exact]
           title: '<i>S</i>'
           type: integer
-          visible: (exact && s)
-        - name: df[exact]
-          title: '<i>df</i>'
+          visible: (exact)
+        - name: nobs[exact]
+          title: '<i>n</i>'
           type: integer
-          visible: (exact && df)
+          visible: (exact && nobs)
         - name: p[exact]
           title: '<i>p</i>-Value'
           type: number
@@ -63,11 +63,11 @@ items:
         - name: s[approximate]
           title: '<i>S</i>'
           type: integer
-          visible: (approximate && s)
-        - name: df[approximate]
-          title: '<i>df</i>'
+          visible: (approximate)
+        - name: nobs[approximate]
+          title: '<i>n</i>'
           type: integer
-          visible: (approximate && df)
+          visible: (approximate && nobs)
         - name: p[approximate]
           title: '<i>p</i>-Value'
           type: number
@@ -86,11 +86,11 @@ items:
           title: '<i>S</i>'
           type: integer
           format: int
-          visible: (asymptotic && s)
-        - name: df[asymptotic]
-          title: '<i>df</i>'
+          visible: (asymptotic)
+        - name: nobs[asymptotic]
+          title: '<i>n</i>'
           type: integer
-          visible: (asymptotic && df)
+          visible: (asymptotic && nobs)
         - name: p[asymptotic]
           title: '<i>p</i>-Value'
           type: number

@@ -44,7 +44,6 @@ children:
             children:
               - type: CheckBox
                 name: exact
-                
               - type: CheckBox
                 name: approximate
                 children:
@@ -52,10 +51,8 @@ children:
                     name: nsamples
                     format: number
                     enable: (approximate)
-                
               - type: CheckBox
                 name: asymptotic
-                 
           - type: Label
             label: Hypothesis
             children:
@@ -63,18 +60,14 @@ children:
                 name: hypothesis_less
                 optionName: alternative
                 optionPart: less
-                
               - type: RadioButton
                 name: hypothesis_two.sided
                 optionName: alternative
                 optionPart: two.sided
-              
               - type: RadioButton
                 name: hypothesis_greater
                 optionName: alternative
                 optionPart: greater
-                
-
       - type: LayoutBox
         stretchFactor: 1
         cell:
@@ -82,13 +75,18 @@ children:
           row: 0
         children:
           - type: Label
-            label: "Additional Statistics"
+            label: Additional Statistics
             children:
-              - type: CheckBox
-                name: s
-              - type: CheckBox
-                name: df
-
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: CheckBox
+                    name: nobs
+              # - type: LayoutBox
+              #   margin: large
+              #   children:
+              #     - type: CheckBox
+              #       name: s
           - type: Label
             label: Descriptives
             children:

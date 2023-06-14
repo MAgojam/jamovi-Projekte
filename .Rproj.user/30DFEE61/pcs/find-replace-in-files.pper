@@ -1,6 +1,6 @@
 {
     "dialog-state": {
-        "query": "rankmean_R1",
+        "query": "df",
         "path": "",
         "regex": false,
         "caseSensitive": true,
@@ -9,7 +9,7 @@
         "useGitGrep": true,
         "excludeGitIgnore": true,
         "excludeFilePatterns": [],
-        "resultsCount": 2,
+        "resultsCount": 36,
         "errorCount": 0,
         "replaceErrors": "",
         "projectRelative": true

@@ -11,7 +11,6 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       ############################### To Do ###############################
       # - Testen ob alle fehlerhaften Datenytypen abgefangen werden
-      # - überprüfen ob df wirklich nur Integer sein kann
       # - am Schluss im Code und im r.yaml results$control entfernen
       #####################################################################
       
@@ -69,7 +68,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # counts all IDs and if there are less than 2 of any ID, the ID is stored
       NAid <- data$ID |>                     # take ID
         table() |>                           # creates frequency table
-        as.data.frame() |>                   # to df for easier filtering
+        as.data.frame() |>                   # to dataframe for easier filtering
         dplyr::filter(Freq < 2) |>           # get IDs with frequency < 2
         `colnames<-`(c("ID", "Freq")) |>     # rename variables for easier selection
         dplyr::select(ID) |>                 # select the ID   
@@ -116,11 +115,11 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       
       ########## start of general statistics and descriptives
-      # calculate df
+      # calculate the observed n 'nobs'
       if(all.equal(length(g1), length(g2), nrow(data)/2)) {
-        df <- length(g1)
+        nobs <- length(g1)
       } else {
-        df <- NA
+        nobs <- NA
       }
       
       
@@ -171,8 +170,8 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           desk$setRow(rowNo = 1,
                       values = list(
                         "dep" = dep,
-                        "nobs[1]" = df,
-                        "nobs[2]" = df,
+                        "nobs[1]" = nobs,
+                        "nobs[2]" = nobs,
                         
                         "time[1]" = sampLevels[1],
                         "time[2]" = sampLevels[2],
@@ -210,7 +209,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                        "type[exact]" = "",
                        "stat[exact]" = "",
                        "s[exact]" = "",
-                       "df[exact]" = "",
+                       "nobs[exact]" = "",
                        "p[exact]" = ""
                      ))
       } else {
@@ -220,7 +219,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                        "type[exact]" = "Exact",
                        "stat[exact]" = coin::statistic(exakt),
                        "s[exact]" = s,
-                       "df[exact]" = df,
+                       "nobs[exact]" = nobs,
                        "p[exact]" = coin::pvalue(exakt)
                      ))
       }
@@ -241,7 +240,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                        "type[approximate]" = "",
                        "stat[approximate]" = "",
                        "s[approximate]" = "",
-                       "df[approximate]" = "",
+                       "nobs[approximate]" = "",
                        "p[approximate]" = ""
                      ))
       } else {
@@ -251,7 +250,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                        "type[approximate]" = "Monte-Carlo Approximation",
                        "stat[approximate]" = coin::statistic(mc),
                        "s[approximate]" = s,
-                       "df[approximate]" = df,
+                       "nobs[approximate]" = nobs,
                        "p[approximate]" = coin::pvalue(mc)
                      ))
       }
@@ -272,7 +271,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                        "type[asymptotic]" = "",
                        "stat[asymptotic]" = "",
                        "s[asymptotic]" = "",
-                       "df[asymptotic]" = "",
+                       "nobs[asymptotic]" = "",
                        "p[asymptotic]" = ""
                      ))
       } else {
@@ -282,7 +281,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                        "type[asymptotic]" = "Asymptotic",
                        "stat[asymptotic]" = coin::statistic(asymp),
                        "s[asymptotic]" = s,
-                       "df[asymptotic]" = df,
+                       "nobs[asymptotic]" = nobs,
                        "p[asymptotic]" = coin::pvalue(asymp)
                      ))
       }

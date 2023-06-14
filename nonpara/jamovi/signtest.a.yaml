@@ -67,12 +67,12 @@ options:
           name:  greater
       default: two.sided
       
-    - title: '<i>S</i>' 
-      name: s
-      type: Bool
-      default: false
-    - title: 'Degrees of Freedom'
-      name: df
+    # - title: '<i>S</i>'
+    #   name: s
+    #   type: Bool
+    #   default: false
+    - title: 'Number of observations'
+      name: nobs
       type: Bool
       default: false
       

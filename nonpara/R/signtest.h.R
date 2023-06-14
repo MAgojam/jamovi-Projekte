@@ -14,8 +14,7 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             nsamples = 10000,
             asymptotic = TRUE,
             alternative = "two.sided",
-            s = FALSE,
-            df = FALSE,
+            nobs = FALSE,
             descriptives = FALSE,
             plot = FALSE,
             observed = "line", ...) {
@@ -73,13 +72,9 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "two.sided",
                     "greater"),
                 default="two.sided")
-            private$..s <- jmvcore::OptionBool$new(
-                "s",
-                s,
-                default=FALSE)
-            private$..df <- jmvcore::OptionBool$new(
-                "df",
-                df,
+            private$..nobs <- jmvcore::OptionBool$new(
+                "nobs",
+                nobs,
                 default=FALSE)
             private$..descriptives <- jmvcore::OptionBool$new(
                 "descriptives",
@@ -106,8 +101,7 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..nsamples)
             self$.addOption(private$..asymptotic)
             self$.addOption(private$..alternative)
-            self$.addOption(private$..s)
-            self$.addOption(private$..df)
+            self$.addOption(private$..nobs)
             self$.addOption(private$..descriptives)
             self$.addOption(private$..plot)
             self$.addOption(private$..observed)
@@ -121,8 +115,7 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         nsamples = function() private$..nsamples$value,
         asymptotic = function() private$..asymptotic$value,
         alternative = function() private$..alternative$value,
-        s = function() private$..s$value,
-        df = function() private$..df$value,
+        nobs = function() private$..nobs$value,
         descriptives = function() private$..descriptives$value,
         plot = function() private$..plot$value,
         observed = function() private$..observed$value),
@@ -135,8 +128,7 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..nsamples = NA,
         ..asymptotic = NA,
         ..alternative = NA,
-        ..s = NA,
-        ..df = NA,
+        ..nobs = NA,
         ..descriptives = NA,
         ..plot = NA,
         ..observed = NA)
@@ -200,12 +192,12 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="s[exact]", 
                         `title`="<i>S</i>", 
                         `type`="integer", 
-                        `visible`="(exact && s)"),
+                        `visible`="(exact)"),
                     list(
-                        `name`="df[exact]", 
-                        `title`="<i>df</i>", 
+                        `name`="nobs[exact]", 
+                        `title`="<i>n</i>", 
                         `type`="integer", 
-                        `visible`="(exact && df)"),
+                        `visible`="(exact && nobs)"),
                     list(
                         `name`="p[exact]", 
                         `title`="<i>p</i>-Value", 
@@ -226,12 +218,12 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="s[approximate]", 
                         `title`="<i>S</i>", 
                         `type`="integer", 
-                        `visible`="(approximate && s)"),
+                        `visible`="(approximate)"),
                     list(
-                        `name`="df[approximate]", 
-                        `title`="<i>df</i>", 
+                        `name`="nobs[approximate]", 
+                        `title`="<i>n</i>", 
                         `type`="integer", 
-                        `visible`="(approximate && df)"),
+                        `visible`="(approximate && nobs)"),
                     list(
                         `name`="p[approximate]", 
                         `title`="<i>p</i>-Value", 
@@ -253,12 +245,12 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="<i>S</i>", 
                         `type`="integer", 
                         `format`="int", 
-                        `visible`="(asymptotic && s)"),
+                        `visible`="(asymptotic)"),
                     list(
-                        `name`="df[asymptotic]", 
-                        `title`="<i>df</i>", 
+                        `name`="nobs[asymptotic]", 
+                        `title`="<i>n</i>", 
                         `type`="integer", 
-                        `visible`="(asymptotic && df)"),
+                        `visible`="(asymptotic && nobs)"),
                     list(
                         `name`="p[asymptotic]", 
                         `title`="<i>p</i>-Value", 
@@ -354,8 +346,7 @@ signtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param nsamples .
 #' @param asymptotic .
 #' @param alternative .
-#' @param s .
-#' @param df .
+#' @param nobs .
 #' @param descriptives .
 #' @param plot .
 #' @param observed .
@@ -385,8 +376,7 @@ signtest <- function(
     nsamples = 10000,
     asymptotic = TRUE,
     alternative = "two.sided",
-    s = FALSE,
-    df = FALSE,
+    nobs = FALSE,
     descriptives = FALSE,
     plot = FALSE,
     observed = "line") {
@@ -415,8 +405,7 @@ signtest <- function(
         nsamples = nsamples,
         asymptotic = asymptotic,
         alternative = alternative,
-        s = s,
-        df = df,
+        nobs = nobs,
         descriptives = descriptives,
         plot = plot,
         observed = observed)
