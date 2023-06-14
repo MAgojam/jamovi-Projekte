@@ -17,6 +17,7 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             nobs = FALSE,
             effectSize = FALSE,
             ciES = FALSE,
+            ciWidth = 95,
             descriptives = FALSE,
             plot = FALSE,
             observed = "line", ...) {
@@ -86,6 +87,12 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "ciES",
                 ciES,
                 default=FALSE)
+            private$..ciWidth <- jmvcore::OptionNumber$new(
+                "ciWidth",
+                ciWidth,
+                min=50,
+                max=99.9,
+                default=95)
             private$..descriptives <- jmvcore::OptionBool$new(
                 "descriptives",
                 descriptives,
@@ -114,6 +121,7 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..nobs)
             self$.addOption(private$..effectSize)
             self$.addOption(private$..ciES)
+            self$.addOption(private$..ciWidth)
             self$.addOption(private$..descriptives)
             self$.addOption(private$..plot)
             self$.addOption(private$..observed)
@@ -130,6 +138,7 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         nobs = function() private$..nobs$value,
         effectSize = function() private$..effectSize$value,
         ciES = function() private$..ciES$value,
+        ciWidth = function() private$..ciWidth$value,
         descriptives = function() private$..descriptives$value,
         plot = function() private$..plot$value,
         observed = function() private$..observed$value),
@@ -145,6 +154,7 @@ signtestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..nobs = NA,
         ..effectSize = NA,
         ..ciES = NA,
+        ..ciWidth = NA,
         ..descriptives = NA,
         ..plot = NA,
         ..observed = NA)
@@ -188,7 +198,8 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "data",
                     "dep",
                     "samp",
-                    "effectSize"),
+                    "effectSize",
+                    "ciES"),
                 rows=1,
                 columns=list(
                     list(
@@ -348,6 +359,14 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Median", 
                         `type`="text"),
                     list(
+                        `name`="ev[1]", 
+                        `title`="Expected <i>S</i>", 
+                        `type`="number"),
+                    list(
+                        `name`="var[1]", 
+                        `title`="Variance of <i>S</i>", 
+                        `type`="number"),
+                    list(
                         `name`="time[2]", 
                         `title`="Sample", 
                         `type`="text"),
@@ -358,7 +377,15 @@ signtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="median[2]", 
                         `title`="Median", 
-                        `type`="text"))))
+                        `type`="text"),
+                    list(
+                        `name`="ev[2]", 
+                        `title`="Expected <i>S</i>", 
+                        `type`="number"),
+                    list(
+                        `name`="var[2]", 
+                        `title`="Variance of <i>S</i>", 
+                        `type`="number"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -399,7 +426,7 @@ signtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #' @param data the data as a data frame
 #' @param id .
-#' @param dep Dependent variable. Does not neet to be specified when using a
+#' @param dep Dependent variable. Does not need to be specified when using a
 #'   formula.
 #' @param samp Grouping variable, must have two levels. Does not need to be
 #'   specified when using a formula.
@@ -409,8 +436,12 @@ signtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param asymptotic .
 #' @param alternative .
 #' @param nobs .
-#' @param effectSize .
-#' @param ciES .
+#' @param effectSize \code{TRUE} or \code{FALSE} (default), provide
+#'   <a>&gamma;</a> effect size
+#' @param ciES \code{TRUE} or \code{FALSE} (default), provide confidence
+#'   intervals for the effect-size
+#' @param ciWidth a number between 50 and 99.9 (default: 95), the width of
+#'   confidence intervals for the effect size
 #' @param descriptives .
 #' @param plot .
 #' @param observed .
@@ -443,6 +474,7 @@ signtest <- function(
     nobs = FALSE,
     effectSize = FALSE,
     ciES = FALSE,
+    ciWidth = 95,
     descriptives = FALSE,
     plot = FALSE,
     observed = "line") {
@@ -474,6 +506,7 @@ signtest <- function(
         nobs = nobs,
         effectSize = effectSize,
         ciES = ciES,
+        ciWidth = ciWidth,
         descriptives = descriptives,
         plot = plot,
         observed = observed)

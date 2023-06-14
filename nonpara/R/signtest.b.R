@@ -15,6 +15,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       #   Andernfalls sonst irgendeinen Hinweis machen irgendwo dass Daten long sein müssen,
       #   weil Rest von jamovi ist wide.
       # - am Schluss im Code und im r.yaml results$control entfernen
+      # - ig ha gad random chönne ID (nominal) bi dependent drizieh... sött eig nid müglech si
       #####################################################################
       
       
@@ -24,6 +25,8 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       ID <- self$options$id
       dep <- self$options$dep
       samp <- self$options$samp
+      ciWidth <- self$options$ciWidth / 100
+      
       
       if(is.null(dep) || is.null(samp) || is.null(ID)) {
         return()  # do nothing, as long as not all of samp, dep and id are specified
@@ -38,6 +41,8 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       data$ID <- factor(data$ID, ordered = FALSE) # necessary for ggplot
       if(any(table(data$ID) > 2)) {
         jmvcore::reject("More than 2 instances of an ID were found. This test is only for two samples. Please check your dataset.")
+      } else if (all(table(data$ID) == 1)) {
+        jmvcore::reject("Only 1 instance found for each ID. Please make sure your data is in long-format.")
       }
       
       # clean dependent variable
@@ -50,7 +55,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       if(jmvcore::isError(samErr)) { # throw error message if factoring is unsuccessful
         jmvcore::reject("Unable to determine factors of grouping variable. Please check for missing values.")
       } else if(length(base::levels(samErr)) != 2) {
-        jmvcore::reject("Grouping variable must have exactly 2 levels")
+        jmvcore::reject("Grouping variable must have exactly 2 levels.")
       } else { # if successful, overwrite sample as factor
         data$samp <- factor(data$samp, ordered = FALSE)
         sampLevels <- base::levels(data$samp) #count extract levels
@@ -136,26 +141,28 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       
       # calculate expected s, variance of s and z
-      eS <- nobs * 0.5
+      expS <- nobs * 0.5
       varS <- nobs * 0.25
-      z <- (nobs - eS) / sqrt(varS)
       
       # calculate effect size of exact test if selected
-      if(self$options$effectSize) {
-        pi0 <- 0.5
-        pi <- s/nobs
-        effsize <- pi - pi0
-        
-        if(self$options$ciES){
-          ci <- c(((2*nobs*pi + z^2 - (z*sqrt(z^2+4*nobs*pi*(1-pi)))) /
-                     (2*(nobs+z^2)) - 0.5),
-                  ((2*nobs*pi + z^2 + (z*sqrt(z^2+4*nobs*pi*(1-pi)))) /
-                     (2*(nobs+z^2)) - 0.5))
-          ciLower <- min(ci)
-          ciUpper <- max(ci)}
-        
-        self$results$control$setContent(effsize)
-      }
+      pi0 <- 0.5
+      pi <- s/nobs
+      effsize <- pi - pi0
+      
+      alpha <- 1 - ciWidth
+      zw <- qnorm(1 - alpha/2)  # 0.95 ist das 90% KI
+      
+      ci <- c(((2*nobs*pi + zw^2 - zw*sqrt(zw^2+4*nobs*pi*(1-pi))) /
+                 (2*(nobs+zw^2)) - 0.5),
+              ((2*nobs*pi + zw^2 + zw*sqrt(zw^2+4*nobs*pi*(1-pi))) /
+                 (2*(nobs+zw^2)) - 0.5))
+      # shortened version
+      # ci_short <- c(((2 + zw^2 - zw*sqrt(zw^2+4*(1-pi))) /
+      #                  (2*(nobs+zw^2)) - 0.5),
+      #               ((2 + zw^2 + zw*sqrt(zw^2+4*(1-pi))) /
+      #                  (2*(nobs+zw^2)) - 0.5))
+      ciLower <- min(ci)
+      ciUpper <- max(ci)
       
       
       
@@ -192,7 +199,13 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         "time[2]" = "",
                         
                         "median[1]" = "",
-                        "median[2]" = ""
+                        "median[2]" = "",
+                        
+                        "ev[1]" = "",
+                        "ev[2]" = "",
+                        
+                        "var[1]" = "",
+                        "var[2]" = ""
                       ))
         } else {
           desk$setRow(rowNo = 1,
@@ -205,7 +218,13 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         "time[2]" = sampLevels[2],
                         
                         "median[1]" = median_g1,
-                        "median[2]" = median_g2
+                        "median[2]" = median_g2,
+                        
+                        "ev[1]" = expS,
+                        "ev[2]" = expS,
+                        
+                        "var[1]" = varS,
+                        "var[2]" = varS
                       ))
           
           note_obs <- "Observations with identical values for both samples are disregarded for this test and do therefore not count as observations."
@@ -248,7 +267,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                      values = list(
                        var = self$options$dep,
                        "type[exact]" = "Exact",
-                       "stat[exact]" = z,
+                       "stat[exact]" = coin::statistic(exakt),
                        "s[exact]" = s,
                        "nobs[exact]" = nobs,
                        "p[exact]" = coin::pvalue(exakt),
@@ -259,7 +278,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       }
       
       
-      ####       Monte carlo
+      ####       Monte-Carlo
       mc <- try(coin::sign_test(formula = g1 ~ g2,
                                 data = data,
                                 distribution = "approximate",
@@ -286,7 +305,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                      values = list(
                        var = self$options$dep,
                        "type[approximate]" = "Monte-Carlo Approximation",
-                       "stat[approximate]" = z,
+                       "stat[approximate]" = coin::statistic(mc),
                        "s[approximate]" = s,
                        "nobs[approximate]" = nobs,
                        "p[approximate]" = coin::pvalue(mc),
@@ -323,7 +342,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                      values = list(
                        var = self$options$dep,
                        "type[asymptotic]" = "Asymptotic",
-                       "stat[asymptotic]" = z,
+                       "stat[asymptotic]" = coin::statistic(asymp),
                        "s[asymptotic]" = s,
                        "nobs[asymptotic]" = nobs,
                        "p[asymptotic]" = coin::pvalue(asymp),
@@ -408,8 +427,9 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     .init=function() {
       
       table <- self$results$get("stest")
-      
-      ciTitle <- '90% Confidence Interval'
+
+      ciTitle <- jmvcore::format('{ciWidth}% Confidence Interval', 
+                                 ciWidth = self$options$ciWidth)
       
       table$getColumn('ciles[exact]')$setSuperTitle(ciTitle)
       table$getColumn('ciues[exact]')$setSuperTitle(ciTitle)

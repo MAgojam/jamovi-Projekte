@@ -82,11 +82,6 @@ children:
                 children:
                   - type: CheckBox
                     name: nobs
-              # - type: LayoutBox
-              #   margin: large
-              #   children:
-              #     - type: CheckBox
-              #       name: s
               - type: CheckBox
                 name: effectSize
                 label: Effect size
@@ -97,6 +92,15 @@ children:
                       name: ciES
                       label: Confidence interval
                       enable: (effectSize)
+                      style: inline
+                      verticalAlignment: center
+                      children:
+                        - type: TextBox
+                          name: ciWidth
+                          label: ""
+                          suffix: "%"
+                          format: number
+                          enable: (effectSize && ciES)
           - type: Label
             label: Descriptives
             children:

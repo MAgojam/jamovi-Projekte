@@ -25,7 +25,7 @@ options:
         ui: >
           Dependent variable
         R: >
-          Dependent variable. Does not neet to be specified when using a formula.
+          Dependent variable. Does not need to be specified when using a formula.
       
     - name: samp
       title: Grouping Variable
@@ -66,11 +66,6 @@ options:
         - title: 'Group 1 > Group 2'
           name:  greater
       default: two.sided
-      
-    # - title: '<i>S</i>'
-    #   name: s
-    #   type: Bool
-    #   default: false
     - title: 'Number of observations'
       name: nobs
       type: Bool
@@ -79,10 +74,33 @@ options:
       name: effectSize
       type: Bool
       default: false
+      description:
+          ui: >
+            provide effect-size (<a>&gamma;</a>).
+          R: >
+            `TRUE` or `FALSE` (default), provide <a>&gamma;</a> effect size
     - title: 'Confidence interval'
       name: ciES
       type: Bool
       default: false
+      description:
+          ui: >
+            provide confidence intervals for the effect-size
+          R: >
+            `TRUE` or `FALSE` (default), provide confidence intervals for the effect-size
+    - name: ciWidth
+      title: Confidence level
+      type: Number
+      min: 50
+      max: 99.9
+      default: 95
+      description:
+          ui: >
+            the confidence interval width for the effect-size.
+          R: >
+            a number between 50 and 99.9 (default: 95), the width of confidence
+            intervals for the effect size
+
       
     - title: Descriptives Table
       name: descriptives

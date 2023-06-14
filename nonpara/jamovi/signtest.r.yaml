@@ -25,6 +25,7 @@ items:
         - dep
         - samp
         - effectSize
+        - ciES
       rows: 1
       columns:
         - name: var
@@ -158,6 +159,12 @@ items:
         - name: median[1]
           title: Median
           type: text
+        - name: ev[1]
+          title: 'Expected <i>S</i>'
+          type: number
+        - name: var[1]
+          title: 'Variance of <i>S</i>'
+          type: number
         
         - name: time[2]
           title: Sample
@@ -168,6 +175,12 @@ items:
         - name: median[2]
           title: Median
           type: text
+        - name: ev[2]
+          title: 'Expected <i>S</i>'
+          type: number
+        - name: var[2]
+          title: 'Variance of <i>S</i>'
+          type: number
           
     - name: plot
       title: Descriptives Plot

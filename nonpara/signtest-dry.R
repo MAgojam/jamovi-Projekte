@@ -48,6 +48,10 @@ self$options$descriptives <- FALSE
 self$options$plot <- TRUE
 self$options$observed <- "line"
 
+self$options$nobs <- TRUE
+self$options$effectSize <- TRUE
+self$options$ciES <- TRUE
+self$options$ciWidth <- 95
 
 
 # self$data[13, 1] <- NA
@@ -77,71 +81,72 @@ self$options$observed <- "line"
 
 
 ########## start of data preparation
-# get dep and samp
+# get ID, dep and samp
+ID <- self$options$id
 dep <- self$options$dep
 samp <- self$options$samp
-id <- self$options$id
 
-if(is.null(dep) || is.null(samp) || is.null(id)) {
+if(is.null(dep) || is.null(samp) || is.null(ID)) {
   return()  # do nothing, as long as not all of samp, dep and id are specified
 } 
 
-# create and control data
-data <- as.data.frame(self$data)
-data <- data.frame(ID = data[[id]],
-                   dep = data[[dep]],
-                   samp = data[[samp]])
+# create dataset
+data <- data.frame(ID = self$data[[ID]],
+                   dep = self$data[[dep]],
+                   samp = self$data[[samp]])
 
 # clean ID
-data$ID <- factor(data$ID, ordered = FALSE)
+data$ID <- factor(data$ID, ordered = FALSE) # necessary for ggplot
 if(any(table(data$ID) > 2)) {
   jmvcore::reject("More than 2 instances of an ID were found. This test is only for two samples. Please check your dataset.")
+} else if (all(table(data$ID) == 1)) {
+  jmvcore::reject("Only 1 instance found for each ID. Please make sure your data is in long-format.")
 }
 
 # clean dependent variable
 data$dep <- jmvcore::toNumeric(data$dep)
 
 # clean sample / grouping variable
-sampLevels <- try(factor(data$samp, ordered = FALSE),
-                  silent = TRUE)
-if(jmvcore::isError(sampLevels)) {
-  jmvcore::reject("Unable to determine factors of grouping variable. Please check for missing values.",
-                  code = "levels_undeterminable")
-} else if(length(base::levels(sampLevels)) != 2) {
-  jmvcore::reject("Grouping variable must have exactly 2 levels",
-                  code = "grouping_var_must_have_2_levels")
-} else {
+## try formating the sample variable as factor and suppress error if not possible
+samErr <- try(factor(data$samp, ordered = FALSE),
+              silent = TRUE)
+if(jmvcore::isError(samErr)) { # throw error message if factoring is unsuccessful
+  jmvcore::reject("Unable to determine factors of grouping variable. Please check for missing values.")
+} else if(length(base::levels(samErr)) != 2) {
+  jmvcore::reject("Grouping variable must have exactly 2 levels.")
+} else { # if successful, overwrite sample as factor
   data$samp <- factor(data$samp, ordered = FALSE)
-  sampLevels <- base::levels(data$samp)
+  sampLevels <- base::levels(data$samp) #count extract levels
 }
 
 
-
-# find missings and print warnings
+# find missings and print warning if any are found
 if(anyNA.data.frame(data)){
   # self$results$na_warning$setContent("Missings found in dataset. Corresponding observations were removed.")
   # self$results$na_warning$setTitle("Warning")
-  # remove rows with missings
+  # after warning, remove rows with missings
   data <- jmvcore::naOmit(data)
   
-} 
-# else {self$results$na_warning$setVisible(visible = FALSE)}
+} else {
+  # self$results$na_warning$setVisible(visible = FALSE)
+}
 
 # counts all IDs and if there are less than 2 of any ID, the ID is stored
-NAid <- data$ID |> 
-  table() |> 
-  as.data.frame() |> 
-  dplyr::filter(Freq < 2) |> 
-  `colnames<-`(c("ID", "Freq")) |>
-  dplyr::select(ID) |>
-  unlist() |>
-  as.vector()
+NAid <- data$ID |>                     # take ID
+  table() |>                           # creates frequency table
+  as.data.frame() |>                   # to dataframe for easier filtering
+  dplyr::filter(Freq < 2) |>           # get IDs with frequency < 2
+  `colnames<-`(c("ID", "Freq")) |>     # rename variables for easier selection
+  dplyr::select(ID) |>                 # select the ID   
+  unlist() |>                          # extract values
+  as.vector()                          # format as vector for the next step
 
 # remove als IDs with less than two instances
-if(length(NAid) > 0) {
-  data <- data |> 
-    dplyr::filter(!data$ID %in% NAid)
+if(length(NAid) > 0) {                 # only necessary if NAid is not empty
+  data <- data |>                      # 
+    dplyr::filter(!data$ID %in% NAid)  # filter for all IDs that are not in NAid
 }
+
 
 
 # find IDs which have identical values for both samples and remove them from the dataset
@@ -159,39 +164,68 @@ for (id in data$ID) {
 }
 
 
-# Daten sortieren zuerst nach Gruppe dann nach ID
-data <- dplyr::arrange(data, data$samp, data$id)
+# sort data for group then for ID
+data <- dplyr::arrange(data, data$samp, data$ID)
 
-# of the dependent variables, take those that have level 1 for samp as samp 1
+# of the dependent variables, take those that have level 1 for samp as samp1
 g1 <- data$dep[data$samp == sampLevels[1]]
 g2 <- data$dep[data$samp == sampLevels[2]]
 
-# table <- self$results$vzr
-# self$results$control$setContent(data)
+# prepare output tables
+table <- self$results$stest
+desk <- self$results$desc
 
+# self$results$control$setContent(data)
 ########## end of data preparation 
 
 
 
-########## start of general statistics and descriptives
-# calculate df and s
-df = 0
-s = 0
+########## start of general  statistics and descriptives
+# calculate the observed n 'nobs'
+if(all.equal(length(g1), length(g2), nrow(data)/2)) {
+  nobs <- length(g1)
+} else {
+  nobs <- NA
+}
 
-for(i in 1:length(g1)) {
-  # if a value does not change between t1 and t2, 
-  # it is excluded from the analysis, so df is reduced by 1
-  # coin does this automatically, so no need to change the dataset
-  if(g1[i] != g2[i]) { df = df + 1 }  
+
+# calculate s
+s <- 0
+
+# if a value is greater in sample 1 than in sample 2, increase s by 1
+for(i in 1:length(g1)) { 
   if(g1[i]  > g2[i]) { s = s + 1 }
 }
+
+
+# calculate expected s, variance of s and z
+eS <- nobs * 0.5
+varS <- nobs * 0.25
+z <- (nobs - eS) / sqrt(varS)
+
+# calculate effect size of exact test if selected
+if(self$options$effectSize) {
+  pi0 <- 0.5
+  pi <- s/nobs
+  effsize <- pi - pi0
+  
+  if(self$options$ciES){
+    ci <- c(((2*nobs*pi + z^2 - (z*sqrt(z^2+4*nobs*pi*(1-pi)))) /
+               (2*(nobs+z^2)) - 0.5),
+            ((2*nobs*pi + z^2 + (z*sqrt(z^2+4*nobs*pi*(1-pi)))) /
+               (2*(nobs+z^2)) - 0.5))
+    ciLower <- min(ci)
+    ciUpper <- max(ci)
+  }
+  
+  # self$results$control$setContent(effsize)
+}
+
+
 
 ## get descriptives if selected
 if(self$options$descriptives) {
   try_desk <- try({
-    ### n per samp
-    nobs <- length(data$samp)/2 # or rather df, I figure?
-    
     #### median per samp
     median_g1 <- data |>
       dplyr::filter(samp == sampLevels[1]) |>
@@ -228,7 +262,7 @@ if(self$options$descriptives) {
     # desk$setRow(rowNo = 1,
     #             values = list(
     #               "dep" = dep,
-    #               "nobs[1]" = nobs,  # or df? see above
+    #               "nobs[1]" = nobs,
     #               "nobs[2]" = nobs,
     #               
     #               "time[1]" = sampLevels[1],
@@ -237,6 +271,9 @@ if(self$options$descriptives) {
     #               "median[1]" = median_g1,
     #               "median[2]" = median_g2
     #             ))
+    
+    note_obs <- "Observations with identical values for both samples are disregarded for this test and do therefore not count as observations."
+    # desk$setNote(key = 'observs', note = note_obs)
   }
 }
 
@@ -264,22 +301,29 @@ if(jmvcore::isError(exakt)) {
   #                "type[exact]" = "",
   #                "stat[exact]" = "",
   #                "s[exact]" = "",
-  #                "df[exact]" = "",
-  #                "p[exact]" = ""
+  #                "nobs[exact]" = "",
+  #                "p[exact]" = "",
+  #                "es[exact]" = "",
+  #                "ciles[exact]" = "",
+  #                "ciues[exact]" = ""
   #              ))
 } else {
   # table$setRow(rowNo = 1, 
   #              values = list(
   #                var = self$options$dep,
   #                "type[exact]" = "Exact",
-  #                "stat[exact]" = coin::statistic(exakt),
+  #                "stat[exact]" = z,
   #                "s[exact]" = s,
-  #                "df[exact]" = df,
-  #                "p[exact]" = coin::pvalue(exakt)
+  #                "nobs[exact]" = nobs,
+  #                "p[exact]" = coin::pvalue(exakt),
+  #                "es[exact]" = effsize,
+  #                "ciles[exact]" = ciLower,
+  #                "ciues[exact]" = ciUpper
   #              ))
 }
 
-####       Monte carlo
+
+####       Monte-Carlo
 mc <- try(coin::sign_test(formula = g1 ~ g2,
                           data = data,
                           distribution = "approximate",
@@ -295,18 +339,24 @@ if(jmvcore::isError(exakt)) {
   #                "type[approximate]" = "",
   #                "stat[approximate]" = "",
   #                "s[approximate]" = "",
-  #                "df[approximate]" = "",
-  #                "p[approximate]" = ""
+  #                "nobs[approximate]" = "",
+  #                "p[approximate]" = "",
+  #                "es[approximate]" = "",
+  #                "ciles[approximate]" = "",
+  #                "ciues[approximate]" = ""
   #              ))
 } else {
   # table$setRow(rowNo = 1, 
   #              values = list(
   #                var = self$options$dep,
   #                "type[approximate]" = "Monte-Carlo Approximation",
-  #                "stat[approximate]" = coin::statistic(mc),
+  #                "stat[approximate]" = z,
   #                "s[approximate]" = s,
-  #                "df[approximate]" = df,
-  #                "p[approximate]" = coin::pvalue(mc)
+  #                "nobs[approximate]" = nobs,
+  #                "p[approximate]" = coin::pvalue(mc),
+  #                "es[approximate]" = effsize,
+  #                "ciles[approximate]" = ciLower,
+  #                "ciues[approximate]" = ciUpper
   #              ))
 }
 
@@ -326,18 +376,24 @@ if(jmvcore::isError(exakt)) {
   #                "type[asymptotic]" = "",
   #                "stat[asymptotic]" = "",
   #                "s[asymptotic]" = "",
-  #                "df[asymptotic]" = "",
-  #                "p[asymptotic]" = ""
+  #                "nobs[asymptotic]" = "",
+  #                "p[asymptotic]" = "",
+  #                "es[asymptotic]" = "",
+  #                "ciles[asymptotic]" = "",
+  #                "ciues[asymptotic]" = ""
   #              ))
 } else {
   # table$setRow(rowNo = 1, 
   #              values = list(
   #                var = self$options$dep,
   #                "type[asymptotic]" = "Asymptotic",
-  #                "stat[asymptotic]" = coin::statistic(asymp),
+  #                "stat[asymptotic]" = z,
   #                "s[asymptotic]" = s,
-  #                "df[asymptotic]" = df,
-  #                "p[asymptotic]" = coin::pvalue(asymp)
+  #                "nobs[asymptotic]" = nobs,
+  #                "p[asymptotic]" = coin::pvalue(asymp),
+  #                "es[asymptotic]" = effsize,
+  #                "ciles[asymptotic]" = ciLower,
+  #                "ciues[asymptotic]" = ciUpper
   #              ))
 }
 ########## end of analysis
@@ -347,54 +403,25 @@ if(jmvcore::isError(exakt)) {
 ########## start of warnings
 # Warnings / remarks
 ## Empty note-object
-note <- c()
+note1 <- note2 <- c()
 
 ## Write a note, if these conditions are met
+note1 <- 'Test statistic <i>S</i> is calculated as the number of positive differences between values of sample 1 - sample 2.'
+
 if(self$options$approximate){
-  note <-  paste('Monte Carlo Approximation with', 
-                 self$options$nsamples, 
-                 'samples was applied. <i>p</i>-value might differ for each execution.')
+  note2 <-  paste('Monte Carlo Approximation with', 
+                  self$options$nsamples, 
+                  'samples was applied. <i>p</i>-value might differ for each execution.')
+}
+
+## Paste the notes together
+## ("" ) is so that the string is never empty, which would lead to 'character(0)'
+if(is.null(note2)) {
+  # table$setNote('remark', note1)
+} else {
+  note <- paste('a)', note1, "<br> b)", note2)
   # table$setNote('remark', note)
 }
 ########## end of warnings
-
-
-
-library(ggplot2)
-
-if(is.null(self$options$id) || is.null(self$options$dep) || is.null(self$options$samp)) {
-  return()  # do nothing, as long as not all of samp, dep and id are specified
-}
-
-plot <- ggplot(data = data,
-               aes(x = samp,
-                   y = dep,
-                   fill = samp)) + 
-  geom_boxplot(outlier.shape = 1,
-               outlier.size = 2) +
-  labs(x = self$options$samp, 
-       y = self$options$dep) +
-  theme_classic() +
-  # ggtheme +
-  theme(axis.text = element_text(size = 12),
-        axis.title = element_text(size = 16),
-        axis.ticks.length = unit(.2, "cm"),
-        legend.position = "none",
-        plot.margin = margin(5.5, 5.5, 5.5, 5.5))
-
-if(self$options$observed == "line"){
-  plot <- plot +
-    geom_line(aes(color = ID, group = ID)) +
-    geom_point()
-} else if(self$options$observed == "jitter"){
-  plot <- plot +
-    geom_jitter(color = "black",
-                size = 1,
-                width = 0.1,
-                alpha = 0.9)
-}
-
-print(plot)
-
 
 
