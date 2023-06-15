@@ -247,30 +247,30 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `name`="type[cc]", 
                         `title`="Type", 
                         `type`="text", 
-                        `visible`="(cc)"),
+                        `visible`="(cc && asymptotic)"),
                     list(
                         `name`="stat[cc]", 
                         `title`="<i>z</i>-Value", 
                         `type`="text", 
-                        `visible`="(cc)", 
+                        `visible`="(cc && asymptotic)", 
                         `refs`=list(
                             "cf")),
                     list(
                         `name`="rs1[cc]", 
                         `title`="<i>RS</i><sub>1</sub>", 
                         `type`="number", 
-                        `visible`="(cc && rs1)"),
+                        `visible`="(cc && asymptotic && rs1)"),
                     list(
                         `name`="u[cc]", 
                         `title`="<i>U</i>", 
                         `type`="number", 
-                        `visible`="(cc && u)"),
+                        `visible`="(cc && asymptotic && u)"),
                     list(
                         `name`="p[cc]", 
                         `title`="<i>p</i>-Value", 
                         `type`="number", 
                         `format`="zto,pvalue", 
-                        `visible`="(cc)"))))
+                        `visible`="(cc && asymptotic)"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="desc",
@@ -349,7 +349,8 @@ wilcoxRanksumBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
         }))
 
 #' Wilcoxon Rank-Sum Test

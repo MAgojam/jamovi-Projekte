@@ -87,25 +87,25 @@ items:
         - name: type[cc]
           title: 'Type'
           type: text
-          visible: (cc)
+          visible: (cc && asymptotic)
         - name: stat[cc]
           title: '<i>z</i>-Value'
           type: text
-          visible: (cc)
+          visible: (cc && asymptotic)
           refs: [cf]
         - name: rs1[cc]
           title: '<i>RS</i><sub>1</sub>'
           type: number
-          visible: (cc && rs1)
+          visible: (cc && asymptotic && rs1)
         - name: u[cc]
           title: '<i>U</i>'
           type: number
-          visible: (cc && u)
+          visible: (cc && asymptotic && u)
         - name: p[cc]
           title: '<i>p</i>-Value'
           type: number
           format: zto,pvalue
-          visible: (cc)
+          visible: (cc && asymptotic)
 
     - name: desc
       title: Descriptive Statistics
