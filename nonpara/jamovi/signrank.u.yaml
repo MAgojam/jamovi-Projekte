@@ -53,6 +53,10 @@ children:
                     enable: (approximate)
               - type: CheckBox
                 name: asymptotic
+                children:
+                  - type: CheckBox
+                    name: cc
+                    enable: (asymptotic)
           - type: Label
             label: Hypothesis
             children:

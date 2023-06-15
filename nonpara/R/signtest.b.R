@@ -239,111 +239,115 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       ########## start of analysis
       ####       Exakt
-      exakt <- try(coin::sign_test(formula = g1 ~ g2,
-                                   distribution = "exact",
-                                   alternative = self$options$alternative),
-                   silent = TRUE)
-      
-      if(jmvcore::isError(exakt)) {
+      if(self$options$get("exact")) {
+        exakt <- try(coin::sign_test(formula = g1 ~ g2,
+                                     distribution = "exact",
+                                     alternative = self$options$alternative),
+                     silent = TRUE)
         
-        table$setRow(rowNo = 1,
-                     values = list(
-                       var = "",
-                       "type[exact]" = "",
-                       "stat[exact]" = "",
-                       "s[exact]" = "",
-                       "nobs[exact]" = "",
-                       "p[exact]" = "",
-                       "es[exact]" = "",
-                       "ciles[exact]" = "",
-                       "ciues[exact]" = ""
-                     ))
-      } else {
-        table$setRow(rowNo = 1, 
-                     values = list(
-                       var = self$options$dep,
-                       "type[exact]" = "Exact",
-                       "stat[exact]" = coin::statistic(exakt),
-                       "s[exact]" = s,
-                       "nobs[exact]" = nobs,
-                       "p[exact]" = coin::pvalue(exakt),
-                       "es[exact]" = effsize,
-                       "ciles[exact]" = ciLower,
-                       "ciues[exact]" = ciUpper
-                     ))
+        if(jmvcore::isError(exakt)) {
+          
+          table$setRow(rowNo = 1,
+                       values = list(
+                         var = "",
+                         "type[exact]" = "",
+                         "stat[exact]" = "",
+                         "s[exact]" = "",
+                         "nobs[exact]" = "",
+                         "p[exact]" = "",
+                         "es[exact]" = "",
+                         "ciles[exact]" = "",
+                         "ciues[exact]" = ""
+                       ))
+        } else {
+          table$setRow(rowNo = 1, 
+                       values = list(
+                         var = self$options$dep,
+                         "type[exact]" = "Exact",
+                         "stat[exact]" = coin::statistic(exakt),
+                         "s[exact]" = s,
+                         "nobs[exact]" = nobs,
+                         "p[exact]" = coin::pvalue(exakt),
+                         "es[exact]" = effsize,
+                         "ciles[exact]" = ciLower,
+                         "ciues[exact]" = ciUpper
+                       ))
+        }
       }
-      
       
       ####       Monte-Carlo
-      mc <- try(coin::sign_test(formula = g1 ~ g2,
-                                distribution = "approximate",
-                                nsamples = self$options$nsamples,
-                                alternative = self$options$alternative),
-                silent = TRUE)
-      
-      if(jmvcore::isError(exakt)) {
+      if(self$options$get("approximate")) {
+        mc <- try(coin::sign_test(formula = g1 ~ g2,
+                                  distribution = "approximate",
+                                  nsamples = self$options$nsamples,
+                                  alternative = self$options$alternative),
+                  silent = TRUE)
         
-        table$setRow(rowNo = 1,
-                     values = list(
-                       var = "",
-                       "type[approximate]" = "",
-                       "stat[approximate]" = "",
-                       "s[approximate]" = "",
-                       "nobs[approximate]" = "",
-                       "p[approximate]" = "",
-                       "es[approximate]" = "",
-                       "ciles[approximate]" = "",
-                       "ciues[approximate]" = ""
-                     ))
-      } else {
-        table$setRow(rowNo = 1, 
-                     values = list(
-                       var = self$options$dep,
-                       "type[approximate]" = "Monte-Carlo Approximation",
-                       "stat[approximate]" = coin::statistic(mc),
-                       "s[approximate]" = s,
-                       "nobs[approximate]" = nobs,
-                       "p[approximate]" = coin::pvalue(mc),
-                       "es[approximate]" = effsize,
-                       "ciles[approximate]" = ciLower,
-                       "ciues[approximate]" = ciUpper
-                     ))
+        if(jmvcore::isError(mc)) {
+          
+          table$setRow(rowNo = 1,
+                       values = list(
+                         var = "",
+                         "type[approximate]" = "",
+                         "stat[approximate]" = "",
+                         "s[approximate]" = "",
+                         "nobs[approximate]" = "",
+                         "p[approximate]" = "",
+                         "es[approximate]" = "",
+                         "ciles[approximate]" = "",
+                         "ciues[approximate]" = ""
+                       ))
+        } else {
+          table$setRow(rowNo = 1, 
+                       values = list(
+                         var = self$options$dep,
+                         "type[approximate]" = "Monte-Carlo Approximation",
+                         "stat[approximate]" = coin::statistic(mc),
+                         "s[approximate]" = s,
+                         "nobs[approximate]" = nobs,
+                         "p[approximate]" = coin::pvalue(mc),
+                         "es[approximate]" = effsize,
+                         "ciles[approximate]" = ciLower,
+                         "ciues[approximate]" = ciUpper
+                       ))
+        }
       }
       
-      
       ####       Asymptotisch
-      asymp <- try(coin::sign_test(formula = g1 ~ g2,
-                                   distribution = "asymptotic",
-                                   alternative = self$options$alternative),
-                   silent = TRUE)
-      
-      if(jmvcore::isError(exakt)) {
+      if(self$options$get("asymptotic")) {
+        asymp <- try(coin::sign_test(formula = g1 ~ g2,
+                                     distribution = "asymptotic",
+                                     alternative = self$options$alternative),
+                     silent = TRUE)
         
-        table$setRow(rowNo = 1,
-                     values = list(
-                       var = "",
-                       "type[asymptotic]" = "",
-                       "stat[asymptotic]" = "",
-                       "s[asymptotic]" = "",
-                       "nobs[asymptotic]" = "",
-                       "p[asymptotic]" = "",
-                       "es[asymptotic]" = "",
-                       "ciles[asymptotic]" = "",
-                       "ciues[asymptotic]" = ""
-                     ))
-      } else {
-        table$setRow(rowNo = 1, 
-                     values = list(
-                       var = self$options$dep,
-                       "type[asymptotic]" = "Asymptotic",
-                       "stat[asymptotic]" = coin::statistic(asymp),
-                       "s[asymptotic]" = s,
-                       "nobs[asymptotic]" = nobs,
-                       "p[asymptotic]" = coin::pvalue(asymp),
-                       "es[asymptotic]" = effsize,
-                       "ciles[asymptotic]" = ciLower,
-                       "ciues[asymptotic]" = ciUpper
-                     ))
+        if(jmvcore::isError(asymp)) {
+          
+          table$setRow(rowNo = 1,
+                       values = list(
+                         var = "",
+                         "type[asymptotic]" = "",
+                         "stat[asymptotic]" = "",
+                         "s[asymptotic]" = "",
+                         "nobs[asymptotic]" = "",
+                         "p[asymptotic]" = "",
+                         "es[asymptotic]" = "",
+                         "ciles[asymptotic]" = "",
+                         "ciues[asymptotic]" = ""
+                       ))
+        } else {
+          table$setRow(rowNo = 1, 
+                       values = list(
+                         var = self$options$dep,
+                         "type[asymptotic]" = "Asymptotic",
+                         "stat[asymptotic]" = coin::statistic(asymp),
+                         "s[asymptotic]" = s,
+                         "nobs[asymptotic]" = nobs,
+                         "p[asymptotic]" = coin::pvalue(asymp),
+                         "es[asymptotic]" = effsize,
+                         "ciles[asymptotic]" = ciLower,
+                         "ciues[asymptotic]" = ciUpper
+                       ))
+        }
       }
       ########## end of analysis
       

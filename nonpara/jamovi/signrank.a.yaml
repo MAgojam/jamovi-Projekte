@@ -45,7 +45,7 @@ options:
     - title: 'Monte-Carlo Approximation'
       name: approximate
       type: Bool
-      default: true
+      default: false
     - title: 'Number of Samples:' 
       name: nsamples
       type: Integer
@@ -53,7 +53,11 @@ options:
     - title: Asymptotic
       name: asymptotic
       type: Bool
-      default: true
+      default: false
+    - title: Continuity Correction
+      name: cc
+      type: Bool
+      default: false
 
     - title: Alternative Hypothesis
       name: alternative

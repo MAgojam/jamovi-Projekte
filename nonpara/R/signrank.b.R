@@ -15,13 +15,16 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # - ig ha gad random chönne ID (nominal) bi dependent drizieh... sött eig nid müglech si
       #   GLOUBS da chame nüt mache ussert uf intelligenti Benutzer hoffe
       # - sign-rank test, sign rank test, signed-rank test or signed rank test?
-      # - continuity-correction für asymptotischen test einbauen (wilcox.test())
       # - zero.method als auswählbare option einbauen?
       #   Das wirkt sich aber wahrsch. auf die Daten aus
       #   d.h. ich müsste die Daten-Manipulation auch anpassen.
-      # - Berechnung der Teststatistik anpassen: W+ nicht S. Ändern bei den Results
-      #   und auch in den .yaml-files
+      #   Braucht zudem einen Hinweis, welche zeroMethod verwendet wurde,
+      #   auch wenn immer nur Wilcoxon verwendet wird.
+      # - entscheiden ob Anmerkungen unter der Tabelle als Note oder als Footnote
+      #   oder auch einfach als eigenes Element wie die Warnings
       # - Berechnung der Effektstärke und des Konfidenzintervalls anpassen
+      #   STATUS: eigentlich fertig, aber funktioniert erst mit jmv v2.4,
+      #   was anscheinend bald released werden soll.
       # - Interpretation für Effektstärke hinzufügen?
       # - Welche Bootstrap-Methode soll man nehmen? Oder user wählen lassen?
       #####################################################################
@@ -36,7 +39,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       ciWidth <- self$options$ciWidth / 100
       
       # preparation for later addition of zero.method = "Pratt"
-      zero <- "Wilcoxon"
+      zeroMethod <- "Wilcoxon"
       
       # preparation for possible addition of CI-type selection and number of bootstraps
       ciType <- "perc"
@@ -103,6 +106,8 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       }
       
       
+      # Preparation of addition of zero.method = "Pratt"
+      # if(zeroMethod == "Wilcoxon") {
       
       # find IDs which have identical values for both samples and remove them from the dataset
       ## for each ID get the according dependent values
@@ -117,6 +122,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           data <- data[data$ID != id,]
         }
       }
+      # } else if(zeroMethod == "Pratt") { TBD }
       
       
       # sort data for group then for ID
@@ -153,8 +159,9 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       
       # calculate expected Wp, variance of Wp and z
-      expS <- (nobs * (nobs+1)) / 4
-      varS <- (nobs * (nobs+1) * (2*nobs+1)) / 24
+      expWp <- (nobs * (nobs+1)) / 4
+      varWp <- (nobs * (nobs+1) * (2*nobs+1)) / 24
+      z <- (Wp-expWp) / sqrt(varWp)
       
       # calculate effect size of exact test
       
@@ -238,11 +245,11 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         "median[1]" = median_g1,
                         "median[2]" = median_g2,
                         
-                        "ev[1]" = expS,
-                        "ev[2]" = expS,
+                        "ev[1]" = expWp,
+                        "ev[2]" = expWp,
                         
-                        "var[1]" = varS,
-                        "var[2]" = varS
+                        "var[1]" = varWp,
+                        "var[2]" = varWp
                       ))
           
           note_obs <- "Observations with identical values for both samples are disregarded for this test and do therefore not count as observations."
@@ -259,114 +266,160 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       ########## start of analysis
       ####       Exakt
-      exakt <- try(coin::wilcoxsign_test(formula = g1 ~ g2,
-                                         distribution = "exact",
-                                         zero.method = zero,
-                                         alternative = self$options$alternative),
-                   silent = TRUE)
-      
-      if(jmvcore::isError(exakt)) {
+      if(self$options$get("exact")) {
+        exakt <- try(coin::wilcoxsign_test(formula = g1 ~ g2,
+                                           distribution = "exact",
+                                           zero.method = zeroMethod,
+                                           alternative = self$options$alternative),
+                     silent = TRUE)
         
-        table$setRow(rowNo = 1,
-                     values = list(
-                       var = "",
-                       "type[exact]" = "",
-                       "stat[exact]" = "",
-                       "Wp[exact]" = "",
-                       "nobs[exact]" = "",
-                       "p[exact]" = "",
-                       "es[exact]" = "",
-                       "ciles[exact]" = "",
-                       "ciues[exact]" = ""
-                     ))
-      } else {
-        table$setRow(rowNo = 1, 
-                     values = list(
-                       var = self$options$dep,
-                       "type[exact]" = "Exact",
-                       "stat[exact]" = coin::statistic(exakt),
-                       "Wp[exact]" = Wp,
-                       "nobs[exact]" = nobs,
-                       "p[exact]" = coin::pvalue(exakt),
-                       "es[exact]" = effsize,
-                       "ciles[exact]" = ciLower,
-                       "ciues[exact]" = ciUpper
-                     ))
+        if(jmvcore::isError(exakt)) {
+          
+          table$setRow(rowNo = 1,
+                       values = list(
+                         var = "",
+                         "type[exact]" = "",
+                         "stat[exact]" = "",
+                         "Wp[exact]" = "",
+                         "nobs[exact]" = "",
+                         "p[exact]" = "",
+                         "es[exact]" = "",
+                         "ciles[exact]" = "",
+                         "ciues[exact]" = ""
+                       ))
+        } else {
+          table$setRow(rowNo = 1, 
+                       values = list(
+                         var = self$options$dep,
+                         "type[exact]" = "Exact",
+                         "stat[exact]" = z,
+                         "Wp[exact]" = Wp,
+                         "nobs[exact]" = nobs,
+                         "p[exact]" = coin::pvalue(exakt),
+                         "es[exact]" = effsize,
+                         "ciles[exact]" = ciLower,
+                         "ciues[exact]" = ciUpper
+                       ))
+        }
       }
-      
       
       ####       Monte-Carlo
-      mc <- try(coin::wilcoxsign_test(formula = g1 ~ g2,
-                                      distribution = "approximate",
-                                      nsamples = self$options$nsamples,
-                                      zero.method = zero,
-                                      alternative = self$options$alternative),
-                silent = TRUE)
-      
-      if(jmvcore::isError(exakt)) {
+      if(self$options$get("approximate")) {
+        mc <- try(coin::wilcoxsign_test(formula = g1 ~ g2,
+                                        distribution = "approximate",
+                                        nsamples = self$options$nsamples,
+                                        zero.method = zeroMethod,
+                                        alternative = self$options$alternative),
+                  silent = TRUE)
         
-        table$setRow(rowNo = 1,
-                     values = list(
-                       var = "",
-                       "type[approximate]" = "",
-                       "stat[approximate]" = "",
-                       "Wp[approximate]" = "",
-                       "nobs[approximate]" = "",
-                       "p[approximate]" = "",
-                       "es[approximate]" = "",
-                       "ciles[approximate]" = "",
-                       "ciues[approximate]" = ""
-                     ))
-      } else {
-        table$setRow(rowNo = 1, 
-                     values = list(
-                       var = self$options$dep,
-                       "type[approximate]" = "Monte-Carlo Approximation",
-                       "stat[approximate]" = coin::statistic(mc),
-                       "Wp[approximate]" = Wp,
-                       "nobs[approximate]" = nobs,
-                       "p[approximate]" = coin::pvalue(mc),
-                       "es[approximate]" = effsize,
-                       "ciles[approximate]" = ciLower,
-                       "ciues[approximate]" = ciUpper
-                     ))
+        if(jmvcore::isError(mc)) {
+          
+          table$setRow(rowNo = 1,
+                       values = list(
+                         var = "",
+                         "type[approximate]" = "",
+                         "stat[approximate]" = "",
+                         "Wp[approximate]" = "",
+                         "nobs[approximate]" = "",
+                         "p[approximate]" = "",
+                         "es[approximate]" = "",
+                         "ciles[approximate]" = "",
+                         "ciues[approximate]" = ""
+                       ))
+        } else {
+          table$setRow(rowNo = 1, 
+                       values = list(
+                         var = self$options$dep,
+                         "type[approximate]" = "Monte-Carlo Approximation",
+                         "stat[approximate]" = z,
+                         "Wp[approximate]" = Wp,
+                         "nobs[approximate]" = nobs,
+                         "p[approximate]" = coin::pvalue(mc),
+                         "es[approximate]" = effsize,
+                         "ciles[approximate]" = ciLower,
+                         "ciues[approximate]" = ciUpper
+                       ))
+        }
       }
       
-      
-      ####       Asymptotisch
-      asymp <- try(coin::wilcoxsign_test(formula = g1 ~ g2,
-                                         distribution = "asymptotic",
-                                         zero.method = zero,
-                                         alternative = self$options$alternative),
-                   silent = TRUE)
-      
-      if(jmvcore::isError(exakt)) {
+      ####       Asymptotisch ohne CC
+      if(self$options$get("asymptotic")) {
+        asymp <- try(stats::wilcox.test(x = g1,
+                                        y = g2,
+                                        paired = TRUE,
+                                        exact = FALSE,
+                                        correct = FALSE,
+                                        alternative = self$options$alternative),
+                     silent = TRUE)
         
-        table$setRow(rowNo = 1,
-                     values = list(
-                       var = "",
-                       "type[asymptotic]" = "",
-                       "stat[asymptotic]" = "",
-                       "Wp[asymptotic]" = "",
-                       "nobs[asymptotic]" = "",
-                       "p[asymptotic]" = "",
-                       "es[asymptotic]" = "",
-                       "ciles[asymptotic]" = "",
-                       "ciues[asymptotic]" = ""
-                     ))
-      } else {
-        table$setRow(rowNo = 1, 
-                     values = list(
-                       var = self$options$dep,
-                       "type[asymptotic]" = "Asymptotic",
-                       "stat[asymptotic]" = coin::statistic(asymp),
-                       "Wp[asymptotic]" = Wp,
-                       "nobs[asymptotic]" = nobs,
-                       "p[asymptotic]" = coin::pvalue(asymp),
-                       "es[asymptotic]" = effsize,
-                       "ciles[asymptotic]" = ciLower,
-                       "ciues[asymptotic]" = ciUpper
-                     ))
+        if(jmvcore::isError(asymp)) {
+          
+          table$setRow(rowNo = 1,
+                       values = list(
+                         var = "",
+                         "type[asymptotic]" = "",
+                         "stat[asymptotic]" = "",
+                         "Wp[asymptotic]" = "",
+                         "nobs[asymptotic]" = "",
+                         "p[asymptotic]" = "",
+                         "es[asymptotic]" = "",
+                         "ciles[asymptotic]" = "",
+                         "ciues[asymptotic]" = ""
+                       ))
+        } else {
+          table$setRow(rowNo = 1, 
+                       values = list(
+                         var = self$options$dep,
+                         "type[asymptotic]" = "Asymptotic",
+                         "stat[asymptotic]" = z,
+                         "Wp[asymptotic]" = Wp,
+                         "nobs[asymptotic]" = nobs,
+                         "p[asymptotic]" = asymp$p.value,
+                         "es[asymptotic]" = effsize,
+                         "ciles[asymptotic]" = ciLower,
+                         "ciues[asymptotic]" = ciUpper
+                       ))
+        }
+      }
+      
+      ####       Asymptotisch mit CC
+      if(self$options$get("cc")) {
+        asymp_cc <- try(stats::wilcox.test(x = g1,
+                                           y = g2,
+                                           paired = TRUE,
+                                           exact = FALSE,
+                                           correct = TRUE,
+                                           alternative = self$options$alternative),
+                        silent = TRUE)
+        
+        if(jmvcore::isError(asymp_cc)) {
+          
+          table$setRow(rowNo = 1,
+                       values = list(
+                         var = "",
+                         "type[cc]" = "",
+                         "stat[cc]" = "",
+                         "Wp[cc]" = "",
+                         "nobs[cc]" = "",
+                         "p[cc]" = "",
+                         "es[cc]" = "",
+                         "ciles[cc]" = "",
+                         "ciues[cc]" = ""
+                       ))
+        } else {
+          table$setRow(rowNo = 1, 
+                       values = list(
+                         var = self$options$dep,
+                         "type[cc]" = "Asymptotic (CC)",
+                         "stat[cc]" = z,
+                         "Wp[cc]" = Wp,
+                         "nobs[cc]" = nobs,
+                         "p[cc]" = asymp_cc$p.value,
+                         "es[cc]" = effsize,
+                         "ciles[cc]" = ciLower,
+                         "ciues[cc]" = ciUpper
+                       ))
+        }
       }
       ########## end of analysis
       

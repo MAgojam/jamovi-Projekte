@@ -10,9 +10,10 @@ signrankOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             dep = NULL,
             samp = NULL,
             exact = TRUE,
-            approximate = TRUE,
+            approximate = FALSE,
             nsamples = 10000,
-            asymptotic = TRUE,
+            asymptotic = FALSE,
+            cc = FALSE,
             alternative = "two.sided",
             nobs = FALSE,
             effectSize = FALSE,
@@ -58,7 +59,7 @@ signrankOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..approximate <- jmvcore::OptionBool$new(
                 "approximate",
                 approximate,
-                default=TRUE)
+                default=FALSE)
             private$..nsamples <- jmvcore::OptionInteger$new(
                 "nsamples",
                 nsamples,
@@ -66,7 +67,11 @@ signrankOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..asymptotic <- jmvcore::OptionBool$new(
                 "asymptotic",
                 asymptotic,
-                default=TRUE)
+                default=FALSE)
+            private$..cc <- jmvcore::OptionBool$new(
+                "cc",
+                cc,
+                default=FALSE)
             private$..alternative <- jmvcore::OptionList$new(
                 "alternative",
                 alternative,
@@ -117,6 +122,7 @@ signrankOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..approximate)
             self$.addOption(private$..nsamples)
             self$.addOption(private$..asymptotic)
+            self$.addOption(private$..cc)
             self$.addOption(private$..alternative)
             self$.addOption(private$..nobs)
             self$.addOption(private$..effectSize)
@@ -134,6 +140,7 @@ signrankOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         approximate = function() private$..approximate$value,
         nsamples = function() private$..nsamples$value,
         asymptotic = function() private$..asymptotic$value,
+        cc = function() private$..cc$value,
         alternative = function() private$..alternative$value,
         nobs = function() private$..nobs$value,
         effectSize = function() private$..effectSize$value,
@@ -150,6 +157,7 @@ signrankOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..approximate = NA,
         ..nsamples = NA,
         ..asymptotic = NA,
+        ..cc = NA,
         ..alternative = NA,
         ..nobs = NA,
         ..effectSize = NA,
@@ -211,7 +219,9 @@ signrankResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="type[exact]", 
                         `title`="Type", 
                         `type`="text", 
-                        `visible`="(exact)"),
+                        `visible`="(exact)", 
+                        `refs`=list(
+                            "coin")),
                     list(
                         `name`="stat[exact]", 
                         `title`="<i>z</i>-Value", 
@@ -235,7 +245,7 @@ signrankResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `visible`="(exact)"),
                     list(
                         `name`="es[exact]", 
-                        `title`="Effect Size <a>&gamma;</a>", 
+                        `title`="Effect Size <i>r</i>", 
                         `type`="number", 
                         `visible`="(exact && effectSize)"),
                     list(
@@ -252,7 +262,9 @@ signrankResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="type[approximate]", 
                         `title`="Type", 
                         `type`="text", 
-                        `visible`="(approximate)"),
+                        `visible`="(approximate)", 
+                        `refs`=list(
+                            "coin")),
                     list(
                         `name`="stat[approximate]", 
                         `title`="<i>z</i>-Value", 
@@ -276,7 +288,7 @@ signrankResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `visible`="(approximate)"),
                     list(
                         `name`="es[approximate]", 
-                        `title`="Effect Size <a>&gamma;</a>", 
+                        `title`="Effect Size <i>r</i>", 
                         `type`="number", 
                         `visible`="(approximate && effectSize)"),
                     list(
@@ -318,7 +330,7 @@ signrankResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `visible`="(asymptotic)"),
                     list(
                         `name`="es[asymptotic]", 
-                        `title`="Effect Size <a>&gamma;</a>", 
+                        `title`="Effect Size <i>r</i>", 
                         `type`="number", 
                         `visible`="(asymptotic && effectSize)"),
                     list(
@@ -330,7 +342,51 @@ signrankResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="ciues[asymptotic]", 
                         `title`="Upper", 
                         `type`="number", 
-                        `visible`="(asymptotic && effectSize && ciES)"))))
+                        `visible`="(asymptotic && effectSize && ciES)"),
+                    list(
+                        `name`="type[cc]", 
+                        `title`="Type", 
+                        `type`="text", 
+                        `visible`="(cc)", 
+                        `refs`=list(
+                            "cc")),
+                    list(
+                        `name`="stat[cc]", 
+                        `title`="<i>z</i>-Value", 
+                        `type`="number", 
+                        `visible`="(cc)"),
+                    list(
+                        `name`="Wp[cc]", 
+                        `title`="<i>W</i><sub>+</sub>", 
+                        `type`="integer", 
+                        `format`="int", 
+                        `visible`="(cc)"),
+                    list(
+                        `name`="nobs[cc]", 
+                        `title`="<i>n</i>", 
+                        `type`="integer", 
+                        `visible`="(cc && nobs)"),
+                    list(
+                        `name`="p[cc]", 
+                        `title`="<i>p</i>-Value", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(cc)"),
+                    list(
+                        `name`="es[cc]", 
+                        `title`="Effect Size <i>r</i>", 
+                        `type`="number", 
+                        `visible`="(cc && effectSize)"),
+                    list(
+                        `name`="ciles[cc]", 
+                        `title`="Lower", 
+                        `type`="number", 
+                        `visible`="(cc && effectSize && ciES)"),
+                    list(
+                        `name`="ciues[cc]", 
+                        `title`="Upper", 
+                        `type`="number", 
+                        `visible`="(cc && effectSize && ciES)"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="desc",
@@ -435,6 +491,7 @@ signrankBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param approximate .
 #' @param nsamples .
 #' @param asymptotic .
+#' @param cc .
 #' @param alternative .
 #' @param nobs .
 #' @param effectSize \code{TRUE} or \code{FALSE} (default), provide
@@ -468,9 +525,10 @@ signrank <- function(
     dep,
     samp,
     exact = TRUE,
-    approximate = TRUE,
+    approximate = FALSE,
     nsamples = 10000,
-    asymptotic = TRUE,
+    asymptotic = FALSE,
+    cc = FALSE,
     alternative = "two.sided",
     nobs = FALSE,
     effectSize = FALSE,
@@ -503,6 +561,7 @@ signrank <- function(
         approximate = approximate,
         nsamples = nsamples,
         asymptotic = asymptotic,
+        cc = cc,
         alternative = alternative,
         nobs = nobs,
         effectSize = effectSize,

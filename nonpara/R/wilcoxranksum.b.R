@@ -16,6 +16,7 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
       # - Hinweise zu MC und CC: entscheide ob beide Footnotes, Notes,
       #   oder ggf. MC in Note und CC in Footnote oder sonst als Hinweis,
       #   wie das Warning beim signtest.
+      # - CC verstecken wenn asymptotisch nicht angewählt ist oder nicht?
       #####################################################################
       
       
