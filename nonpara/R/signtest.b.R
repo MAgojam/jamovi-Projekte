@@ -14,6 +14,7 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # - am Schluss im Code und im r.yaml results$control entfernen
       # - ig ha gad random chönne ID (nominal) bi dependent drizieh... sött eig nid müglech si
       #   GLOUBS da chame nüt mache ussert uf intelligenti Benutzer hoffe
+      # - Interpretation für Effektstärke hinzufügen?
       #####################################################################
       
       
@@ -152,8 +153,8 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                  (2*(nobs+zw^2)) - 0.5),
               ((2*nobs*pi + zw^2 + zw*sqrt(zw^2+4*nobs*pi*(1-pi))) /
                  (2*(nobs+zw^2)) - 0.5))
-      # shortened version
-      # ci_short <- c(((2 + zw^2 - zw*sqrt(zw^2+4*(1-pi))) /
+      # shortened version: nobs*pi is nobs*s/nobs = s
+      # ci_short <- c(((2*s + zw^2 - zw*sqrt(zw^2+4*s*(1-pi))) /
       #                  (2*(nobs+zw^2)) - 0.5),
       #               ((2 + zw^2 + zw*sqrt(zw^2+4*(1-pi))) /
       #                  (2*(nobs+zw^2)) - 0.5))
@@ -239,7 +240,6 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       ########## start of analysis
       ####       Exakt
       exakt <- try(coin::sign_test(formula = g1 ~ g2,
-                                   data = data,
                                    distribution = "exact",
                                    alternative = self$options$alternative),
                    silent = TRUE)
@@ -276,7 +276,6 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       ####       Monte-Carlo
       mc <- try(coin::sign_test(formula = g1 ~ g2,
-                                data = data,
                                 distribution = "approximate",
                                 nsamples = self$options$nsamples,
                                 alternative = self$options$alternative),
@@ -314,7 +313,6 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       ####       Asymptotisch
       asymp <- try(coin::sign_test(formula = g1 ~ g2,
-                                   data = data,
                                    distribution = "asymptotic",
                                    alternative = self$options$alternative),
                    silent = TRUE)

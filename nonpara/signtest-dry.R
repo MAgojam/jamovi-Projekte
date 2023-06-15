@@ -1,21 +1,21 @@
 # Options init
 self <- list()
 
-# self$data <- data.frame( 
-#   ID = as.factor(rep(1:6, times = 2)),
-#   Blutdruck = c(130.2, 180.2, 149.6, 153.2, 162.6, 160.1,
-#                 136.9, 201.4, 166.8, 150.0, 173.2, 169.3), 
-#   Horrorfilm = factor(rep(c("vorher","nachher"), each = 6),
-#                       levels = c("vorher", "nachher")))
-
 self$data <- data.frame(
-  ID = as.factor(rep(1:7, times = 2)),
-  Blutdruck = c(6,4,1,4,10,3,8,
-                3,9,2,4, 3,1,4),
-  Horrorfilm = factor(rep(c("vorher","nachher"), each = 7),
+  ID = as.factor(rep(1:6, times = 2)),
+  Blutdruck = c(130.2, 180.2, 149.6, 153.2, 162.6, 160.1,
+                136.9, 201.4, 166.8, 150.0, 173.2, 169.3),
+  Horrorfilm = factor(rep(c("vorher","nachher"), each = 6),
                       levels = c("vorher", "nachher")))
 
-self$data$Horrorfilm[13:14] <- NA
+# self$data <- data.frame(
+#   ID = as.factor(rep(1:7, times = 2)),
+#   Blutdruck = c(6,4,1,4,10,3,8,
+#                 3,9,2,4, 3,1,4),
+#   Horrorfilm = factor(rep(c("vorher","nachher"), each = 7),
+#                       levels = c("vorher", "nachher")))
+# 
+# self$data$Horrorfilm[13:14] <- NA
 
 
 # self$data <- data.frame( 

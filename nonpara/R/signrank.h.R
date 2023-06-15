@@ -6,9 +6,21 @@ signrankOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            samp1 = NULL,
-            samp2 = NULL,
-            alternative = "two.sided", ...) {
+            id = NULL,
+            dep = NULL,
+            samp = NULL,
+            exact = TRUE,
+            approximate = TRUE,
+            nsamples = 10000,
+            asymptotic = TRUE,
+            alternative = "two.sided",
+            nobs = FALSE,
+            effectSize = FALSE,
+            ciES = FALSE,
+            ciWidth = 95,
+            descriptives = FALSE,
+            plot = FALSE,
+            observed = "line", ...) {
 
             super$initialize(
                 package="nonpara",
@@ -16,41 +28,147 @@ signrankOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..samp1 <- jmvcore::OptionVariable$new(
-                "samp1",
-                samp1)
-            private$..samp2 <- jmvcore::OptionVariable$new(
-                "samp2",
-                samp2)
+            private$..id <- jmvcore::OptionVariable$new(
+                "id",
+                id,
+                suggested=list(
+                    "nominal",
+                    "ordinal",
+                    "continuous"))
+            private$..dep <- jmvcore::OptionVariable$new(
+                "dep",
+                dep,
+                suggested=list(
+                    "ordinal",
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..samp <- jmvcore::OptionVariable$new(
+                "samp",
+                samp,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"))
+            private$..exact <- jmvcore::OptionBool$new(
+                "exact",
+                exact,
+                default=TRUE)
+            private$..approximate <- jmvcore::OptionBool$new(
+                "approximate",
+                approximate,
+                default=TRUE)
+            private$..nsamples <- jmvcore::OptionInteger$new(
+                "nsamples",
+                nsamples,
+                default=10000)
+            private$..asymptotic <- jmvcore::OptionBool$new(
+                "asymptotic",
+                asymptotic,
+                default=TRUE)
             private$..alternative <- jmvcore::OptionList$new(
                 "alternative",
                 alternative,
                 options=list(
+                    "less",
                     "two.sided",
-                    "greater",
-                    "less"),
+                    "greater"),
                 default="two.sided")
+            private$..nobs <- jmvcore::OptionBool$new(
+                "nobs",
+                nobs,
+                default=FALSE)
+            private$..effectSize <- jmvcore::OptionBool$new(
+                "effectSize",
+                effectSize,
+                default=FALSE)
+            private$..ciES <- jmvcore::OptionBool$new(
+                "ciES",
+                ciES,
+                default=FALSE)
+            private$..ciWidth <- jmvcore::OptionNumber$new(
+                "ciWidth",
+                ciWidth,
+                min=50,
+                max=99.9,
+                default=95)
+            private$..descriptives <- jmvcore::OptionBool$new(
+                "descriptives",
+                descriptives,
+                default=FALSE)
+            private$..plot <- jmvcore::OptionBool$new(
+                "plot",
+                plot,
+                default=FALSE)
+            private$..observed <- jmvcore::OptionList$new(
+                "observed",
+                observed,
+                options=list(
+                    "none",
+                    "line",
+                    "jitter"),
+                default="line")
 
-            self$.addOption(private$..samp1)
-            self$.addOption(private$..samp2)
+            self$.addOption(private$..id)
+            self$.addOption(private$..dep)
+            self$.addOption(private$..samp)
+            self$.addOption(private$..exact)
+            self$.addOption(private$..approximate)
+            self$.addOption(private$..nsamples)
+            self$.addOption(private$..asymptotic)
             self$.addOption(private$..alternative)
+            self$.addOption(private$..nobs)
+            self$.addOption(private$..effectSize)
+            self$.addOption(private$..ciES)
+            self$.addOption(private$..ciWidth)
+            self$.addOption(private$..descriptives)
+            self$.addOption(private$..plot)
+            self$.addOption(private$..observed)
         }),
     active = list(
-        samp1 = function() private$..samp1$value,
-        samp2 = function() private$..samp2$value,
-        alternative = function() private$..alternative$value),
+        id = function() private$..id$value,
+        dep = function() private$..dep$value,
+        samp = function() private$..samp$value,
+        exact = function() private$..exact$value,
+        approximate = function() private$..approximate$value,
+        nsamples = function() private$..nsamples$value,
+        asymptotic = function() private$..asymptotic$value,
+        alternative = function() private$..alternative$value,
+        nobs = function() private$..nobs$value,
+        effectSize = function() private$..effectSize$value,
+        ciES = function() private$..ciES$value,
+        ciWidth = function() private$..ciWidth$value,
+        descriptives = function() private$..descriptives$value,
+        plot = function() private$..plot$value,
+        observed = function() private$..observed$value),
     private = list(
-        ..samp1 = NA,
-        ..samp2 = NA,
-        ..alternative = NA)
+        ..id = NA,
+        ..dep = NA,
+        ..samp = NA,
+        ..exact = NA,
+        ..approximate = NA,
+        ..nsamples = NA,
+        ..asymptotic = NA,
+        ..alternative = NA,
+        ..nobs = NA,
+        ..effectSize = NA,
+        ..ciES = NA,
+        ..ciWidth = NA,
+        ..descriptives = NA,
+        ..plot = NA,
+        ..observed = NA)
 )
 
 signrankResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "signrankResults",
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]],
-        table = function() private$.items[["table"]]),
+        na_warning = function() private$.items[["na_warning"]],
+        control = function() private$.items[["control"]],
+        srtest = function() private$.items[["srtest"]],
+        desc = function() private$.items[["desc"]],
+        plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -60,35 +178,229 @@ signrankResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Signed Rank Test")
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="text",
-                title="text"))
+                name="na_warning",
+                title="Warning",
+                visible=FALSE,
+                clearWith=list(
+                    "data",
+                    "id",
+                    "dep",
+                    "samp")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="control"))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="table",
-                title="Exact Wilcoxon Signed-Rank Test",
+                name="srtest",
+                title="Sign Test",
+                refs=list(
+                    "coin"),
+                clearWith=list(
+                    "data",
+                    "dep",
+                    "samp",
+                    "effectSize",
+                    "ciES"),
                 rows=1,
                 columns=list(
                     list(
-                        `name`="s1", 
-                        `title`="Sample One", 
+                        `name`="var", 
+                        `title`="", 
                         `type`="text"),
                     list(
-                        `name`="alt", 
-                        `title`="Alternative", 
+                        `name`="type[exact]", 
+                        `title`="Type", 
+                        `type`="text", 
+                        `visible`="(exact)"),
+                    list(
+                        `name`="stat[exact]", 
+                        `title`="<i>z</i>-Value", 
+                        `type`="number", 
+                        `visible`="(exact)"),
+                    list(
+                        `name`="Wp[exact]", 
+                        `title`="<i>W</i><sub>+</sub>", 
+                        `type`="integer", 
+                        `visible`="(exact)"),
+                    list(
+                        `name`="nobs[exact]", 
+                        `title`="<i>n</i>", 
+                        `type`="integer", 
+                        `visible`="(exact && nobs)"),
+                    list(
+                        `name`="p[exact]", 
+                        `title`="<i>p</i>-Value", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(exact)"),
+                    list(
+                        `name`="es[exact]", 
+                        `title`="Effect Size <a>&gamma;</a>", 
+                        `type`="number", 
+                        `visible`="(exact && effectSize)"),
+                    list(
+                        `name`="ciles[exact]", 
+                        `title`="Lower", 
+                        `type`="number", 
+                        `visible`="(exact && effectSize && ciES)"),
+                    list(
+                        `name`="ciues[exact]", 
+                        `title`="Upper", 
+                        `type`="number", 
+                        `visible`="(exact && effectSize && ciES)"),
+                    list(
+                        `name`="type[approximate]", 
+                        `title`="Type", 
+                        `type`="text", 
+                        `visible`="(approximate)"),
+                    list(
+                        `name`="stat[approximate]", 
+                        `title`="<i>z</i>-Value", 
+                        `type`="number", 
+                        `visible`="(approximate)"),
+                    list(
+                        `name`="Wp[approximate]", 
+                        `title`="<i>W</i><sub>+</sub>", 
+                        `type`="integer", 
+                        `visible`="(approximate)"),
+                    list(
+                        `name`="nobs[approximate]", 
+                        `title`="<i>n</i>", 
+                        `type`="integer", 
+                        `visible`="(approximate && nobs)"),
+                    list(
+                        `name`="p[approximate]", 
+                        `title`="<i>p</i>-Value", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(approximate)"),
+                    list(
+                        `name`="es[approximate]", 
+                        `title`="Effect Size <a>&gamma;</a>", 
+                        `type`="number", 
+                        `visible`="(approximate && effectSize)"),
+                    list(
+                        `name`="ciles[approximate]", 
+                        `title`="Lower", 
+                        `type`="number", 
+                        `visible`="(approximate && effectSize && ciES)"),
+                    list(
+                        `name`="ciues[approximate]", 
+                        `title`="Upper", 
+                        `type`="number", 
+                        `visible`="(approximate && effectSize && ciES)"),
+                    list(
+                        `name`="type[asymptotic]", 
+                        `title`="Type", 
+                        `type`="text", 
+                        `visible`="(asymptotic)"),
+                    list(
+                        `name`="stat[asymptotic]", 
+                        `title`="<i>z</i>-Value", 
+                        `type`="number", 
+                        `visible`="(asymptotic)"),
+                    list(
+                        `name`="Wp[asymptotic]", 
+                        `title`="<i>W</i><sub>+</sub>", 
+                        `type`="integer", 
+                        `format`="int", 
+                        `visible`="(asymptotic)"),
+                    list(
+                        `name`="nobs[asymptotic]", 
+                        `title`="<i>n</i>", 
+                        `type`="integer", 
+                        `visible`="(asymptotic && nobs)"),
+                    list(
+                        `name`="p[asymptotic]", 
+                        `title`="<i>p</i>-Value", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(asymptotic)"),
+                    list(
+                        `name`="es[asymptotic]", 
+                        `title`="Effect Size <a>&gamma;</a>", 
+                        `type`="number", 
+                        `visible`="(asymptotic && effectSize)"),
+                    list(
+                        `name`="ciles[asymptotic]", 
+                        `title`="Lower", 
+                        `type`="number", 
+                        `visible`="(asymptotic && effectSize && ciES)"),
+                    list(
+                        `name`="ciues[asymptotic]", 
+                        `title`="Upper", 
+                        `type`="number", 
+                        `visible`="(asymptotic && effectSize && ciES)"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="desc",
+                title="Descriptive Statistics",
+                visible="(descriptives)",
+                clearWith=list(
+                    "id",
+                    "samp",
+                    "dep",
+                    "data"),
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="dep", 
+                        `title`="", 
                         `type`="text"),
                     list(
-                        `name`="s2", 
-                        `title`="Sample Two", 
+                        `name`="time[1]", 
+                        `title`="Sample", 
                         `type`="text"),
                     list(
-                        `name`="stat", 
-                        `title`="Statistic", 
+                        `name`="nobs[1]", 
+                        `title`="Observations", 
+                        `type`="integer"),
+                    list(
+                        `name`="median[1]", 
+                        `title`="Median", 
+                        `type`="text"),
+                    list(
+                        `name`="ev[1]", 
+                        `title`="Expected <i>W</i><sub>+</sub>", 
                         `type`="number"),
                     list(
-                        `name`="p", 
-                        `title`="p-Value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"))))}))
+                        `name`="var[1]", 
+                        `title`="Variance of <i>W</i><sub>+</sub>", 
+                        `type`="number"),
+                    list(
+                        `name`="time[2]", 
+                        `title`="Sample", 
+                        `type`="text"),
+                    list(
+                        `name`="nobs[2]", 
+                        `title`="Observations", 
+                        `type`="integer"),
+                    list(
+                        `name`="median[2]", 
+                        `title`="Median", 
+                        `type`="text"),
+                    list(
+                        `name`="ev[2]", 
+                        `title`="Expected <i>W</i><sub>+</sub>", 
+                        `type`="number"),
+                    list(
+                        `name`="var[2]", 
+                        `title`="Variance of <i>W</i><sub>+</sub>", 
+                        `type`="number"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="Descriptives Plot",
+                width=400,
+                height=300,
+                visible="(plot)",
+                renderFun=".descplot",
+                clearWith=list(
+                    "id",
+                    "samp",
+                    "dep",
+                    "data",
+                    "observed")))}))
 
 signrankBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "signrankBase",
@@ -113,45 +425,92 @@ signrankBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Signed Rank Test
 #'
 #' 
-#' @param data .
-#' @param samp1 .
-#' @param samp2 .
+#' @param data the data as a data frame
+#' @param id .
+#' @param dep Dependent variable. Does not need to be specified when using a
+#'   formula.
+#' @param samp Grouping variable, must have two levels. Does not need to be
+#'   specified when using a formula.
+#' @param exact .
+#' @param approximate .
+#' @param nsamples .
+#' @param asymptotic .
 #' @param alternative .
+#' @param nobs .
+#' @param effectSize \code{TRUE} or \code{FALSE} (default), provide
+#'   <a>&gamma;</a> effect size
+#' @param ciES \code{TRUE} or \code{FALSE} (default), provide confidence
+#'   intervals for the effect-size
+#' @param ciWidth a number between 50 and 99.9 (default: 95), the width of
+#'   confidence intervals for the effect size
+#' @param descriptives .
+#' @param plot .
+#' @param observed .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$na_warning} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$control} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$srtest} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$table$asDF}
+#' \code{results$srtest$asDF}
 #'
-#' \code{as.data.frame(results$table)}
+#' \code{as.data.frame(results$srtest)}
 #'
 #' @export
 signrank <- function(
     data,
-    samp1,
-    samp2,
-    alternative = "two.sided") {
+    id,
+    dep,
+    samp,
+    exact = TRUE,
+    approximate = TRUE,
+    nsamples = 10000,
+    asymptotic = TRUE,
+    alternative = "two.sided",
+    nobs = FALSE,
+    effectSize = FALSE,
+    ciES = FALSE,
+    ciWidth = 95,
+    descriptives = FALSE,
+    plot = FALSE,
+    observed = "line") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("signrank requires jmvcore to be installed (restart may be required)")
 
-    if ( ! missing(samp1)) samp1 <- jmvcore::resolveQuo(jmvcore::enquo(samp1))
-    if ( ! missing(samp2)) samp2 <- jmvcore::resolveQuo(jmvcore::enquo(samp2))
+    if ( ! missing(id)) id <- jmvcore::resolveQuo(jmvcore::enquo(id))
+    if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
+    if ( ! missing(samp)) samp <- jmvcore::resolveQuo(jmvcore::enquo(samp))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(samp1), samp1, NULL),
-            `if`( ! missing(samp2), samp2, NULL))
+            `if`( ! missing(id), id, NULL),
+            `if`( ! missing(dep), dep, NULL),
+            `if`( ! missing(samp), samp, NULL))
 
+    for (v in samp) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- signrankOptions$new(
-        samp1 = samp1,
-        samp2 = samp2,
-        alternative = alternative)
+        id = id,
+        dep = dep,
+        samp = samp,
+        exact = exact,
+        approximate = approximate,
+        nsamples = nsamples,
+        asymptotic = asymptotic,
+        alternative = alternative,
+        nobs = nobs,
+        effectSize = effectSize,
+        ciES = ciES,
+        ciWidth = ciWidth,
+        descriptives = descriptives,
+        plot = plot,
+        observed = observed)
 
     analysis <- signrankClass$new(
         options = options,

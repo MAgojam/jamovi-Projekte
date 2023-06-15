@@ -112,3 +112,4 @@ children:
                   - type: ComboBox
                     name: observed
                     enable: (plot)
+...

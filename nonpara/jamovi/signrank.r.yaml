@@ -4,29 +4,196 @@ title: Signed Rank Test
 jrs:   '1.1'
 
 items:
-    - name:  text
-      title: text
-      type:  Preformatted
+    - name: na_warning
+      title: Warning
+      type: Preformatted
+      visible: false
+      clearWith:
+        - data
+        - id
+        - dep
+        - samp
     
-    - name: table
-      title: Exact Wilcoxon Signed-Rank Test
+    - name: control
+      type: Preformatted
+    
+    - name: srtest
+      title: Sign Test
       type: Table
+      refs: [coin]
+      clearWith:
+        - data
+        - dep
+        - samp
+        - effectSize
+        - ciES
       rows: 1
       columns:
-        - name: s1
-          title: "Sample One"
+        - name: var
+          title: ''
           type: text
-        - name: alt
-          title: "Alternative"
+
+        - name: type[exact]
+          title: 'Type'
           type: text
-        - name: s2
-          title: "Sample Two"
-          type: text
-        - name: stat
-          title: "Statistic"
+          visible: (exact)
+        - name: stat[exact]
+          title: '<i>z</i>-Value'
           type: number
-        - name: p
-          title: "p-Value"
+          visible: (exact)
+        - name: Wp[exact]
+          title: '<i>W</i><sub>+</sub>'
+          type: integer
+          visible: (exact)
+        - name: nobs[exact]
+          title: '<i>n</i>'
+          type: integer
+          visible: (exact && nobs)
+        - name: p[exact]
+          title: '<i>p</i>-Value'
           type: number
           format: zto,pvalue
+          visible: (exact)
+        - name: es[exact]
+          title: 'Effect Size <a>&gamma;</a>'
+          type: number
+          visible: (exact && effectSize)
+        - name: ciles[exact]
+          title: Lower
+          type: number
+          visible: (exact && effectSize && ciES)
+        - name: ciues[exact]
+          title: Upper
+          type: number
+          visible: (exact && effectSize && ciES)
+          
+        - name: type[approximate]
+          title: 'Type'
+          type: text
+          visible: (approximate)
+        - name: stat[approximate]
+          title: '<i>z</i>-Value'
+          type: number
+          visible: (approximate)
+        - name: Wp[approximate]
+          title: '<i>W</i><sub>+</sub>'
+          type: integer
+          visible: (approximate)
+        - name: nobs[approximate]
+          title: '<i>n</i>'
+          type: integer
+          visible: (approximate && nobs)
+        - name: p[approximate]
+          title: '<i>p</i>-Value'
+          type: number
+          format: zto,pvalue
+          visible: (approximate)
+        - name: es[approximate]
+          title: 'Effect Size <a>&gamma;</a>'
+          type: number
+          visible: (approximate && effectSize)
+        - name: ciles[approximate]
+          title: Lower
+          type: number
+          visible: (approximate && effectSize && ciES)
+        - name: ciues[approximate]
+          title: Upper
+          type: number
+          visible: (approximate && effectSize && ciES)
+
+        - name: type[asymptotic]
+          title: 'Type'
+          type: text
+          visible: (asymptotic)
+        - name: stat[asymptotic]
+          title: '<i>z</i>-Value'
+          type: number
+          visible: (asymptotic)
+        - name: Wp[asymptotic]
+          title: '<i>W</i><sub>+</sub>'
+          type: integer
+          format: int
+          visible: (asymptotic)
+        - name: nobs[asymptotic]
+          title: '<i>n</i>'
+          type: integer
+          visible: (asymptotic && nobs)
+        - name: p[asymptotic]
+          title: '<i>p</i>-Value'
+          type: number
+          format: zto,pvalue
+          visible: (asymptotic)
+        - name: es[asymptotic]
+          title: 'Effect Size <a>&gamma;</a>'
+          type: number
+          visible: (asymptotic && effectSize)
+        - name: ciles[asymptotic]
+          title: Lower
+          type: number
+          visible: (asymptotic && effectSize && ciES)
+        - name: ciues[asymptotic]
+          title: Upper
+          type: number
+          visible: (asymptotic && effectSize && ciES)
+          
+    - name: desc
+      title: Descriptive Statistics
+      type: Table
+      visible: (descriptives)
+      clearWith:
+        - id
+        - samp
+        - dep
+        - data
+      rows: 1
+      columns:
+        - name: dep
+          title: ''
+          type: text
+        
+        - name: time[1]
+          title: Sample
+          type: text
+        - name: nobs[1]
+          title: Observations
+          type: integer
+        - name: median[1]
+          title: Median
+          type: text
+        - name: ev[1]
+          title: 'Expected <i>W</i><sub>+</sub>'
+          type: number
+        - name: var[1]
+          title: 'Variance of <i>W</i><sub>+</sub>'
+          type: number
+        
+        - name: time[2]
+          title: Sample
+          type: text
+        - name: nobs[2]
+          title: Observations
+          type: integer
+        - name: median[2]
+          title: Median
+          type: text
+        - name: ev[2]
+          title: 'Expected <i>W</i><sub>+</sub>'
+          type: number
+        - name: var[2]
+          title: 'Variance of <i>W</i><sub>+</sub>'
+          type: number
+          
+    - name: plot
+      title: Descriptives Plot
+      type: Image
+      width: 400
+      height: 300
+      visible: (plot)
+      renderFun: .descplot
+      clearWith:
+        - id
+        - samp
+        - dep
+        - data
+        - observed
 ...

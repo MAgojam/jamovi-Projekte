@@ -2,28 +2,113 @@ title: Signed Rank Test
 name: signrank
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Sample One
+        label: ID
         children:
           - type: VariablesListBox
-            name: samp1
+            name: id
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Sample Two
+        label: Dependent Variable
         children:
           - type: VariablesListBox
-            name: samp2
+            name: dep
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Grouping Variable
+        children:
+          - type: VariablesListBox
+            name: samp
             maxItemCount: 1
             isTarget: true
   - type: LayoutBox
     margin: large
+    stretchFactor: 1
     children:
-      - type: ComboBox
-        name: alternative
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Method
+            children:
+              - type: CheckBox
+                name: exact
+              - type: CheckBox
+                name: approximate
+                children:
+                  - type: TextBox
+                    name: nsamples
+                    format: number
+                    enable: (approximate)
+              - type: CheckBox
+                name: asymptotic
+          - type: Label
+            label: Hypothesis
+            children:
+              - type: RadioButton
+                name: hypothesis_less
+                optionName: alternative
+                optionPart: less
+              - type: RadioButton
+                name: hypothesis_two.sided
+                optionName: alternative
+                optionPart: two.sided
+              - type: RadioButton
+                name: hypothesis_greater
+                optionName: alternative
+                optionPart: greater
+      - type: LayoutBox
+        stretchFactor: 1
+        cell:
+          column: 1
+          row: 0
+        children:
+          - type: Label
+            label: Additional Statistics
+            children:
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: CheckBox
+                    name: nobs
+              - type: CheckBox
+                name: effectSize
+                label: Effect size
+                children:
+                  - type: LayoutBox
+                    children:
+                    - type: CheckBox
+                      name: ciES
+                      label: Confidence interval
+                      enable: (effectSize)
+                      style: inline
+                      verticalAlignment: center
+                      children:
+                        - type: TextBox
+                          name: ciWidth
+                          label: ""
+                          suffix: "%"
+                          format: number
+                          enable: (effectSize && ciES)
+          - type: Label
+            label: Descriptives
+            children:
+              - type: CheckBox
+                name: descriptives
+              - type: CheckBox
+                name: plot
+                children:
+                  - type: ComboBox
+                    name: observed
+                    enable: (plot)

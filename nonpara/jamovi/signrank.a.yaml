@@ -8,24 +8,117 @@ jas: '1.2'
 options:
     - name: data
       type: Data
+      description:
+        R: the data as a data frame
 
-    - name: samp1
-      title: Sample One
+    - name: id
+      title: ID
       type: Variable
-
-    - name: samp2
-      title: Sample Two
+      suggested: [nominal, ordinal, continuous]
+      
+    - name: dep
+      title: Dependent Variable
       type: Variable
+      suggested: [ordinal, continuous]
+      permitted: [numeric]
+      description:
+        ui: >
+          Dependent variable
+        R: >
+          Dependent variable. Does not need to be specified when using a formula.
+      
+    - name: samp
+      title: Grouping Variable
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+        ui: >
+          Grouping variable, must have two levels.
+        R: >
+          Grouping variable, must have two levels. Does not need to be specified when using a formula.
 
-    - name: alternative
-      title: Alternative hypothesis
+    - title: Exact
+      name: exact
+      type: Bool
+      default: true
+    - title: 'Monte-Carlo Approximation'
+      name: approximate
+      type: Bool
+      default: true
+    - title: 'Number of Samples:' 
+      name: nsamples
+      type: Integer
+      default: 10000
+    - title: Asymptotic
+      name: asymptotic
+      type: Bool
+      default: true
+
+    - title: Alternative Hypothesis
+      name: alternative
       type: List
       options:
-        - title: Not equal
-          name:  two.sided
-        - title: One greater
-          name:  greater
-        - title: Two greater
+        - title: 'Group 1 < Group 2'
           name:  less
+        - title: 'Group 1 ≠ Group 2'
+          name:  two.sided
+        - title: 'Group 1 > Group 2'
+          name:  greater
       default: two.sided
+    - title: 'Number of observations'
+      name: nobs
+      type: Bool
+      default: false
+    - title: 'Effect size'
+      name: effectSize
+      type: Bool
+      default: false
+      description:
+          ui: >
+            provide effect-size (<a>&gamma;</a>).
+          R: >
+            `TRUE` or `FALSE` (default), provide <a>&gamma;</a> effect size
+    - title: 'Confidence interval'
+      name: ciES
+      type: Bool
+      default: false
+      description:
+          ui: >
+            provide confidence intervals for the effect-size
+          R: >
+            `TRUE` or `FALSE` (default), provide confidence intervals for the effect-size
+    - name: ciWidth
+      title: Confidence level
+      type: Number
+      min: 50
+      max: 99.9
+      default: 95
+      description:
+          ui: >
+            the confidence interval width for the effect-size.
+          R: >
+            a number between 50 and 99.9 (default: 95), the width of confidence
+            intervals for the effect size
+
+      
+    - title: Descriptives Table
+      name: descriptives
+      type: Bool
+      default: false
+    - title: Descriptives Plot
+      name: plot
+      type: Bool
+      default: false
+    - title: Plot Observed Scores
+      name: observed
+      type: List
+      options:
+        - title: None
+          name: none
+        - title: Line Plot
+          name: line
+        - title: Jitter Plot
+          name: jitter
+      default: line
 ...
