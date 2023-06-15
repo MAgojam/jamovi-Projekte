@@ -58,6 +58,11 @@ children:
                     name: cc
                     enable: (asymptotic)
           - type: Label
+            label: Handling of Zeros
+            children:
+              - type: ComboBox
+                name: zeroMethod
+          - type: Label
             label: Hypothesis
             children:
               - type: RadioButton

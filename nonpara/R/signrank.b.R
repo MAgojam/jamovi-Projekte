@@ -15,7 +15,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # - ig ha gad random chönne ID (nominal) bi dependent drizieh... sött eig nid müglech si
       #   GLOUBS da chame nüt mache ussert uf intelligenti Benutzer hoffe
       # - sign-rank test, sign rank test, signed-rank test or signed rank test?
-      # - zero.method als auswählbare option einbauen?
+      # - zero.method als auswählbare option einbauen
       #   Das wirkt sich aber wahrsch. auf die Daten aus
       #   d.h. ich müsste die Daten-Manipulation auch anpassen.
       #   Braucht zudem einen Hinweis, welche zeroMethod verwendet wurde,
@@ -25,8 +25,14 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # - Berechnung der Effektstärke und des Konfidenzintervalls anpassen
       #   STATUS: eigentlich fertig, aber funktioniert erst mit jmv v2.4,
       #   was anscheinend bald released werden soll.
-      # - Interpretation für Effektstärke hinzufügen?
-      # - Welche Bootstrap-Methode soll man nehmen? Oder user wählen lassen?
+      # - In Bortz & Lienert (2008) steht auf S. 193 (PDF s.207),
+      #   dass z = (W+ - E(W+)) / Var(W+) ist, bzw. bei Kontinuitätskorrektur
+      #   z = (|W+ - E(W+)| - 0.5) / Var(W+)
+      #   1. Müsste demfall beim WRS-test auch ein anderer z-Wert resultieren
+      #      für den Fall mit CC?
+      #   2. Is that even true? Sollte ich das auch so übernehmen?
+      #      Actually könnte ich ja wirklich anstatt mit stats::wilcox.test()
+      #      einfach selber den asymptotischen Test machen, der ist ja easy.
       #####################################################################
       
       
@@ -37,9 +43,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       dep <- self$options$dep
       samp <- self$options$samp
       ciWidth <- self$options$ciWidth / 100
-      
-      # preparation for later addition of zero.method = "Pratt"
-      zeroMethod <- "Wilcoxon"
+      zeroMethod <- self$options$zeroMethod
       
       # preparation for possible addition of CI-type selection and number of bootstraps
       ciType <- "perc"
@@ -162,12 +166,13 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       expWp <- (nobs * (nobs+1)) / 4
       varWp <- (nobs * (nobs+1) * (2*nobs+1)) / 24
       z <- (Wp-expWp) / sqrt(varWp)
+      zcc <- (abs(Wp-expWp) - 0.5) / sqrt(varWp)
       
       # calculate effect size of exact test
       
       # rstatix is currently not installable within jamovi but will be soon.
       # in the meantime, fake values will be displayed:
-      
+
       effsize <- 0.5
       ciLower <- 0.25
       ciUpper <- 0.75
@@ -175,12 +180,12 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # This function bootstraps the CI, which takes a few seconds in R
       # and might take even longer in jamovi. Maybe find a way to
       # calculate it without bootstrapping, or reduce bootstrap-count?
-      # confi <- rstatix::wilcox_effsize(formula = dep ~ samp, 
+      # confi <- rstatix::wilcox_effsize(formula = dep ~ samp,
       #                                  data = data,
       #                                  paired = TRUE,
-      #                                  alternative = self$options$alternative, 
-      #                                  ci = TRUE, 
-      #                                  conf.level = ciWidth, 
+      #                                  alternative = self$options$alternative,
+      #                                  ci = TRUE,
+      #                                  conf.level = ciWidth,
       #                                  ci.type = ciType,
       #                                  nboot = nboot)
       # 
@@ -342,14 +347,12 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
       }
       
-      ####       Asymptotisch ohne CC
+      ####       Asymptotic without CC
       if(self$options$get("asymptotic")) {
-        asymp <- try(stats::wilcox.test(x = g1,
-                                        y = g2,
-                                        paired = TRUE,
-                                        exact = FALSE,
-                                        correct = FALSE,
-                                        alternative = self$options$alternative),
+        asymp <- try(coin::wilcoxsign_test(formula = g1 ~ g2,
+                                           distribution = "asymptotic",
+                                           zero.method = zeroMethod,
+                                           alternative = self$options$alternative),
                      silent = TRUE)
         
         if(jmvcore::isError(asymp)) {
@@ -382,7 +385,13 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
       }
       
-      ####       Asymptotisch mit CC
+      ####       Asymptotic with CC
+      
+      # allenfalls diesen Teil ersetzen durch pnorm(zcc) bzw. pnorm(-zcc),
+      # glaube es ist abhängig von der Richtung der gewählten Hypothese.
+      # dann spielt es keine Rolle mehr dass hier keine zero-method gewählt werden kann,
+      # weil zcc basierend auf dem Datensatz berechnet wird, 
+      # auf den schon die gewählte zeroMethod angewendet wurde.
       if(self$options$get("cc")) {
         asymp_cc <- try(stats::wilcox.test(x = g1,
                                            y = g2,
@@ -411,7 +420,8 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                        values = list(
                          var = self$options$dep,
                          "type[cc]" = "Asymptotic (CC)",
-                         "stat[cc]" = z,
+                         # "stat[cc]" = z,
+                         "stat[cc]" = zcc,
                          "Wp[cc]" = Wp,
                          "nobs[cc]" = nobs,
                          "p[cc]" = asymp_cc$p.value,
@@ -507,6 +517,8 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       table$getColumn('ciues[approximate]')$setSuperTitle(ciTitle)
       table$getColumn('ciles[asymptotic]')$setSuperTitle(ciTitle)
       table$getColumn('ciues[asymptotic]')$setSuperTitle(ciTitle)
+      table$getColumn('ciles[cc]')$setSuperTitle(ciTitle)
+      table$getColumn('ciues[cc]')$setSuperTitle(ciTitle)
       
       
     }

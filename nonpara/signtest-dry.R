@@ -39,6 +39,7 @@ self$options$exact <- TRUE
 self$options$approximate <- TRUE
 self$options$nsamples <- 10000
 self$options$asymptotic <- TRUE
+self$options$cc <- TRUE
 self$options$dep <- "Blutdruck"
 self$options$samp <- "Horrorfilm"
 self$options$id <- "ID"

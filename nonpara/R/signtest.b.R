@@ -15,6 +15,9 @@ signtestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # - ig ha gad random chönne ID (nominal) bi dependent drizieh... sött eig nid müglech si
       #   GLOUBS da chame nüt mache ussert uf intelligenti Benutzer hoffe
       # - Interpretation für Effektstärke hinzufügen?
+      # - Bei jamovi Frequencies on sample proportion test 2 outcomes nachschauen
+      #   wie das KI berechnet wird, ist scheinbar anders als es hier gemacht wird.
+      #   Boris meint es ist vlt exakt, während das hier eig. approximativ ist.
       #####################################################################
       
       

@@ -38,7 +38,7 @@ options:
         R: >
           Grouping variable, must have two levels. Does not need to be specified when using a formula.
 
-    - title: Exact
+    - title: 'Exact'
       name: exact
       type: Bool
       default: true
@@ -50,14 +50,23 @@ options:
       name: nsamples
       type: Integer
       default: 10000
-    - title: Asymptotic
+    - title: 'Asymptotic'
       name: asymptotic
       type: Bool
       default: false
-    - title: Continuity Correction
+    - title: 'Continuity Correction'
       name: cc
       type: Bool
       default: false
+
+    - title: 'Zero Method'
+      name: zeroMethod
+      type: List
+      options:
+        - title: 'Wilcoxon'
+          name: Wilcoxon
+        - title: 'Pratt'
+          name: Pratt
 
     - title: Alternative Hypothesis
       name: alternative

@@ -54,3 +54,17 @@ get2 <- coin::wilcoxsign_test(x1 ~ x2,
 coin::statistic(get2)
 coin::pvalue(get2)
 ```
+```{r}
+coin::wilcoxsign_test(x1 ~ x2,
+                      distribution = "asymptotic",
+                      data = blood_coin,
+                      zero.method = "Wilcoxon",
+                      alternative = "less")
+stats::wilcox.test(x = x1,
+                   y = x2,
+                   paired = TRUE,
+                   exact = FALSE,
+                   correct = FALSE,
+                   alternative = "less")
+```
+

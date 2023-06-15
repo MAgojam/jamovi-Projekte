@@ -15,4 +15,17 @@
         `year`=2006, 
         `title`="Implementing a class of permutation tests: The coin package", 
         `publisher`="[R package]. Retrieved from https://cran.r-project.org/package=coin", 
-        `url`="https://cran.r-project.org/package=coin"))
+        `url`="https://cran.r-project.org/package=coin"), 
+    `pratt`=list(
+        `type`="article", 
+        `author`="Pratt, J. W.", 
+        `year`=1959, 
+        `title`="Remarks on zeros and ties in the Wilcoxon signed rank procedures", 
+        `publisher`="Journal of the American Statistical Association. https://doi10.1080/01621459.1959.10501526", 
+        `url`="https://doi10.1080/01621459.1959.10501526"), 
+    `wilcox`=list(
+        `type`="book", 
+        `author`="Wilcoxon, F.", 
+        `year`=1949, 
+        `title`="Some rapid approximate statistical procedures", 
+        `publisher`="Cyanamid Company"))

@@ -14,6 +14,7 @@ signrankOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             nsamples = 10000,
             asymptotic = FALSE,
             cc = FALSE,
+            zeroMethod = NULL,
             alternative = "two.sided",
             nobs = FALSE,
             effectSize = FALSE,
@@ -72,6 +73,12 @@ signrankOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "cc",
                 cc,
                 default=FALSE)
+            private$..zeroMethod <- jmvcore::OptionList$new(
+                "zeroMethod",
+                zeroMethod,
+                options=list(
+                    "Wilcoxon",
+                    "Pratt"))
             private$..alternative <- jmvcore::OptionList$new(
                 "alternative",
                 alternative,
@@ -123,6 +130,7 @@ signrankOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..nsamples)
             self$.addOption(private$..asymptotic)
             self$.addOption(private$..cc)
+            self$.addOption(private$..zeroMethod)
             self$.addOption(private$..alternative)
             self$.addOption(private$..nobs)
             self$.addOption(private$..effectSize)
@@ -141,6 +149,7 @@ signrankOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         nsamples = function() private$..nsamples$value,
         asymptotic = function() private$..asymptotic$value,
         cc = function() private$..cc$value,
+        zeroMethod = function() private$..zeroMethod$value,
         alternative = function() private$..alternative$value,
         nobs = function() private$..nobs$value,
         effectSize = function() private$..effectSize$value,
@@ -158,6 +167,7 @@ signrankOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..nsamples = NA,
         ..asymptotic = NA,
         ..cc = NA,
+        ..zeroMethod = NA,
         ..alternative = NA,
         ..nobs = NA,
         ..effectSize = NA,
@@ -173,7 +183,6 @@ signrankResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         na_warning = function() private$.items[["na_warning"]],
-        control = function() private$.items[["control"]],
         srtest = function() private$.items[["srtest"]],
         desc = function() private$.items[["desc"]],
         plot = function() private$.items[["plot"]]),
@@ -194,9 +203,6 @@ signrankResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "id",
                     "dep",
                     "samp")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="control"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="srtest",
@@ -492,6 +498,7 @@ signrankBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param nsamples .
 #' @param asymptotic .
 #' @param cc .
+#' @param zeroMethod .
 #' @param alternative .
 #' @param nobs .
 #' @param effectSize \code{TRUE} or \code{FALSE} (default), provide
@@ -506,7 +513,6 @@ signrankBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$na_warning} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$control} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$srtest} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
@@ -529,6 +535,7 @@ signrank <- function(
     nsamples = 10000,
     asymptotic = FALSE,
     cc = FALSE,
+    zeroMethod,
     alternative = "two.sided",
     nobs = FALSE,
     effectSize = FALSE,
@@ -562,6 +569,7 @@ signrank <- function(
         nsamples = nsamples,
         asymptotic = asymptotic,
         cc = cc,
+        zeroMethod = zeroMethod,
         alternative = alternative,
         nobs = nobs,
         effectSize = effectSize,

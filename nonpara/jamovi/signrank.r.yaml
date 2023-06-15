@@ -14,9 +14,6 @@ items:
         - dep
         - samp
     
-    - name: control
-      type: Preformatted
-    
     - name: srtest
       title: Sign Test
       type: Table
