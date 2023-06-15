@@ -13,6 +13,9 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
       # - Testen ob alle fehlerhaften Datenytypen abgefangen werden
       # - Quelle für Empfehlung gegen cc wird immer angezeigt,
       #   sollte aber weg wenn keine CC gemacht wird.
+      # - Hinweise zu MC und CC: entscheide ob beide Footnotes, Notes,
+      #   oder ggf. MC in Note und CC in Footnote oder sonst als Hinweis,
+      #   wie das Warning beim signtest.
       #####################################################################
       
       
