@@ -33,6 +33,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       #   2. Is that even true? Sollte ich das auch so übernehmen?
       #      Actually könnte ich ja wirklich anstatt mit stats::wilcox.test()
       #      einfach selber den asymptotischen Test machen, der ist ja easy.
+      # - Hinweis auf nicht-Verwendung der CC hinzufügen
       #####################################################################
       
       
@@ -377,7 +378,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                          "stat[asymptotic]" = z,
                          "Wp[asymptotic]" = Wp,
                          "nobs[asymptotic]" = nobs,
-                         "p[asymptotic]" = asymp$p.value,
+                         "p[asymptotic]" = coin::pvalue(asymp),
                          "es[asymptotic]" = effsize,
                          "ciles[asymptotic]" = ciLower,
                          "ciues[asymptotic]" = ciUpper
@@ -421,7 +422,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                          var = self$options$dep,
                          "type[cc]" = "Asymptotic (CC)",
                          # "stat[cc]" = z,
-                         "stat[cc]" = zcc,
+                         "stat[cc]" = stats::qnorm(asymp_cc$p.value),
                          "Wp[cc]" = Wp,
                          "nobs[cc]" = nobs,
                          "p[cc]" = asymp_cc$p.value,

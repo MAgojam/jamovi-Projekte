@@ -156,11 +156,7 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "data",
                     "dep",
-                    "group",
-                    "exact",
-                    "approximate",
-                    "asymptotic",
-                    "cc"),
+                    "group"),
                 rows=1,
                 columns=list(
                     list(
