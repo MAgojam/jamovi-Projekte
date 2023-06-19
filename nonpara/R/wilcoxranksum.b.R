@@ -244,7 +244,7 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                          "u[approximate]" = u,
                          "p[approximate]" = coin::pvalue(results)
                        ))
-
+          
           footnote1 <- paste('Monte Carlo Approximation with',
                              self$options$nsamples, 
                              'samples was applied. <i>p</i>-value might differ for each execution.')
@@ -342,7 +342,7 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                          "u[cc]" = u,
                          "p[cc]" = results$p.value
                        ))
-
+          
           footnote2 <- 'The use of the continuity correction is generally not recommended, if an exact test is possible.
                         We recommend using the exact test instead.'
           table$addFootnote(rowNo=1, col="type[cc]", footnote2)
@@ -353,14 +353,28 @@ wilcoxRanksumClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
       
       
       
-      ########## Throw error if no method is selected
+      #### Throw error if no method is selected
       if(!self$options$exact && !self$options$approximate && !self$options$asymptotic && !self$options$cc) {
         jmvcore::reject("Must select at least one method",
                         code = "min_one_method")
       }
       
+      # #### Adjust references based on which tests are selected
+      # # exact and/or approximate active, but cc not active
+      # if((self$options$exact || self$options$approximate) && !self$options$cc) {
+      #   table$setRefs('coin')
+      #   # neither exact nor approximate active, but cc active
+      # } else if(!self$options$exact && !self$options$approximate && self$options$cc) {
+      #   table$setRefs('cf')
+      #   # exact and/or approximate active, cc also active
+      # } else if((self$options$exact || self$options$approximate) && self$options$cc) {
+      #   table$setRefs(c('coin', 'cf'))
+      # }
+  
       
-      # # Warnings / remarks
+      
+      
+      # #### Warnings / remarks
       # ## Empty note-object
       # note1 <- note2 <- c()
       # 

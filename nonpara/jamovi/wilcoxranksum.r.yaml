@@ -7,7 +7,7 @@ items:
     - name: wrs
       title: Wilcoxon Rank-Sum Test
       type: Table
-      refs: [coin, cf]
+      # refs: [coin,cf]
       clearWith:
         - data
         - dep
@@ -22,11 +22,11 @@ items:
           title: 'Type'
           type: text
           visible: (exact)
-          # refs: [coin]
         - name: stat[exact]
           title: '<i>z</i>-Value'
           type: text
           visible: (exact)
+          refs: [coin]
         - name: rs1[exact]
           title: '<i>RS</i><sub>1</sub>'
           type: number
@@ -45,11 +45,11 @@ items:
           title: 'Type'
           type: text
           visible: (approximate)
-          # refs: [coin]
         - name: stat[approximate]
           title: '<i>z</i>-Value'
           type: text
           visible: (approximate)
+          refs: [coin]
         - name: rs1[approximate]
           title: '<i>RS</i><sub>1</sub>'
           type: number
@@ -90,11 +90,11 @@ items:
           title: 'Type'
           type: text
           visible: (cc && asymptotic)
-          # refs: [cf]
         - name: stat[cc]
           title: '<i>z</i>-Value'
           type: text
           visible: (cc && asymptotic)
+          refs: [cf]
         - name: rs1[cc]
           title: '<i>RS</i><sub>1</sub>'
           type: number

@@ -153,13 +153,14 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="wrs",
                 title="Wilcoxon Rank-Sum Test",
-                refs=list(
-                    "coin",
-                    "cf"),
                 clearWith=list(
                     "data",
                     "dep",
-                    "group"),
+                    "group",
+                    "exact",
+                    "approximate",
+                    "asymptotic",
+                    "cc"),
                 rows=1,
                 columns=list(
                     list(
@@ -175,7 +176,9 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `name`="stat[exact]", 
                         `title`="<i>z</i>-Value", 
                         `type`="text", 
-                        `visible`="(exact)"),
+                        `visible`="(exact)", 
+                        `refs`=list(
+                            "coin")),
                     list(
                         `name`="rs1[exact]", 
                         `title`="<i>RS</i><sub>1</sub>", 
@@ -201,7 +204,9 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `name`="stat[approximate]", 
                         `title`="<i>z</i>-Value", 
                         `type`="text", 
-                        `visible`="(approximate)"),
+                        `visible`="(approximate)", 
+                        `refs`=list(
+                            "coin")),
                     list(
                         `name`="rs1[approximate]", 
                         `title`="<i>RS</i><sub>1</sub>", 
@@ -253,7 +258,9 @@ wilcoxRanksumResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `name`="stat[cc]", 
                         `title`="<i>z</i>-Value", 
                         `type`="text", 
-                        `visible`="(cc && asymptotic)"),
+                        `visible`="(cc && asymptotic)", 
+                        `refs`=list(
+                            "cf")),
                     list(
                         `name`="rs1[cc]", 
                         `title`="<i>RS</i><sub>1</sub>", 
@@ -348,7 +355,8 @@ wilcoxRanksumBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
         }))
 
 #' Wilcoxon Rank-Sum Test

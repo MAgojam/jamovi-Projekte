@@ -8,10 +8,10 @@ self <- list()
 self$data <- data.frame(value = mtcars[, 1], group = rep(c(1,2), each = 16))
 self$data[32, 1] <- 66
 
-self$options$exact <- TRUE
-self$options$app <- TRUE
-self$options$asy <- TRUE
-self$options$cc <- TRUE
+self$options$exact <- FALSE
+self$options$approximate <- TRUE
+self$options$asymptotic <- TRUE
+self$options$cc <- FALSE
 # self$options$dep <- "Werte"
 self$options$dep <- "value"
 # self$options$group <- "Gruppe"
