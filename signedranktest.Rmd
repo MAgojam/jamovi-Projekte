@@ -68,3 +68,24 @@ stats::wilcox.test(x = x1,
                    alternative = "less")
 ```
 
+
+```{r}
+ball <- data.frame(ID = as.factor(rep(1:6, times = 2)), 
+                   Distanz = c(35,45,49,49,51,53,
+                               31,35,37,39,40,53), 
+                   Alkohol = factor(rep(c("vorher","nachher"), each = 6),
+                                    levels = c("vorher", "nachher")))
+
+
+coin::wilcoxsign_test(Distanz ~ Alkohol | ID, 
+                      distribution = "asymptotic",
+                      data = ball,
+                      zero.method = "Wilcoxon",
+                      alternative = "greater")
+coin::wilcoxsign_test(Distanz ~ Alkohol | ID, 
+                      distribution = "asymptotic",
+                      data = ball,
+                      zero.method = "Pratt",
+                      alternative = "greater")
+```
+

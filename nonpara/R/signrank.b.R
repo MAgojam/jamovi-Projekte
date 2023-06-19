@@ -34,6 +34,9 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       #      Actually könnte ich ja wirklich anstatt mit stats::wilcox.test()
       #      einfach selber den asymptotischen Test machen, der ist ja easy.
       # - Hinweis auf nicht-Verwendung der CC hinzufügen
+      # - Berechnung von W+: rank(diff) weist einer Differenz von 0
+      #   auch einen Rang zu (logischerweise), aber eig werden ja die
+      #   Differenzen von 0 einfach entfernt oder?
       #####################################################################
       
       
@@ -156,11 +159,14 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       
       # calculate W+
-      diff <- g1 - g2
-      idiff <- sign(diff)
-      idiff[idiff < 0] <- 0
-      rdiff <- rank(abs(diff))
-      Wp <- sum(idiff * rdiff)
+      diff <- g1 - g2              # calculate sample 1 - sample 2
+      # diff[diff != 0]              # remove differences of 0 
+      # think that is currently already done in the cleanup-section
+      # would have to be changed there for zeromethod = Pratt
+      idiff <- sign(diff)          # get indicator
+      idiff[idiff < 0] <- 0        #
+      rdiff <- rank(abs(diff))     # rank the differences
+      Wp <- sum(idiff * rdiff)     # 
       
       
       # calculate expected Wp, variance of Wp and z
@@ -173,7 +179,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       # rstatix is currently not installable within jamovi but will be soon.
       # in the meantime, fake values will be displayed:
-
+      
       effsize <- 0.5
       ciLower <- 0.25
       ciUpper <- 0.75
