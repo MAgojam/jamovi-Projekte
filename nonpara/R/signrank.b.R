@@ -37,6 +37,8 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # - Berechnung von W+: rank(diff) weist einer Differenz von 0
       #   auch einen Rang zu (logischerweise), aber eig werden ja die
       #   Differenzen von 0 einfach entfernt oder?
+      # - Berechnung von Erwartungswert und Varianz stimmen noch nicht, 
+      #   für den Fall mit Ties ist es eine andere Formel
       #####################################################################
       
       
@@ -160,7 +162,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       # calculate W+
       diff <- g1 - g2              # calculate sample 1 - sample 2
-      # diff[diff != 0]              # remove differences of 0 
+      # diff <- diff[diff != 0]      # remove differences of 0 
       # think that is currently already done in the cleanup-section
       # would have to be changed there for zeromethod = Pratt
       idiff <- sign(diff)          # get indicator
@@ -304,7 +306,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                        values = list(
                          var = self$options$dep,
                          "type[exact]" = "Exact",
-                         "stat[exact]" = z,
+                         "stat[exact]" = coin::statistic(exakt),
                          "Wp[exact]" = Wp,
                          "nobs[exact]" = nobs,
                          "p[exact]" = coin::pvalue(exakt),
@@ -343,7 +345,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                        values = list(
                          var = self$options$dep,
                          "type[approximate]" = "Monte-Carlo Approximation",
-                         "stat[approximate]" = z,
+                         "stat[approximate]" = coin::statistic(mc),
                          "Wp[approximate]" = Wp,
                          "nobs[approximate]" = nobs,
                          "p[approximate]" = coin::pvalue(mc),
@@ -381,7 +383,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                        values = list(
                          var = self$options$dep,
                          "type[asymptotic]" = "Asymptotic",
-                         "stat[asymptotic]" = z,
+                         "stat[asymptotic]" = coin::statistic(asymp),
                          "Wp[asymptotic]" = Wp,
                          "nobs[asymptotic]" = nobs,
                          "p[asymptotic]" = coin::pvalue(asymp),
