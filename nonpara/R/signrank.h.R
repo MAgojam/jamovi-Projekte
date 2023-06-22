@@ -202,11 +202,12 @@ signrankResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "data",
                     "id",
                     "dep",
-                    "samp")))
+                    "samp",
+                    "zeroMethod")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="srtest",
-                title="Sign Test",
+                title="Wilcoxon Signed Rank Test",
                 refs=list(
                     "coin"),
                 clearWith=list(
@@ -355,7 +356,7 @@ signrankResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text", 
                         `visible`="(cc)", 
                         `refs`=list(
-                            "cc")),
+                            "cf")),
                     list(
                         `name`="stat[cc]", 
                         `title`="<i>z</i>-Value", 
@@ -481,7 +482,8 @@ signrankBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
         }))
 
 #' Signed Rank Test

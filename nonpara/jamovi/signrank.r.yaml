@@ -13,9 +13,10 @@ items:
         - id
         - dep
         - samp
+        - zeroMethod
     
     - name: srtest
-      title: Sign Test
+      title: Wilcoxon Signed Rank Test
       type: Table
       refs: [coin]
       clearWith:
@@ -139,7 +140,7 @@ items:
           title: 'Type'
           type: text
           visible: (cc)
-          refs: [cc]
+          refs: [cf]
         - name: stat[cc]
           title: '<i>z</i>-Value'
           type: number

@@ -39,6 +39,9 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       #   Differenzen von 0 einfach entfernt oder?
       # - Berechnung von Erwartungswert und Varianz stimmen noch nicht, 
       #   für den Fall mit Ties ist es eine andere Formel
+      # - Hinweis, dass Null-Differenzen ausgeschlossen werden,
+      #   sollte nicht erst bei den Deskriptiv-Statistiken stehen,
+      #   sondern bereits bei der Haupt-Tabelle als Hinweis stehen.
       #####################################################################
       
       
@@ -116,23 +119,32 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       }
       
       
+      ############### This now probably has to be done further below,
+      ############### at least after the calculation of W+,
+      ############### because the full dataset is needed for the ranking in Pratt-Method
+      ############### Also, the 0-differences are removed in either case, 
+      ############### so the if-else statement is not really necessary probably
+      #
       # Preparation of addition of zero.method = "Pratt"
       # if(zeroMethod == "Wilcoxon") {
       
       # find IDs which have identical values for both samples and remove them from the dataset
       ## for each ID get the according dependent values
-      for (id in data$ID) {
-        vals <- data |> 
-          dplyr::filter(ID == id) |> 
-          dplyr::select(dep) |>  
-          unlist() |>
-          as.vector() 
-        # if the dependent vals are equal, remove them from the dataset
-        if(all(vals == vals[1])) { 
-          data <- data[data$ID != id,]
-        }
-      }
+      # for (id in data$ID) {
+      #   vals <- data |> 
+      #     dplyr::filter(ID == id) |> 
+      #     dplyr::select(dep) |>  
+      #     unlist() |>
+      #     as.vector() 
+      #   # if the dependent vals are equal, remove them from the dataset
+      #   if(all(vals == vals[1])) { 
+      #     data <- data[data$ID != id,]
+      #   }
+      # }
       # } else if(zeroMethod == "Pratt") { TBD }
+      # 
+      # 
+      ########### what happens to the calculations relying on g1 and g2 if this is moved down?
       
       
       # sort data for group then for ID
@@ -153,31 +165,73 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       ########## start of general  statistics and descriptives
       # calculate the observed n 'nobs'
-      if(all.equal(length(g1), length(g2), nrow(data)/2)) {
-        nobs <- length(g1)
-      } else {
-        nobs <- NA
-      }
+      # 
+      ############### actually this is now handled just below
+      # 
+      # if(all.equal(length(g1), length(g2), nrow(data)/2)) {
+      #   nobs <- length(g1)
+      # } else {
+      #   nobs <- NA
+      # }
       
       
       # calculate W+
-      diff <- g1 - g2              # calculate sample 1 - sample 2
-      # diff <- diff[diff != 0]      # remove differences of 0 
-      # think that is currently already done in the cleanup-section
-      # would have to be changed there for zeromethod = Pratt
-      idiff <- sign(diff)          # get indicator
-      idiff[idiff < 0] <- 0        #
-      rdiff <- rank(abs(diff))     # rank the differences
-      Wp <- sum(idiff * rdiff)     # 
+      diffs <- g1 - g2
+      abs_diffs <- abs(diffs)
+      pos_abs_diffs <- abs_diffs > 0
+      if (all(abs_diffs < 1)){
+        jmvcore::reject("All pairwise differences equal zero.")
+      }
+      if (zeroMethod == "Pratt") {
+        rank_abs_diffs <- rank(abs_diffs)
+        pos <- (rank_abs_diffs * (diffs > 0))[pos_abs_diffs]
+        neg <- (rank_abs_diffs * (diffs < 0))[pos_abs_diffs]
+        
+      } else if (zeroMethod == "Wilcoxon"){
+        diffs <- diffs[pos_abs_diffs]
+        abs_diffs <- abs_diffs[pos_abs_diffs]
+        rank_abs_diffs <- rank(abs_diffs)
+        pos <- rank_abs_diffs * (diffs > 0)
+        neg <- rank_abs_diffs * (diffs < 0)
+      } else {
+        jmvcore::reject("No zero-method selected.")
+      }
+      
+      n <- length(pos)
+      Wp <- sum(pos)
+      tieVec <- table(pos) # not yet sure if this is the right way to calculate the tievec
+      tieCorr <- sum(tieVec^3-tieVec)/48 
+      ew <- (n*(n+1)) / 4
+      vw <- ((n*(n+1)*(2*n+1)) / 24) - tieCorr
+      z <- ((Wp - ew)) / sqrt(vw)
+      zcc <- (abs(Wp-ew) - 0.5) / sqrt(vw)
       
       
-      # calculate expected Wp, variance of Wp and z
-      expWp <- (nobs * (nobs+1)) / 4
-      varWp <- (nobs * (nobs+1) * (2*nobs+1)) / 24
-      z <- (Wp-expWp) / sqrt(varWp)
-      zcc <- (abs(Wp-expWp) - 0.5) / sqrt(varWp)
+      # set the table's title according to the zero-method selected
+      if(zeroMethod == "Pratt") {
+        table$setTitle("Wilcoxon-Pratt Signed Rank Test")
+      }
       
-      # calculate effect size of exact test
+      
+      ########### This was moved down from further up. Need to check that this does not mess up any other calculations.
+      ########### The analyses rely on g1 and g2 which is calculated from the unfiltered dataset,
+      ########### but it SHOULD not matter as these functions clean up the data themselves.
+      ########### only stats::wilcox.test might throw issues, but I think with exact = F it's okay.
+      
+      # find IDs which have identical values for both samples and remove them from the dataset
+      # for each ID get the according dependent values
+      for (id in data$ID) {
+        vals <- data |>
+          dplyr::filter(ID == id) |>
+          dplyr::select(dep) |>
+          unlist() |>
+          as.vector()
+        # if the dependent vals are equal, remove them from the dataset
+        if(all(vals == vals[1])) {
+          data <- data[data$ID != id,]
+        }
+      }
+      
       
       # rstatix is currently not installable within jamovi but will be soon.
       # in the meantime, fake values will be displayed:
@@ -186,9 +240,9 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       ciLower <- 0.25
       ciUpper <- 0.75
       
-      # This function bootstraps the CI, which takes a few seconds in R
-      # and might take even longer in jamovi. Maybe find a way to
-      # calculate it without bootstrapping, or reduce bootstrap-count?
+      # # This function bootstraps the CI, which takes a few seconds in R
+      # # and might take even longer in jamovi. Maybe find a way to
+      # # calculate it without bootstrapping, or reduce bootstrap-count?
       # confi <- rstatix::wilcox_effsize(formula = dep ~ samp,
       #                                  data = data,
       #                                  paired = TRUE,
@@ -202,7 +256,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # ciLower <- confi$conf.low
       # ciUpper <- confi$conf.high
       # Preparation for possible inclusion of magnitude:
-      # ciMag <- confi$magnitude   
+      # ciMag <- confi$magnitude
       
       
       ## get descriptives if selected
@@ -250,8 +304,8 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           desk$setRow(rowNo = 1,
                       values = list(
                         "dep" = dep,
-                        "nobs[1]" = nobs,
-                        "nobs[2]" = nobs,
+                        "nobs[1]" = n,
+                        "nobs[2]" = n,
                         
                         "time[1]" = sampLevels[1],
                         "time[2]" = sampLevels[2],
@@ -259,11 +313,11 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         "median[1]" = median_g1,
                         "median[2]" = median_g2,
                         
-                        "ev[1]" = expWp,
-                        "ev[2]" = expWp,
+                        "ev[1]" = ew,
+                        "ev[2]" = ew,
                         
-                        "var[1]" = varWp,
-                        "var[2]" = varWp
+                        "var[1]" = vw,
+                        "var[2]" = vw
                       ))
           
           note_obs <- "Observations with identical values for both samples are disregarded for this test and do therefore not count as observations."
@@ -308,7 +362,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                          "type[exact]" = "Exact",
                          "stat[exact]" = coin::statistic(exakt),
                          "Wp[exact]" = Wp,
-                         "nobs[exact]" = nobs,
+                         "nobs[exact]" = n,
                          "p[exact]" = coin::pvalue(exakt),
                          "es[exact]" = effsize,
                          "ciles[exact]" = ciLower,
@@ -347,7 +401,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                          "type[approximate]" = "Monte-Carlo Approximation",
                          "stat[approximate]" = coin::statistic(mc),
                          "Wp[approximate]" = Wp,
-                         "nobs[approximate]" = nobs,
+                         "nobs[approximate]" = n,
                          "p[approximate]" = coin::pvalue(mc),
                          "es[approximate]" = effsize,
                          "ciles[approximate]" = ciLower,
@@ -385,7 +439,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                          "type[asymptotic]" = "Asymptotic",
                          "stat[asymptotic]" = coin::statistic(asymp),
                          "Wp[asymptotic]" = Wp,
-                         "nobs[asymptotic]" = nobs,
+                         "nobs[asymptotic]" = n,
                          "p[asymptotic]" = coin::pvalue(asymp),
                          "es[asymptotic]" = effsize,
                          "ciles[asymptotic]" = ciLower,
@@ -432,7 +486,7 @@ signrankClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                          # "stat[cc]" = z,
                          "stat[cc]" = stats::qnorm(asymp_cc$p.value),
                          "Wp[cc]" = Wp,
-                         "nobs[cc]" = nobs,
+                         "nobs[cc]" = n,
                          "p[cc]" = asymp_cc$p.value,
                          "es[cc]" = effsize,
                          "ciles[cc]" = ciLower,
